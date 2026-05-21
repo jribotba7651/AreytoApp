@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import type { Project } from '@/types/project';
 import { createProject } from '@/lib/project-fs';
 import { loadInitialChapter } from '@/lib/chapter-loader';
+import { ensureGitInit } from '@/lib/versioning';
+import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import { useProjectStore } from '@/stores/projectStore';
 
 interface CreateProjectModalProps {
@@ -13,6 +15,7 @@ interface CreateProjectModalProps {
 function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectModalProps) {
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const setChapters = useProjectStore((s) => s.setChapters);
+  const setCommits = useProjectStore((s) => s.setCommits);
   const [nombre, setNombre] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,6 +51,15 @@ function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectMod
     if (chapter.ok) {
       setActiveChapter(chapter.value.activeChapter.path, chapter.value.activeChapter.content);
       setChapters(chapter.value.allChapters);
+
+      const gitInit = await ensureGitInit(result.value.rootPath);
+      if (!gitInit.ok) console.warn('Git init warning:', gitInit.error);
+
+      const commitsResult = await loadCommitsForActiveChapter(
+        result.value.rootPath,
+        chapter.value.activeChapter.path
+      );
+      if (commitsResult.ok) setCommits(commitsResult.value);
     }
 
     onCreated(result.value);

@@ -1,3 +1,4 @@
+mod git;
 mod project_fs;
 
 #[tauri::command]
@@ -18,6 +19,12 @@ pub fn run() {
             project_fs::ensure_dir,
             project_fs::list_dir,
             project_fs::rename_path,
+            git::git_repo_exists,
+            git::git_init,
+            git::git_initial_commit,
+            git::git_has_changes,
+            git::git_commit_file,
+            git::git_log_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

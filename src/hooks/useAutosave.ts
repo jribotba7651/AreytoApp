@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { writeChapter } from '@/lib/project-fs';
+import { commitChanges } from '@/lib/versioning';
+import { useProjectStore } from '@/stores/projectStore';
 import type { SaveStatus } from '@/stores/projectStore';
 
 interface UseAutosaveOptions {
   content: string;
   chapterPath: string | null;
+  projectPath: string | null;
   onStatusChange: (status: SaveStatus) => void;
   delay?: number;
 }
@@ -12,6 +15,7 @@ interface UseAutosaveOptions {
 export function useAutosave({
   content,
   chapterPath,
+  projectPath,
   onStatusChange,
   delay = 500,
 }: UseAutosaveOptions): void {
@@ -37,6 +41,21 @@ export function useAutosave({
       if (result.ok) {
         lastSavedRef.current = content;
         onStatusChange('saved');
+
+        if (projectPath) {
+          const commitResult = await commitChanges(projectPath, chapterPath);
+          if (commitResult.ok && commitResult.value) {
+            const hash = commitResult.value;
+            const filename = chapterPath.split('/').pop() ?? chapterPath;
+            const commit = {
+              hash,
+              shortHash: hash.slice(0, 7),
+              message: `autosave: ${filename}`,
+              timestamp: new Date().toISOString(),
+            };
+            useProjectStore.getState().prependCommit(commit);
+          }
+        }
       } else {
         onStatusChange('error');
       }
@@ -49,5 +68,5 @@ export function useAutosave({
         clearTimeout(timerRef.current);
       }
     };
-  }, [content, chapterPath, delay, onStatusChange]);
+  }, [content, chapterPath, projectPath, delay, onStatusChange]);
 }

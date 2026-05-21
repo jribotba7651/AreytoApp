@@ -6,6 +6,7 @@ import { useAutosave } from '@/hooks/useAutosave';
 function EditorPanel() {
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
+  const currentProject = useProjectStore((s) => s.currentProject);
   const updateContent = useProjectStore((s) => s.updateContent);
   const setSaveStatus = useProjectStore((s) => s.setSaveStatus);
   const saveStatus = useProjectStore((s) => s.saveStatus);
@@ -13,6 +14,7 @@ function EditorPanel() {
   useAutosave({
     content: activeChapterContent,
     chapterPath: activeChapterPath,
+    projectPath: currentProject?.rootPath ?? null,
     onStatusChange: setSaveStatus,
     delay: 500,
   });

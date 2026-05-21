@@ -1,5 +1,6 @@
 import { useProjectStore } from '@/stores/projectStore';
 import { readChapter, updateProjectMeta } from '@/lib/project-fs';
+import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
 
 function ChapterList() {
@@ -7,6 +8,7 @@ function ChapterList() {
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const currentProject = useProjectStore((s) => s.currentProject);
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
+  const setCommits = useProjectStore((s) => s.setCommits);
 
   async function handleSelect(chapterPath: string, filename: string) {
     if (chapterPath === activeChapterPath || !currentProject) return;
@@ -19,6 +21,9 @@ function ChapterList() {
 
     setActiveChapter(chapterPath, read.value);
     await updateProjectMeta(currentProject, { capituloActivo: filename });
+
+    const commitsResult = await loadCommitsForActiveChapter(currentProject.rootPath, chapterPath);
+    if (commitsResult.ok) setCommits(commitsResult.value);
   }
 
   if (chapters.length === 0) {

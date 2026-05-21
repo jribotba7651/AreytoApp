@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Chapter, Project } from '@/types/project';
+import type { Commit } from '@/types/git';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -9,6 +10,7 @@ interface ProjectState {
   activeChapterContent: string;
   saveStatus: SaveStatus;
   chapters: Chapter[];
+  commits: Commit[];
   setCurrentProject: (project: Project | null) => void;
   closeProject: () => void;
   setActiveChapter: (path: string, content: string) => void;
@@ -16,6 +18,8 @@ interface ProjectState {
   setSaveStatus: (status: SaveStatus) => void;
   setChapters: (chapters: Chapter[]) => void;
   addChapter: (chapter: Chapter) => void;
+  setCommits: (commits: Commit[]) => void;
+  prependCommit: (commit: Commit) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -24,6 +28,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   activeChapterContent: '',
   saveStatus: 'idle',
   chapters: [],
+  commits: [],
 
   setCurrentProject: (project: Project | null) => set({ currentProject: project }),
 
@@ -34,10 +39,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
       activeChapterContent: '',
       saveStatus: 'idle',
       chapters: [],
+      commits: [],
     }),
 
   setActiveChapter: (path: string, content: string) =>
-    set({ activeChapterPath: path, activeChapterContent: content, saveStatus: 'idle' }),
+    set({ activeChapterPath: path, activeChapterContent: content, saveStatus: 'idle', commits: [] }),
 
   updateContent: (content: string) => set({ activeChapterContent: content }),
 
@@ -52,4 +58,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
         a.filename.localeCompare(b.filename)
       ),
     })),
+
+  setCommits: (commits: Commit[]) => set({ commits }),
+
+  prependCommit: (commit: Commit) =>
+    set((state) => ({ commits: [commit, ...state.commits] })),
 }));

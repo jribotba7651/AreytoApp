@@ -24,7 +24,7 @@ describe('useAutosave', () => {
   it('no guarda si chapterPath es null', async () => {
     const onStatusChange = vi.fn();
     renderHook(() =>
-      useAutosave({ content: '# Hola', chapterPath: null, onStatusChange, delay: 500 })
+      useAutosave({ content: '# Hola', chapterPath: null, projectPath: null, onStatusChange, delay: 500 })
     );
 
     await vi.advanceTimersByTimeAsync(600);
@@ -37,7 +37,7 @@ describe('useAutosave', () => {
 
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutosave({ content, chapterPath: PATH, onStatusChange, delay: 500 }),
+        useAutosave({ content, chapterPath: PATH, projectPath: null, onStatusChange, delay: 500 }),
       { initialProps: { content: 'inicio' } }
     );
 
@@ -55,7 +55,7 @@ describe('useAutosave', () => {
 
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutosave({ content, chapterPath: PATH, onStatusChange, delay: 500 }),
+        useAutosave({ content, chapterPath: PATH, projectPath: null, onStatusChange, delay: 500 }),
       { initialProps: { content: 'inicio' } }
     );
 
@@ -78,7 +78,7 @@ describe('useAutosave', () => {
 
     const { rerender } = renderHook(
       ({ content }: { content: string }) =>
-        useAutosave({ content, chapterPath: PATH, onStatusChange, delay: 500 }),
+        useAutosave({ content, chapterPath: PATH, projectPath: null, onStatusChange, delay: 500 }),
       { initialProps: { content: 'inicio' } }
     );
 

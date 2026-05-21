@@ -1,13 +1,16 @@
 import { ChevronRight } from 'lucide-react';
 import { useLayoutStore } from '@/stores/layoutStore';
+import CommitList from '@/components/versions/CommitList';
 
 function VersionsPanel() {
   const toggleVersionsPanel = useLayoutStore((s) => s.toggleVersionsPanel);
 
   return (
     <div className="h-full bg-bg-secondary border-l border-border-subtle flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
-        <span className="text-xs text-text-secondary uppercase tracking-wider">Versiones</span>
+      <div className="px-3 pt-4 pb-2 shrink-0 flex items-center justify-between border-b border-border-subtle">
+        <p className="text-xs text-text-tertiary uppercase tracking-wider font-sans">
+          Versiones
+        </p>
         <button
           onClick={toggleVersionsPanel}
           aria-label="Colapsar panel de versiones"
@@ -16,9 +19,8 @@ function VersionsPanel() {
           <ChevronRight size={14} />
         </button>
       </div>
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-sm text-text-tertiary">Historial</p>
-      </div>
+
+      <CommitList />
     </div>
   );
 }
