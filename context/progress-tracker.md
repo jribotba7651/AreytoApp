@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Editor base sin persistencia (CodeMirror 6)
+- Última feature completada: Filesystem service
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -81,10 +81,33 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Atajos custom (Cmd+B bold, etc) queda para Polish
 - Bugs encontrados: ninguno
 
+### 2026-05-21 - Filesystem service (lib/project-fs.ts)
+- Qué se hizo: capa de servicio de filesystem que toda la app va a usar para operaciones sobre proyectos de libro. API tipada con Result style. Tauri commands en Rust como thin wrappers para IO crudo. Lógica de negocio (validación, parsing, naming) en TypeScript. Cero cambios en UI.
+- Archivos creados/modificados:
+  - src/types/project.ts (nuevo)
+  - src/lib/project-fs.ts (nuevo)
+  - src/lib/project-fs.test.ts (nuevo)
+  - src-tauri/src/project_fs.rs (nuevo)
+  - src-tauri/src/lib.rs (modificado, registrar commands)
+  - src/components/editor/ChapterEditor.test.tsx (import cleanup menor)
+- Decisiones tomadas:
+  - D-017: estructura de proyecto sigue architecture.md exactamente (frontmatter/, capitulos/, capitulos-terminados/, backmatter/, proyecto.json en root)
+  - D-018: validación de "es un proyecto válido" = tiene proyecto.json parseable
+  - D-019: API con ProjectResult<T> (discriminated union) en vez de excepciones. Errores tipados como ProjectFsError.
+  - D-020: Tauri commands son thin wrappers de IO. Lógica de negocio en TypeScript según architecture.md invariante 5
+  - D-021: modelo "abrir carpeta = abrir proyecto" sin carpeta default del sistema
+- Pendientes relacionados:
+  - Selector de proyecto en UI (task siguiente)
+  - Sidebar de capítulos en UI conectado al servicio
+  - Conexión editor ↔ servicio para autosave y load
+  - File watching para detectar cambios externos
+- Bugs encontrados: ninguno
+
 ## Decisiones arquitectónicas (acumuladas)
 - D-001 a D-009 documentadas arriba en F0
 - D-010 a D-012 documentadas arriba en Layout de 3 paneles
 - D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
