@@ -1,4 +1,6 @@
+import { X } from 'lucide-react';
 import { useLayoutStore } from '@/stores/layoutStore';
+import { useProjectStore } from '@/stores/projectStore';
 import type { Tab } from '@/types/layout';
 
 interface TabDef {
@@ -15,6 +17,8 @@ const TABS: TabDef[] = [
 function TopTabs() {
   const activeTab = useLayoutStore((s) => s.activeTab);
   const setActiveTab = useLayoutStore((s) => s.setActiveTab);
+  const currentProject = useProjectStore((s) => s.currentProject);
+  const closeProject = useProjectStore((s) => s.closeProject);
 
   return (
     <div className="flex items-center bg-bg-secondary border-b border-border-subtle shrink-0">
@@ -35,6 +39,23 @@ function TopTabs() {
           </button>
         );
       })}
+
+      <div className="ml-auto flex items-center gap-3 px-3">
+        {currentProject && (
+          <>
+            <span className="text-xs text-text-secondary max-w-48 truncate">
+              {currentProject.nombre}
+            </span>
+            <button
+              onClick={closeProject}
+              aria-label="Cerrar proyecto"
+              className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+            >
+              <X size={14} />
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
