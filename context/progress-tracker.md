@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Filesystem service
+- Última feature completada: Selector de proyecto
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -108,6 +108,41 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-010 a D-012 documentadas arriba en Layout de 3 paneles
 - D-013 a D-016 documentadas arriba en Editor base sin persistencia
 - D-017 a D-021 documentadas arriba en Filesystem service
+
+### 2026-05-21 - Selector de proyecto (welcome screen + abrir/crear)
+- Qué se hizo: primer punto de entrada de la app. Welcome screen cuando no hay proyecto abierto. Flujo unificado "abrir o crear": dialog nativo para carpeta, si tiene proyecto.json se abre, si no se ofrece crear con modal. Estado de proyecto en projectStore. Nombre del proyecto visible en TopTabs con botón para cerrar.
+- Archivos creados/modificados:
+  - src/stores/projectStore.ts (nuevo)
+  - src/stores/projectStore.test.ts (nuevo)
+  - src/components/welcome/WelcomeScreen.tsx (nuevo)
+  - src/components/welcome/CreateProjectModal.tsx (nuevo)
+  - src/App.tsx (modificado, condicional Welcome vs Layout)
+  - src/components/layout/TopTabs.tsx (modificado, nombre proyecto + botón cerrar)
+  - src-tauri/src/lib.rs (plugin dialog registrado)
+  - src-tauri/Cargo.toml (tauri-plugin-dialog añadido)
+  - src-tauri/capabilities/default.json (dialog:default permission)
+  - package.json (@tauri-apps/plugin-dialog añadido)
+- Decisiones tomadas:
+  - D-022: createProject no hace git init en esta feature. Queda para task Versioning.
+  - D-023: lista de proyectos recientes fuera de scope. Queda para task Settings.
+  - D-024: persistencia de último proyecto abierto fuera de scope. App arranca siempre en Welcome.
+  - D-025: plugin oficial @tauri-apps/plugin-dialog para dialogs nativos.
+  - D-026: estado "no hay proyecto" es el primary state al arrancar. WelcomeScreen es la primera UI.
+  - D-027: flujo unificado "abrir o crear" en un solo botón. Si la carpeta no es proyecto, se ofrece crear.
+  - D-028: nombre del proyecto visible en TopTabs con botón X sutil para cerrar.
+- Pendientes relacionados:
+  - Conectar editor al proyecto/capítulo activo (próxima task)
+  - Sidebar de capítulos en panel izquierdo
+  - git init al crear proyecto (task Versioning)
+  - Proyectos recientes y persistencia (task Settings)
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
