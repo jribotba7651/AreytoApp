@@ -6,7 +6,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
 - Fase activa: Versioning
-- Última feature completada: Git versioning automático + Panel de Versiones
+- Última feature completada: Restore de versión anterior
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -245,6 +245,39 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-029 a D-033 documentadas arriba en Editor conectado al proyecto
 - D-034 a D-037 documentadas arriba en Sidebar de capítulos
 - D-038 a D-043 documentadas arriba en Git versioning automático
+
+### 2026-05-21 - Restore de versión anterior
+- Qué se hizo: click en commit del panel Versiones abre modal de confirmación. Confirmar ejecuta flush de autosave pendiente, lee contenido del archivo en ese commit con git show, escribe al disco, hace commit "restore: {file} from {shortHash}". Editor remonta con contenido restaurado. Reversible vía historial.
+- Archivos creados/modificados:
+  - src-tauri/src/git.rs (+git_show_file_at_commit)
+  - src/lib/versioning.ts (+readFileAtCommit, +restoreFile, commitChanges acepta customMessage)
+  - src/hooks/useAutosave.ts (retorna {flush, syncSaved} con callback-ref pattern)
+  - src/stores/projectStore.ts (+editorVersion, +flushAutosave, +syncAutosaveSaved y actions)
+  - src/components/panels/EditorPanel.tsx (key={path:editorVersion}, registra flush/syncSaved)
+  - src/components/versions/CommitListItem.tsx (isCurrent prop, HEAD deshabilitado)
+  - src/components/versions/CommitList.tsx (click handler, modal state, flujo de restore)
+  - src/components/versions/RestoreConfirmModal.tsx (nuevo)
+- Decisiones tomadas:
+  - D-044: modal de confirmación obligatorio. Acción potencialmente destructiva.
+  - D-045: flush de autosave pendiente antes del restore. Cero pérdida de trabajo.
+  - D-046: restore como commit nuevo, no como reset. Historial conserva todo, reversible.
+  - D-047: git show {hash}:{relative-path} para leer contenido histórico sin checkout completo.
+- Pendientes relacionados:
+  - Diff view side-by-side (task Comparador de versiones)
+  - Restore de proyecto completo (no MVP)
+  - Restore desde branches (task Branching por capítulo)
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
+- D-038 a D-043 documentadas arriba en Git versioning automático
+- D-044 a D-047 documentadas arriba en Restore de versión anterior
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
