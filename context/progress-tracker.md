@@ -3,9 +3,9 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: Foundation
+- Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: F0 - Foundation Scaffold
+- Última feature completada: Layout de 3 paneles
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -34,8 +34,34 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Pendientes relacionados: ninguno
 - Bugs encontrados: ninguno
 
+### 2026-05-21 - Layout de 3 paneles (editor / terminal / versiones)
+- Qué se hizo: chasis visual completo de la app. Top bar con 3 tabs, tab Capítulo Activo con 4 paneles redimensionables (sidebar, editor, terminal, versiones), tabs Libro y Terminados con placeholders. Store Zustand de layout. Todos los placeholders vacíos esperando sus features futuras.
+- Archivos creados/modificados:
+  - src/types/layout.ts (nuevo)
+  - src/stores/layoutStore.ts (nuevo)
+  - src/stores/layoutStore.test.ts (nuevo)
+  - src/components/layout/TopTabs.tsx (nuevo)
+  - src/components/layout/ChapterTabContent.tsx (nuevo)
+  - src/components/layout/BookTabContent.tsx (nuevo)
+  - src/components/layout/FinishedTabContent.tsx (nuevo)
+  - src/components/panels/SidebarPanel.tsx (nuevo)
+  - src/components/panels/EditorPanel.tsx (nuevo)
+  - src/components/panels/TerminalPanel.tsx (nuevo)
+  - src/components/panels/VersionsPanel.tsx (nuevo)
+  - src/App.tsx (reemplazado)
+  - package.json (react-resizable-panels añadido)
+- Decisiones tomadas:
+  - D-010: persistencia de tamaños de paneles fuera de scope. Vive en memoria con Zustand. La persistencia correcta (archivo JSON local) se construirá en la task Settings respetando architecture.md invariante 6. localStorage queda explícitamente prohibido.
+  - D-011: estructura de paneles del tab Capítulo Activo: Group horizontal (Sidebar | Middle | Versions) con Middle siendo Group vertical (Editor / Terminal). Panel versiones colapsable con botón flotante para reexpandir.
+  - D-012: react-resizable-panels v4 instaló v4.11.1 (no v2 como decía el spec). API cambió: PanelGroup→Group, PanelResizeHandle→Separator, direction→orientation, onLayout→onLayoutChanged con Layout={[id:string]:number} en vez de number[].
+- Pendientes relacionados:
+  - Persistencia de tamaños queda para task Settings
+  - Atajos de teclado para cambiar tabs (considerar en Polish)
+- Bugs encontrados: ninguno
+
 ## Decisiones arquitectónicas (acumuladas)
 - D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
