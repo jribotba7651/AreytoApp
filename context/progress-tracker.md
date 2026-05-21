@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Layout de 3 paneles
+- Última feature completada: Editor base sin persistencia (CodeMirror 6)
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -59,9 +59,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Atajos de teclado para cambiar tabs (considerar en Polish)
 - Bugs encontrados: ninguno
 
+### 2026-05-21 - Editor base sin persistencia (CodeMirror 6)
+- Qué se hizo: CodeMirror 6 montado en el panel del editor del tab Capítulo Activo. Markdown syntax highlighting funcional, soft-wrap, fuente serif, tema oscuro custom alineado con CSS variables de ui-context.md. Buffer en memoria con contenido demo. Sin persistencia ni conexión a filesystem.
+- Archivos creados/modificados:
+  - src/components/editor/ChapterEditor.tsx (nuevo)
+  - src/components/editor/editor-theme.ts (nuevo)
+  - src/components/editor/demo-content.ts (nuevo)
+  - src/components/editor/ChapterEditor.test.tsx (nuevo)
+  - src/components/panels/EditorPanel.tsx (reemplazado)
+  - package.json (@codemirror/* y @lezer/highlight añadidos)
+- Decisiones tomadas:
+  - D-013: tema CodeMirror custom desde cero usando CSS variables de ui-context.md. theme-one-dark descartado por paleta incompatible.
+  - D-014: contenido demo en español. Cuando se haga i18n del producto se mueve a archivos de locales.
+  - D-015: sin números de línea (gutter). Modo escritura prosaica, no modo código.
+  - D-016: @lezer/highlight añadido como dependencia directa (es transitiva de @codemirror pero TypeScript la requiere explícita para importar tags).
+- Pendientes relacionados:
+  - Persistencia a disco queda para la siguiente task (filesystem service + conexión)
+  - lib/project-fs.ts pendiente, próxima feature
+  - Conexión editor ↔ filesystem queda como task aparte
+  - Concepto de "capítulo activo" en el store queda para cuando exista filesystem real
+  - Atajos custom (Cmd+B bold, etc) queda para Polish
+- Bugs encontrados: ninguno
+
 ## Decisiones arquitectónicas (acumuladas)
 - D-001 a D-009 documentadas arriba en F0
 - D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
