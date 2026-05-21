@@ -5,8 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Fase activa: Versioning
-- Última feature completada: Restore de versión anterior
+- Última feature completada: Tab Libro con vista renderizada
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -278,6 +277,42 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-034 a D-037 documentadas arriba en Sidebar de capítulos
 - D-038 a D-043 documentadas arriba en Git versioning automático
 - D-044 a D-047 documentadas arriba en Restore de versión anterior
+
+### 2026-05-21 - Tab Libro con vista renderizada
+- Qué se hizo: tab Libro lee todos los capítulos in-progress del proyecto activo, los renderiza con react-markdown en vista de lectura tipo libro. Recarga automáticamente al activar el tab. Tema tipográfico custom alineado con ui-context.md. Manejo gracioso de capítulos con error de lectura.
+- Archivos creados/modificados:
+  - src/types/book.ts (nuevo: BookSection, BookData)
+  - src/lib/book-loader.ts (nuevo: loadBook con carga paralela)
+  - src/lib/book-loader.test.ts (nuevo: 5 tests)
+  - src/components/book/BookHeader.tsx (nuevo)
+  - src/components/book/BookChapter.tsx (nuevo: react-markdown con tema custom)
+  - src/components/book/BookEmptyState.tsx (nuevo)
+  - src/components/book/BookChapterError.tsx (nuevo)
+  - src/components/layout/BookTabContent.tsx (reescrito)
+- Decisiones tomadas:
+  - D-048: react-markdown 10.x instalado (spec asumía 9.x, API compatible). remark-gfm 4.x.
+  - D-049: recarga al activar tab via useEffect en activeTab. Sin cache entre visitas (fresco siempre).
+  - D-050: capítulos con error de lectura se muestran con placeholder sin bloquear el resto (Promise.all no falla por un error individual).
+  - D-051: solo capítulos in-progress. Terminados y frontmatter/backmatter quedan para sus tasks.
+- Pendientes relacionados:
+  - Frontmatter section (header del libro)
+  - Backmatter section
+  - Capítulos terminados visibles en el libro
+  - Numeración de páginas
+  - Export/Print del libro
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
+- D-038 a D-043 documentadas arriba en Git versioning automático
+- D-044 a D-047 documentadas arriba en Restore de versión anterior
+- D-048 a D-051 documentadas arriba en Tab Libro con vista renderizada
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
