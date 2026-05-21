@@ -5,7 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Sidebar de capítulos
+- Fase activa: Versioning
+- Última feature completada: Git versioning automático + Panel de Versiones
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -202,6 +203,48 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-022 a D-028 documentadas arriba en Selector de proyecto
 - D-029 a D-033 documentadas arriba en Editor conectado al proyecto
 - D-034 a D-037 documentadas arriba en Sidebar de capítulos
+
+### 2026-05-21 - Git versioning automático + Panel de Versiones
+- Qué se hizo: cada proyecto tiene su .git/. Al abrir/crear se inicializa silencioso con initial commit. Autosave dispara commit si hay diff real. Panel de Versiones derecha lista commits del capítulo activo con timestamp relativo. Git via Tauri command nativo (Rust std::process::Command). Backend + UI en una task por decisión consciente (D-043).
+- Archivos creados/modificados:
+  - src-tauri/src/git.rs (nuevo: 6 commands)
+  - src-tauri/src/lib.rs (commands registrados)
+  - src/types/git.ts (nuevo)
+  - src/lib/versioning.ts (nuevo)
+  - src/lib/versioning.test.ts (nuevo)
+  - src/lib/commit-loader.ts (nuevo)
+  - src/stores/projectStore.ts (extendido: commits, setCommits, prependCommit)
+  - src/hooks/useAutosave.ts (+projectPath, commit después de save)
+  - src/components/welcome/WelcomeScreen.tsx (ensureGitInit + loadCommits)
+  - src/components/welcome/CreateProjectModal.tsx (ensureGitInit + loadCommits)
+  - src/components/sidebar/ChapterList.tsx (loadCommits al cambiar capítulo)
+  - src/components/panels/VersionsPanel.tsx (reescrito con CommitList)
+  - src/components/versions/CommitList.tsx (nuevo)
+  - src/components/versions/CommitListItem.tsx (nuevo)
+- Decisiones tomadas:
+  - D-038: git via Tauri command nativo (std::process::Command). Sin simple-git ni isomorphic-git. Coherente con architecture invariante 5.
+  - D-039: auto-commit después de cada autosave exitoso. git_has_changes decide si commit o no, respetando architecture invariante 7.
+  - D-040: git init silencioso al abrir proyecto sin .git/. Initial commit con estructura existente.
+  - D-041: mensaje commit simple "autosave: {filename}". Timestamp guardado por git.
+  - D-042: panel Versiones muestra commits del capítulo activo (filtrados por path). Sin diff ni restore en esta task.
+  - D-043: excepción consciente a "una feature a la vez". Backend + UI en una task por decisión de producto.
+- Pendientes relacionados:
+  - Restore de versión anterior (task futura)
+  - Diff view entre versiones
+  - Branches por capítulo
+  - Tags al cerrar capítulo (task Marcar capítulo terminado)
+  - Toggle automático vs manual (task Polish)
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
+- D-038 a D-043 documentadas arriba en Git versioning automático
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
