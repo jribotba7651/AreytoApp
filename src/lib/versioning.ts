@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { Commit, GitError, GitResult } from '@/types/git';
+import { writeChapter } from './project-fs';
 
 interface CommitInfo {
   hash: string;
@@ -51,7 +52,8 @@ export async function ensureGitInit(projectPath: string): Promise<GitResult<void
 
 export async function commitChanges(
   projectPath: string,
-  absoluteFilePath: string
+  absoluteFilePath: string,
+  options?: { customMessage?: string }
 ): Promise<GitResult<string | null>> {
   const relPath = relativePath(projectPath, absoluteFilePath);
 
@@ -63,7 +65,7 @@ export async function commitChanges(
 
     if (!hasChanges) return ok(null);
 
-    const message = `autosave: ${basename(relPath)}`;
+    const message = options?.customMessage ?? `autosave: ${basename(relPath)}`;
     const hash = await invoke<string>('git_commit_file', {
       repoPath: projectPath,
       filePath: relPath,
@@ -94,4 +96,54 @@ export async function listCommitsForFile(
   } catch (e) {
     return fail({ kind: 'LogFailed', reason: String(e) });
   }
+}
+
+export async function readFileAtCommit(
+  projectPath: string,
+  absoluteFilePath: string,
+  commitHash: string
+): Promise<GitResult<string>> {
+  const relPath = relativePath(projectPath, absoluteFilePath);
+
+  try {
+    const content = await invoke<string>('git_show_file_at_commit', {
+      repoPath: projectPath,
+      commitHash,
+      filePath: relPath,
+    });
+    return ok(content);
+  } catch (e) {
+    return fail({ kind: 'LogFailed', reason: String(e) });
+  }
+}
+
+export async function restoreFile(
+  projectPath: string,
+  absoluteFilePath: string,
+  commitHash: string
+): Promise<GitResult<{ commit: Commit; content: string }>> {
+  const read = await readFileAtCommit(projectPath, absoluteFilePath, commitHash);
+  if (!read.ok) return read;
+
+  const write = await writeChapter(absoluteFilePath, read.value);
+  if (!write.ok) {
+    return fail({ kind: 'CommitFailed', reason: 'Failed to write restored content' });
+  }
+
+  const filename = basename(relativePath(projectPath, absoluteFilePath));
+  const shortHash = commitHash.slice(0, 7);
+  const message = `restore: ${filename} from ${shortHash}`;
+  const committed = await commitChanges(projectPath, absoluteFilePath, { customMessage: message });
+
+  if (!committed.ok) return committed;
+
+  const hash = committed.value ?? commitHash;
+  const commit: Commit = {
+    hash,
+    shortHash: hash.slice(0, 7),
+    message,
+    timestamp: new Date().toISOString(),
+  };
+
+  return ok({ commit, content: read.value });
 }

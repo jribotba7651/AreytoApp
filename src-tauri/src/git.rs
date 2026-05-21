@@ -116,3 +116,12 @@ pub fn git_log_file(
 
     Ok(commits)
 }
+
+#[tauri::command]
+pub fn git_show_file_at_commit(
+    repo_path: String,
+    commit_hash: String,
+    file_path: String,
+) -> Result<String, String> {
+    git(&repo_path, &["show", &format!("{commit_hash}:{file_path}")])
+}

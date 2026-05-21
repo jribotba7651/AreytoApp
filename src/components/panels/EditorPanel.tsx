@@ -7,17 +7,30 @@ function EditorPanel() {
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
   const currentProject = useProjectStore((s) => s.currentProject);
+  const editorVersion = useProjectStore((s) => s.editorVersion);
   const updateContent = useProjectStore((s) => s.updateContent);
   const setSaveStatus = useProjectStore((s) => s.setSaveStatus);
   const saveStatus = useProjectStore((s) => s.saveStatus);
+  const setFlushAutosave = useProjectStore((s) => s.setFlushAutosave);
+  const setSyncAutosaveSaved = useProjectStore((s) => s.setSyncAutosaveSaved);
 
-  useAutosave({
+  const { flush, syncSaved } = useAutosave({
     content: activeChapterContent,
     chapterPath: activeChapterPath,
     projectPath: currentProject?.rootPath ?? null,
     onStatusChange: setSaveStatus,
     delay: 500,
   });
+
+  // Register flush and syncSaved in store so restore flow can access them
+  useEffect(() => {
+    setFlushAutosave(flush);
+    setSyncAutosaveSaved(syncSaved);
+    return () => {
+      setFlushAutosave(null);
+      setSyncAutosaveSaved(null);
+    };
+  }, [flush, syncSaved, setFlushAutosave, setSyncAutosaveSaved]);
 
   // Auto-reset 'saved' → 'idle' después de 2s
   useEffect(() => {
@@ -37,7 +50,7 @@ function EditorPanel() {
   return (
     <div className="h-full bg-bg-editor">
       <ChapterEditor
-        key={activeChapterPath}
+        key={`${activeChapterPath}:${editorVersion}`}
         initialContent={activeChapterContent}
         onChange={updateContent}
       />

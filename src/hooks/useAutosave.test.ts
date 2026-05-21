@@ -87,4 +87,45 @@ describe('useAutosave', () => {
 
     expect(onStatusChange).toHaveBeenCalledWith('error');
   });
+
+  it('flush ejecuta el save inmediatamente sin esperar debounce', async () => {
+    mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
+    const onStatusChange = vi.fn();
+
+    const { result, rerender } = renderHook(
+      ({ content }: { content: string }) =>
+        useAutosave({ content, chapterPath: PATH, projectPath: null, onStatusChange, delay: 2000 }),
+      { initialProps: { content: 'inicio' } }
+    );
+
+    rerender({ content: 'cambio flush' });
+
+    // Sin avanzar el timer, flush debe guardar inmediatamente
+    await result.current.flush();
+
+    expect(mockWriteChapter).toHaveBeenCalledWith(PATH, 'cambio flush');
+    expect(onStatusChange).toHaveBeenCalledWith('saved');
+  });
+
+  it('flush cancela timer pendiente antes de guardar', async () => {
+    mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
+    const onStatusChange = vi.fn();
+
+    const { result, rerender } = renderHook(
+      ({ content }: { content: string }) =>
+        useAutosave({ content, chapterPath: PATH, projectPath: null, onStatusChange, delay: 2000 }),
+      { initialProps: { content: 'inicio' } }
+    );
+
+    rerender({ content: 'cambio' });
+
+    // flush cancela el timer y guarda
+    await result.current.flush();
+
+    // Avanzar el timer: no debe guardar de nuevo
+    const prevCallCount = mockWriteChapter.mock.calls.length;
+    await vi.advanceTimersByTimeAsync(2500);
+
+    expect(mockWriteChapter.mock.calls.length).toBe(prevCallCount);
+  });
 });

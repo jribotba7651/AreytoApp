@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ensureGitInit, commitChanges, listCommitsForFile } from './versioning';
+import { ensureGitInit, commitChanges, listCommitsForFile, readFileAtCommit, restoreFile } from './versioning';
 
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
@@ -115,5 +115,53 @@ describe('listCommitsForFile', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value).toHaveLength(0);
+  });
+});
+
+describe('readFileAtCommit', () => {
+  it('retorna el contenido del archivo en el commit especificado', async () => {
+    const content = '# Capítulo 1\n\nContenido antiguo.';
+    mockInvoke.mockResolvedValueOnce(content);
+
+    const result = await readFileAtCommit(PROJECT_PATH, ABS_CHAPTER_PATH, 'abc1234');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(content);
+    expect(mockInvoke).toHaveBeenCalledWith('git_show_file_at_commit', {
+      repoPath: PROJECT_PATH,
+      commitHash: 'abc1234',
+      filePath: REL_CHAPTER_PATH,
+    });
+  });
+
+  it('retorna error si el commit no existe', async () => {
+    mockInvoke.mockRejectedValueOnce(new Error('unknown commit'));
+
+    const result = await readFileAtCommit(PROJECT_PATH, ABS_CHAPTER_PATH, 'deadbeef');
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.kind).toBe('LogFailed');
+  });
+});
+
+describe('restoreFile', () => {
+  it('escribe contenido antiguo, crea commit restore y retorna ambos', async () => {
+    const oldContent = '# Capítulo 1\n\nContenido viejo.';
+    const restoreHash = 'abc1234fullhash';
+
+    mockInvoke
+      .mockResolvedValueOnce(oldContent)    // git_show_file_at_commit
+      .mockResolvedValueOnce(undefined)     // write_text_file (writeChapter)
+      .mockResolvedValueOnce(true)          // git_has_changes
+      .mockResolvedValueOnce(restoreHash);  // git_commit_file
+
+    const result = await restoreFile(PROJECT_PATH, ABS_CHAPTER_PATH, 'abc1234');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.content).toBe(oldContent);
+      expect(result.value.commit.message).toBe('restore: cap-01.md from abc1234');
+      expect(result.value.commit.hash).toBe(restoreHash);
+    }
   });
 });

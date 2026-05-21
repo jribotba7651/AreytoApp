@@ -11,6 +11,9 @@ interface ProjectState {
   saveStatus: SaveStatus;
   chapters: Chapter[];
   commits: Commit[];
+  editorVersion: number;
+  flushAutosave: (() => Promise<void>) | null;
+  syncAutosaveSaved: ((content: string) => void) | null;
   setCurrentProject: (project: Project | null) => void;
   closeProject: () => void;
   setActiveChapter: (path: string, content: string) => void;
@@ -20,6 +23,9 @@ interface ProjectState {
   addChapter: (chapter: Chapter) => void;
   setCommits: (commits: Commit[]) => void;
   prependCommit: (commit: Commit) => void;
+  incrementEditorVersion: () => void;
+  setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
+  setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -29,6 +35,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
   saveStatus: 'idle',
   chapters: [],
   commits: [],
+  editorVersion: 0,
+  flushAutosave: null,
+  syncAutosaveSaved: null,
 
   setCurrentProject: (project: Project | null) => set({ currentProject: project }),
 
@@ -40,6 +49,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       saveStatus: 'idle',
       chapters: [],
       commits: [],
+      editorVersion: 0,
     }),
 
   setActiveChapter: (path: string, content: string) =>
@@ -63,4 +73,12 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   prependCommit: (commit: Commit) =>
     set((state) => ({ commits: [commit, ...state.commits] })),
+
+  incrementEditorVersion: () =>
+    set((state) => ({ editorVersion: state.editorVersion + 1 })),
+
+  setFlushAutosave: (fn: (() => Promise<void>) | null) => set({ flushAutosave: fn }),
+
+  setSyncAutosaveSaved: (fn: ((content: string) => void) | null) =>
+    set({ syncAutosaveSaved: fn }),
 }));

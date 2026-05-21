@@ -25,6 +25,7 @@ pub fn run() {
             git::git_has_changes,
             git::git_commit_file,
             git::git_log_file,
+            git::git_show_file_at_commit,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
