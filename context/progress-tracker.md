@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Selector de proyecto
+- Última feature completada: Editor conectado al proyecto (autosave + capítulo activo)
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -143,6 +143,39 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-013 a D-016 documentadas arriba en Editor base sin persistencia
 - D-017 a D-021 documentadas arriba en Filesystem service
 - D-022 a D-028 documentadas arriba en Selector de proyecto
+
+### 2026-05-21 - Editor conectado al proyecto (autosave + capítulo activo)
+- Qué se hizo: cerró la task original "Editor markdown con CodeMirror 6". El editor lee/escribe el capítulo activo del proyecto. Autosave 500ms debounce. Indicador visual de save status. Al abrir proyecto sin capítulos se crea cap-01.md automáticamente.
+- Archivos creados/modificados:
+  - src/stores/projectStore.ts (extendido con activeChapterPath, activeChapterContent, saveStatus)
+  - src/lib/chapter-loader.ts (nuevo)
+  - src/lib/chapter-loader.test.ts (nuevo)
+  - src/hooks/useAutosave.ts (nuevo)
+  - src/hooks/useAutosave.test.ts (nuevo)
+  - src/components/welcome/WelcomeScreen.tsx (loadInitialChapter integrado)
+  - src/components/welcome/CreateProjectModal.tsx (loadInitialChapter integrado)
+  - src/components/panels/EditorPanel.tsx (usa store, autosave, key={path})
+  - src/components/layout/TopTabs.tsx (indicador save status)
+  - src/stores/projectStore.test.ts (tests extendidos)
+- Decisiones tomadas:
+  - D-029: si proyecto sin capítulos al abrir, crear cap-01.md placeholder automáticamente
+  - D-030: capítulo activo vive en projectStore. Path absoluto en runtime, filename relativo en proyecto.json
+  - D-031: autosave con debounce 500ms en hook reusable useAutosave
+  - D-032: indicador idle/saving/saved/error en TopTabs con auto-reset a idle después de 2s
+  - D-033: editor se rehidrata cuando cambia activeChapterPath vía key={path}. Prepara para sidebar futuro.
+- Pendientes relacionados:
+  - Sidebar con lista de capítulos para cambiar (próxima task lógica)
+  - File watcher para detectar cambios externos de Claude Code/Spiral
+  - Botón Cmd+S para save manual (task Polish)
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
