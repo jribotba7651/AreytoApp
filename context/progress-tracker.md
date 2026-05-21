@@ -205,7 +205,10 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
-Ninguno.
+Ninguno actualmente.
+
+### Bugs resueltos
+- 2026-05-21: `createChapter` no escribía contenido al disco cuando no se pasaba título explícito. Los capítulos creados vía botón + del sidebar quedaban vacíos, y el sidebar mostraba "cap-02" como fallback al no encontrar h1. Fix en commit be69201: el servicio ahora genera `# Capítulo N\n\n` internamente. `chapter-loader.ts` también simplificado para delegar a `createChapter` (DRY).
 
 ## Refactors pendientes
 Ninguno.
