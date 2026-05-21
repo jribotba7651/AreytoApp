@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { openProject } from '@/lib/project-fs';
+import { loadInitialChapter } from '@/lib/chapter-loader';
 import { useProjectStore } from '@/stores/projectStore';
 import CreateProjectModal from './CreateProjectModal';
 import type { Project } from '@/types/project';
 
 function WelcomeScreen() {
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
+  const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,13 @@ function WelcomeScreen() {
     const result = await openProject(path);
 
     if (result.ok) {
+      const chapter = await loadInitialChapter(result.value);
+      if (!chapter.ok) {
+        setError('No se pudo cargar el capítulo activo.');
+        setLoading(false);
+        return;
+      }
+      setActiveChapter(chapter.value.path, chapter.value.content);
       setCurrentProject(result.value);
       return;
     }

@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import type { Tab } from '@/types/layout';
+import type { SaveStatus } from '@/stores/projectStore';
 
 interface TabDef {
   id: Tab;
@@ -14,11 +15,21 @@ const TABS: TabDef[] = [
   { id: 'terminados', label: 'Terminados' },
 ];
 
+const STATUS_LABEL: Record<SaveStatus, string> = {
+  idle: '',
+  saving: 'Guardando…',
+  saved: 'Guardado',
+  error: 'Error al guardar',
+};
+
 function TopTabs() {
   const activeTab = useLayoutStore((s) => s.activeTab);
   const setActiveTab = useLayoutStore((s) => s.setActiveTab);
   const currentProject = useProjectStore((s) => s.currentProject);
   const closeProject = useProjectStore((s) => s.closeProject);
+  const saveStatus = useProjectStore((s) => s.saveStatus);
+
+  const statusLabel = STATUS_LABEL[saveStatus];
 
   return (
     <div className="flex items-center bg-bg-secondary border-b border-border-subtle shrink-0">
@@ -41,6 +52,15 @@ function TopTabs() {
       })}
 
       <div className="ml-auto flex items-center gap-3 px-3">
+        {statusLabel && (
+          <span className={[
+            'text-xs transition-colors duration-150',
+            saveStatus === 'error' ? 'text-error' : 'text-text-tertiary',
+          ].join(' ')}>
+            {statusLabel}
+          </span>
+        )}
+
         {currentProject && (
           <>
             <span className="text-xs text-text-secondary max-w-48 truncate">

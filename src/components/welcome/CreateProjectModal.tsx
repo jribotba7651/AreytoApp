@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Project } from '@/types/project';
 import { createProject } from '@/lib/project-fs';
+import { loadInitialChapter } from '@/lib/chapter-loader';
+import { useProjectStore } from '@/stores/projectStore';
 
 interface CreateProjectModalProps {
   folderPath: string;
@@ -9,6 +11,7 @@ interface CreateProjectModalProps {
 }
 
 function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectModalProps) {
+  const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const [nombre, setNombre] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,9 +30,7 @@ function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectMod
 
     const result = await createProject(folderPath, nombre.trim());
 
-    if (result.ok) {
-      onCreated(result.value);
-    } else {
+    if (!result.ok) {
       const { error: err } = result;
       if (err.kind === 'AlreadyExists') {
         setError('Ya existe un proyecto en esta carpeta.');
@@ -39,7 +40,15 @@ function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectMod
         setError('Error al crear el proyecto. Intenta de nuevo.');
       }
       setLoading(false);
+      return;
     }
+
+    const chapter = await loadInitialChapter(result.value);
+    if (chapter.ok) {
+      setActiveChapter(chapter.value.path, chapter.value.content);
+    }
+
+    onCreated(result.value);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
