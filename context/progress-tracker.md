@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Editor conectado al proyecto (autosave + capítulo activo)
+- Última feature completada: Sidebar de capítulos
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -169,6 +169,31 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Botón Cmd+S para save manual (task Polish)
 - Bugs encontrados: ninguno
 
+### 2026-05-21 - Sidebar de capítulos
+- Qué se hizo: lista de capítulos en el sidebar del tab Capítulo Activo. Click selecciona y editor remonta. Botón + crea capítulo nuevo automáticamente con placeholder y lo activa. Capítulo activo destacado con border-left accent + bg-tertiary. Subset de la task "Panel izquierdo de proyecto": solo capítulos en progreso.
+- Archivos creados/modificados:
+  - src/stores/projectStore.ts (extendido: chapters, setChapters, addChapter)
+  - src/stores/projectStore.test.ts (tests extendidos)
+  - src/lib/chapter-loader.ts (retorna allChapters además de activeChapter)
+  - src/lib/chapter-loader.test.ts (tests actualizados para nueva API)
+  - src/components/welcome/WelcomeScreen.tsx (setChapters integrado)
+  - src/components/welcome/CreateProjectModal.tsx (setChapters integrado)
+  - src/components/panels/SidebarPanel.tsx (reescrito con lista real)
+  - src/components/sidebar/ChapterList.tsx (nuevo)
+  - src/components/sidebar/ChapterListItem.tsx (nuevo)
+  - src/components/sidebar/NewChapterButton.tsx (nuevo)
+- Decisiones tomadas:
+  - D-034: sidebar solo muestra capítulos en progreso. Frontmatter, Backmatter, Terminados van a sus tasks.
+  - D-035: sin drag-to-reorder. Orden por filename ascendente. Reorder queda para Polish.
+  - D-036: sin conteo de palabras. Stats es otra task.
+  - D-037: botón + crea capítulo automáticamente sin modal. Título real se edita en el h1 del editor.
+- Pendientes relacionados:
+  - File watching para refrescar sidebar cuando un capítulo se modifica externamente
+  - Frontmatter, backmatter, capítulos terminados (tasks propias)
+  - Conteo de palabras (task Stats)
+  - Drag-to-reorder, renombrar desde sidebar (Polish)
+- Bugs encontrados: ninguno
+
 ## Decisiones arquitectónicas (acumuladas)
 - D-001 a D-009 documentadas arriba en F0
 - D-010 a D-012 documentadas arriba en Layout de 3 paneles
@@ -176,6 +201,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-017 a D-021 documentadas arriba en Filesystem service
 - D-022 a D-028 documentadas arriba en Selector de proyecto
 - D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
