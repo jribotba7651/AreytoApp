@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Project } from '@/types/project';
+import type { Chapter, Project } from '@/types/project';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -8,11 +8,14 @@ interface ProjectState {
   activeChapterPath: string | null;
   activeChapterContent: string;
   saveStatus: SaveStatus;
+  chapters: Chapter[];
   setCurrentProject: (project: Project | null) => void;
   closeProject: () => void;
   setActiveChapter: (path: string, content: string) => void;
   updateContent: (content: string) => void;
   setSaveStatus: (status: SaveStatus) => void;
+  setChapters: (chapters: Chapter[]) => void;
+  addChapter: (chapter: Chapter) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -20,6 +23,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   activeChapterPath: null,
   activeChapterContent: '',
   saveStatus: 'idle',
+  chapters: [],
 
   setCurrentProject: (project: Project | null) => set({ currentProject: project }),
 
@@ -29,6 +33,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       activeChapterPath: null,
       activeChapterContent: '',
       saveStatus: 'idle',
+      chapters: [],
     }),
 
   setActiveChapter: (path: string, content: string) =>
@@ -37,4 +42,14 @@ export const useProjectStore = create<ProjectState>((set) => ({
   updateContent: (content: string) => set({ activeChapterContent: content }),
 
   setSaveStatus: (status: SaveStatus) => set({ saveStatus: status }),
+
+  setChapters: (chapters: Chapter[]) =>
+    set({ chapters: [...chapters].sort((a, b) => a.filename.localeCompare(b.filename)) }),
+
+  addChapter: (chapter: Chapter) =>
+    set((state) => ({
+      chapters: [...state.chapters, chapter].sort((a, b) =>
+        a.filename.localeCompare(b.filename)
+      ),
+    })),
 }));

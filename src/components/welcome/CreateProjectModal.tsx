@@ -12,6 +12,7 @@ interface CreateProjectModalProps {
 
 function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectModalProps) {
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
+  const setChapters = useProjectStore((s) => s.setChapters);
   const [nombre, setNombre] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,7 +46,8 @@ function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectMod
 
     const chapter = await loadInitialChapter(result.value);
     if (chapter.ok) {
-      setActiveChapter(chapter.value.path, chapter.value.content);
+      setActiveChapter(chapter.value.activeChapter.path, chapter.value.activeChapter.content);
+      setChapters(chapter.value.allChapters);
     }
 
     onCreated(result.value);

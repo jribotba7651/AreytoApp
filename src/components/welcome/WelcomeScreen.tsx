@@ -9,6 +9,7 @@ import type { Project } from '@/types/project';
 function WelcomeScreen() {
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
+  const setChapters = useProjectStore((s) => s.setChapters);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,7 +41,8 @@ function WelcomeScreen() {
         setLoading(false);
         return;
       }
-      setActiveChapter(chapter.value.path, chapter.value.content);
+      setActiveChapter(chapter.value.activeChapter.path, chapter.value.activeChapter.content);
+      setChapters(chapter.value.allChapters);
       setCurrentProject(result.value);
       return;
     }

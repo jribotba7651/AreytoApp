@@ -1,4 +1,4 @@
-import type { Project, ProjectResult } from '@/types/project';
+import type { Chapter, Project, ProjectResult } from '@/types/project';
 import {
   listChapters,
   readChapter,
@@ -11,24 +11,38 @@ export interface LoadedChapter {
   content: string;
 }
 
+export interface LoadResult {
+  activeChapter: LoadedChapter;
+  allChapters: Chapter[];
+}
+
 export async function loadInitialChapter(
   project: Project
-): Promise<ProjectResult<LoadedChapter>> {
+): Promise<ProjectResult<LoadResult>> {
+  const chaptersResult = await listChapters(project);
+  if (!chaptersResult.ok) return chaptersResult;
+
+  const inProgress = chaptersResult.value
+    .filter((c) => c.status === 'in-progress')
+    .sort((a, b) => a.filename.localeCompare(b.filename));
+
   // Rama 1: capituloActivo válido en proyecto.json
   if (project.capituloActivo) {
     const chapterPath = `${project.rootPath}/capitulos/${project.capituloActivo}`;
     const read = await readChapter(chapterPath);
     if (read.ok) {
-      return { ok: true, value: { path: chapterPath, content: read.value } };
+      return {
+        ok: true,
+        value: {
+          activeChapter: { path: chapterPath, content: read.value },
+          allChapters: inProgress,
+        },
+      };
     }
-    // Si el archivo no existe, caer a siguiente rama
+    // Si el archivo no existe, caer a la siguiente rama
   }
 
-  // Rama 2: listar capítulos en progreso y cargar el primero
-  const chapters = await listChapters(project);
-  if (!chapters.ok) return chapters;
-
-  const inProgress = chapters.value.filter((c) => c.status === 'in-progress');
+  // Rama 2: usar el primer capítulo en progreso
   if (inProgress.length > 0) {
     const first = inProgress[0];
     if (!first) return { ok: false, error: { kind: 'ReadFailed', path: project.rootPath, reason: 'No chapter found' } };
@@ -36,18 +50,28 @@ export async function loadInitialChapter(
     const read = await readChapter(first.path);
     if (!read.ok) return read;
 
-    // Actualizar capituloActivo en proyecto.json
     await updateProjectMeta(project, { capituloActivo: first.filename });
 
-    return { ok: true, value: { path: first.path, content: read.value } };
+    return {
+      ok: true,
+      value: {
+        activeChapter: { path: first.path, content: read.value },
+        allChapters: inProgress,
+      },
+    };
   }
 
   // Rama 3: no hay capítulos, crear cap-01.md
   const created = await createChapter(project, 'Capítulo 1');
   if (!created.ok) return created;
 
-  const updated = await updateProjectMeta(project, { capituloActivo: created.value.filename });
-  if (!updated.ok) return updated;
+  await updateProjectMeta(project, { capituloActivo: created.value.filename });
 
-  return { ok: true, value: { path: created.value.path, content: `# Capítulo 1\n\n` } };
+  return {
+    ok: true,
+    value: {
+      activeChapter: { path: created.value.path, content: `# Capítulo 1\n\n` },
+      allChapters: [created.value],
+    },
+  };
 }
