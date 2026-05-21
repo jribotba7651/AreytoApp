@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  /* Background */
+  --color-bg-primary: #0d0d0f;
+  --color-bg-secondary: #161618;
+  --color-bg-tertiary: #1d1d20;
+  --color-bg-editor: #131316;
+  --color-bg-terminal: #0a0a0c;
+
+  /* Borders */
+  --color-border-subtle: #26262a;
+  --color-border-default: #34343a;
+  --color-border-strong: #45454d;
+
+  /* Text */
+  --color-text-primary: #e8e8ec;
+  --color-text-secondary: #a8a8b0;
+  --color-text-tertiary: #6c6c75;
+  --color-text-editor: #d4d4dc;
+
+  /* Accent */
+  --color-accent: #7c8aa8;
+  --color-accent-hover: #93a1c0;
+  --color-accent-muted: #4a5468;
+
+  /* States */
+  --color-success: #6b9a7e;
+  --color-warning: #c4a572;
+  --color-error: #b07070;
+  --color-info: #7a93b8;
+
+  /* Typography */
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-serif: "Iowan Old Style", Charter, Georgia, serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+:root {
+  --bg-primary: #0d0d0f;
+  --bg-secondary: #161618;
+  --bg-tertiary: #1d1d20;
+  --bg-editor: #131316;
+  --bg-terminal: #0a0a0c;
+  --border-subtle: #26262a;
+  --border-default: #34343a;
+  --border-strong: #45454d;
+  --text-primary: #e8e8ec;
+  --text-secondary: #a8a8b0;
+  --text-tertiary: #6c6c75;
+  --text-editor: #d4d4dc;
+  --accent: #7c8aa8;
+  --accent-hover: #93a1c0;
+  --accent-muted: #4a5468;
+  --success: #6b9a7e;
+  --warning: #c4a572;
+  --error: #b07070;
+  --info: #7a93b8;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
