@@ -180,12 +180,15 @@ export async function createChapter(
 
   const filename = generateNextChapterFilename(existing.value);
   const chapterPath = `${project.rootPath}/capitulos/${filename}`;
-  const heading = title ? `# ${title}\n\n` : '';
 
-  const write = await writeFile(chapterPath, heading);
+  // Número humano sin padding: cap-02.md → 2
+  const num = parseInt(filename.replace(/^cap-(\d+)\.md$/, '$1'), 10);
+  const chapterTitle = title ?? `Capítulo ${num}`;
+  const content = `# ${chapterTitle}\n\n`;
+
+  const write = await writeFile(chapterPath, content);
   if (!write.ok) return write;
 
-  const chapterTitle = title ?? filename.replace(/\.md$/, '');
   return ok({ path: chapterPath, filename, title: chapterTitle, status: 'in-progress' });
 }
 

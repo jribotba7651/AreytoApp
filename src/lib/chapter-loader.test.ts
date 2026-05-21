@@ -73,6 +73,7 @@ describe('loadInitialChapter', () => {
       value: { path: '/tmp/mi-libro/capitulos/cap-01.md', filename: 'cap-01.md', title: 'Capítulo 1', status: 'in-progress' },
     });
     mockUpdateProjectMeta.mockResolvedValueOnce({ ok: true, value: { ...PROJECT, capituloActivo: 'cap-01.md' } });
+    mockReadChapter.mockResolvedValueOnce({ ok: true, value: '# Capítulo 1\n\n' });
 
     const result = await loadInitialChapter(PROJECT);
 
@@ -82,7 +83,7 @@ describe('loadInitialChapter', () => {
       expect(result.value.allChapters).toHaveLength(1);
       expect(result.value.allChapters[0]?.filename).toBe('cap-01.md');
     }
-    expect(mockCreateChapter).toHaveBeenCalledWith(PROJECT, 'Capítulo 1');
+    expect(mockCreateChapter).toHaveBeenCalledWith(PROJECT);
   });
 
   it('retorna lista ordenada de todos los capítulos en progreso', async () => {

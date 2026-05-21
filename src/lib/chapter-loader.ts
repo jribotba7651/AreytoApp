@@ -61,16 +61,19 @@ export async function loadInitialChapter(
     };
   }
 
-  // Rama 3: no hay capítulos, crear cap-01.md
-  const created = await createChapter(project, 'Capítulo 1');
+  // Rama 3: no hay capítulos, crear cap-01.md con placeholder via createChapter
+  const created = await createChapter(project);
   if (!created.ok) return created;
 
   await updateProjectMeta(project, { capituloActivo: created.value.filename });
 
+  const read = await readChapter(created.value.path);
+  const content = read.ok ? read.value : `# ${created.value.title}\n\n`;
+
   return {
     ok: true,
     value: {
-      activeChapter: { path: created.value.path, content: `# Capítulo 1\n\n` },
+      activeChapter: { path: created.value.path, content },
       allChapters: [created.value],
     },
   };

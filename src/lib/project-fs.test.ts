@@ -7,6 +7,7 @@ import {
   listChapters,
   readChapter,
   writeChapter,
+  createChapter,
   markChapterFinished,
 } from './project-fs';
 import type { Chapter, Project } from '@/types/project';
@@ -173,6 +174,59 @@ describe('writeChapter', () => {
       path: '/tmp/mi-libro/capitulos/cap-01.md',
       contents: '# Hola',
     });
+  });
+});
+
+describe('createChapter', () => {
+  it('genera archivo con contenido placeholder "# Capítulo N"', async () => {
+    // list_dir capitulos (vacío), list_dir capitulos-terminados (vacío), write_text_file
+    mockInvoke
+      .mockResolvedValueOnce([])        // list_dir capitulos
+      .mockResolvedValueOnce([])        // list_dir capitulos-terminados (for read content)
+      .mockResolvedValueOnce(undefined); // write_text_file
+
+    const result = await createChapter(PROJECT);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.filename).toBe('cap-01.md');
+      expect(result.value.title).toBe('Capítulo 1');
+    }
+
+    const writeCall = mockInvoke.mock.calls.find(([cmd]) => cmd === 'write_text_file');
+    expect(writeCall).toBeDefined();
+    expect((writeCall?.[1] as { contents: string }).contents).toBe('# Capítulo 1\n\n');
+  });
+
+  it('usa "Capítulo N" como título por default derivado del filename', async () => {
+    mockInvoke
+      .mockResolvedValueOnce([{ name: 'cap-01.md', is_file: true, is_dir: false }]) // list_dir capitulos
+      .mockResolvedValueOnce('# Hola')   // read_text_file para título del existente
+      .mockResolvedValueOnce([])          // list_dir capitulos-terminados
+      .mockResolvedValueOnce(undefined);  // write_text_file
+
+    const result = await createChapter(PROJECT);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.filename).toBe('cap-02.md');
+      expect(result.value.title).toBe('Capítulo 2');
+    }
+  });
+
+  it('respeta título explícito cuando se pasa', async () => {
+    mockInvoke
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(undefined);
+
+    const result = await createChapter(PROJECT, 'Mi título');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.title).toBe('Mi título');
+
+    const writeCall = mockInvoke.mock.calls.find(([cmd]) => cmd === 'write_text_file');
+    expect((writeCall?.[1] as { contents: string }).contents).toBe('# Mi título\n\n');
   });
 });
 
