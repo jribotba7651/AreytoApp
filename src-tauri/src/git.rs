@@ -144,7 +144,7 @@ pub fn git_tag_info(repo_path: String, tag_name: String) -> Result<TagInfo, Stri
     let refspec = format!("refs/tags/{tag_name}");
     let out = git(
         &repo_path,
-        &["for-each-ref", "--format=%(refname:short)|%(creatordate:iso8601)|%(subject)", &refspec],
+        &["for-each-ref", "--format=%(refname:short)|%(creatordate:iso8601-strict)|%(subject)", &refspec],
     )?;
     parse_tag_line(out.trim()).ok_or_else(|| format!("tag not found: {tag_name}"))
 }
@@ -155,7 +155,7 @@ pub fn git_list_chapter_tags(repo_path: String) -> Result<Vec<TagInfo>, String> 
         &repo_path,
         &[
             "for-each-ref",
-            "--format=%(refname:short)|%(creatordate:iso8601)|%(subject)",
+            "--format=%(refname:short)|%(creatordate:iso8601-strict)|%(subject)",
             "--sort=-creatordate",
             "refs/tags/cap-*-final",
         ],
