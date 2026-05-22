@@ -160,14 +160,56 @@ function mapTagInfo(raw: RawTagInfo): TagInfo {
   return { name: raw.name, timestamp: raw.timestamp, commitSubject: raw.commit_subject };
 }
 
+export async function tagExists(
+  projectPath: string,
+  tagName: string
+): Promise<GitResult<boolean>> {
+  try {
+    const exists = await invoke<boolean>('git_tag_exists', { repoPath: projectPath, tagName });
+    return ok(exists);
+  } catch (e) {
+    return fail({ kind: 'TagFailed', reason: String(e) });
+  }
+}
+
+export async function findNextAvailableTag(
+  projectPath: string,
+  baseTagName: string
+): Promise<GitResult<string>> {
+  try {
+    const existing = await invoke<string[]>('git_list_tags_matching', {
+      repoPath: projectPath,
+      pattern: `${baseTagName}*`,
+    });
+
+    if (!existing.includes(baseTagName)) return ok(baseTagName);
+
+    let n = 2;
+    for (;;) {
+      const candidate = `${baseTagName}-${n}`;
+      if (!existing.includes(candidate)) return ok(candidate);
+      n++;
+    }
+  } catch (e) {
+    return fail({ kind: 'TagFailed', reason: String(e) });
+  }
+}
+
 export async function tagChapter(
   projectPath: string,
-  filename: string
+  filename: string,
+  options?: { explicitTagName?: string }
 ): Promise<GitResult<string>> {
-  const match = /^cap-(\d+)\.md$/.exec(filename);
-  if (!match?.[1]) return fail({ kind: 'TagFailed', reason: 'invalid filename' });
+  let tagName: string;
 
-  const tagName = `cap-${match[1]}-final`;
+  if (options?.explicitTagName) {
+    tagName = options.explicitTagName;
+  } else {
+    const match = /^cap-(\d+)\.md$/.exec(filename);
+    if (!match?.[1]) return fail({ kind: 'TagFailed', reason: 'invalid filename' });
+    tagName = `cap-${match[1]}-final`;
+  }
+
   try {
     await invoke('git_tag', { repoPath: projectPath, tagName });
     return ok(tagName);

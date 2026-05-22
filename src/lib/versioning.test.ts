@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ensureGitInit, commitChanges, listCommitsForFile, readFileAtCommit, restoreFile } from './versioning';
+import { ensureGitInit, commitChanges, listCommitsForFile, readFileAtCommit, restoreFile, tagExists, findNextAvailableTag, tagChapter } from './versioning';
 
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
@@ -141,6 +141,74 @@ describe('readFileAtCommit', () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.kind).toBe('LogFailed');
+  });
+});
+
+describe('tagExists', () => {
+  it('retorna true si el tag existe', async () => {
+    mockInvoke.mockResolvedValueOnce(true);
+
+    const result = await tagExists(PROJECT_PATH, 'cap-01-final');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(true);
+    expect(mockInvoke).toHaveBeenCalledWith('git_tag_exists', {
+      repoPath: PROJECT_PATH,
+      tagName: 'cap-01-final',
+    });
+  });
+
+  it('retorna false si el tag no existe', async () => {
+    mockInvoke.mockResolvedValueOnce(false);
+
+    const result = await tagExists(PROJECT_PATH, 'cap-01-final');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(false);
+  });
+});
+
+describe('findNextAvailableTag', () => {
+  it('retorna el base si no hay conflicto', async () => {
+    mockInvoke.mockResolvedValueOnce([]); // git_list_tags_matching returns empty
+
+    const result = await findNextAvailableTag(PROJECT_PATH, 'cap-01-final');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe('cap-01-final');
+  });
+
+  it('retorna -2 si solo el base existe', async () => {
+    mockInvoke.mockResolvedValueOnce(['cap-01-final']); // base exists, no -2
+
+    const result = await findNextAvailableTag(PROJECT_PATH, 'cap-01-final');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe('cap-01-final-2');
+  });
+
+  it('salta números usados (-2 existe, retorna -3)', async () => {
+    mockInvoke.mockResolvedValueOnce(['cap-01-final', 'cap-01-final-2']); // -3 free
+
+    const result = await findNextAvailableTag(PROJECT_PATH, 'cap-01-final');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe('cap-01-final-3');
+  });
+});
+
+describe('tagChapter', () => {
+  it('usa explicitTagName cuando se pasa', async () => {
+    mockInvoke.mockResolvedValueOnce(undefined); // git_tag
+
+    const result = await tagChapter(PROJECT_PATH, 'cap-01.md', { explicitTagName: 'cap-01-final-2' });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe('cap-01-final-2');
+    expect(mockInvoke).toHaveBeenCalledWith('git_tag', {
+      repoPath: PROJECT_PATH,
+      tagName: 'cap-01-final-2',
+    });
   });
 });
 

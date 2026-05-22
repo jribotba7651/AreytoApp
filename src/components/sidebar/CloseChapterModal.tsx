@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Chapter, Project } from '@/types/project';
-import { performCloseChapter } from '@/lib/close-chapter-flow';
+import type { ConflictInfo } from '@/lib/close-chapter-flow';
+import { checkCloseConflict, performCloseChapter } from '@/lib/close-chapter-flow';
 import { loadClosedChapters } from '@/lib/closed-chapters-loader';
 import { readChapter, updateProjectMeta } from '@/lib/project-fs';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
@@ -13,15 +14,25 @@ interface CloseChapterModalProps {
 }
 
 function CloseChapterModal({ chapter, project, onClose }: CloseChapterModalProps) {
+  const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const store = useProjectStore;
 
+  useEffect(() => {
+    checkCloseConflict(project.rootPath, chapter.filename).then(setConflictInfo);
+  }, [project.rootPath, chapter.filename]);
+
   async function handleConfirm() {
+    if (!conflictInfo) return;
     setLoading(true);
     setError('');
 
-    const result = await performCloseChapter(project, chapter);
+    const result = await performCloseChapter(
+      project,
+      chapter,
+      conflictInfo.baseTagExists ? { explicitTagName: conflictInfo.suggestedTagName } : undefined
+    );
 
     if (!result.ok) {
       setError(result.error);
@@ -60,6 +71,9 @@ function CloseChapterModal({ chapter, project, onClose }: CloseChapterModalProps
     onClose();
   }
 
+  const checking = conflictInfo === null;
+  const hasConflict = conflictInfo?.baseTagExists === true;
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50"
@@ -70,10 +84,23 @@ function CloseChapterModal({ chapter, project, onClose }: CloseChapterModalProps
         <h2 className="font-serif text-lg font-semibold text-text-primary mb-2">
           Cerrar capítulo
         </h2>
-        <p className="text-sm text-text-secondary mb-4">
-          Vas a marcar <strong className="text-text-primary">{chapter.title}</strong> como terminado.
-          El archivo se moverá a Terminados y quedará marcado con un tag de git.
-        </p>
+
+        {checking ? (
+          <p className="text-sm text-text-tertiary mb-4">Verificando…</p>
+        ) : hasConflict ? (
+          <p className="text-sm text-text-secondary mb-4">
+            Este capítulo ya fue cerrado antes. El tag{' '}
+            <code className="text-xs text-text-tertiary">{conflictInfo!.baseTagName}</code> existe
+            en el historial. Vas a crear un nuevo tag{' '}
+            <code className="text-xs text-text-tertiary">{conflictInfo!.suggestedTagName}</code> que
+            marcará este nuevo momento como terminado. Los tags anteriores quedan como marcas históricas.
+          </p>
+        ) : (
+          <p className="text-sm text-text-secondary mb-4">
+            Vas a marcar <strong className="text-text-primary">{chapter.title}</strong> como terminado.
+            El archivo se moverá a Terminados y quedará marcado con un tag de git.
+          </p>
+        )}
 
         {error && <p className="text-xs text-error mb-4">{error}</p>}
 
@@ -87,10 +114,14 @@ function CloseChapterModal({ chapter, project, onClose }: CloseChapterModalProps
           </button>
           <button
             onClick={handleConfirm}
-            disabled={loading}
+            disabled={loading || checking}
             className="px-4 py-2 text-sm bg-accent-muted text-text-primary rounded hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-150"
           >
-            {loading ? 'Cerrando…' : 'Cerrar capítulo'}
+            {loading
+              ? 'Cerrando…'
+              : hasConflict
+              ? `Crear ${conflictInfo!.suggestedTagName}`
+              : 'Cerrar capítulo'}
           </button>
         </div>
       </div>

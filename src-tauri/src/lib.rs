@@ -29,6 +29,8 @@ pub fn run() {
             git::git_log_file,
             git::git_show_file_at_commit,
             git::git_tag,
+            git::git_tag_exists,
+            git::git_list_tags_matching,
             git::git_tag_info,
             git::git_list_chapter_tags,
             git::git_commit_all,

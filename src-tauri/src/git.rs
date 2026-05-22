@@ -175,6 +175,19 @@ pub fn git_commit_all(repo_path: String, message: String) -> Result<(), String> 
     Ok(())
 }
 
+#[tauri::command]
+pub fn git_tag_exists(repo_path: String, tag_name: String) -> Result<bool, String> {
+    let out = git(&repo_path, &["tag", "-l", &tag_name])?;
+    Ok(!out.trim().is_empty())
+}
+
+#[tauri::command]
+pub fn git_list_tags_matching(repo_path: String, pattern: String) -> Result<Vec<String>, String> {
+    let out = git(&repo_path, &["tag", "-l", &pattern])?;
+    let names = out.lines().filter(|l| !l.is_empty()).map(str::to_owned).collect();
+    Ok(names)
+}
+
 fn parse_tag_line(line: &str) -> Option<TagInfo> {
     let mut parts = line.splitn(3, '|');
     Some(TagInfo {
