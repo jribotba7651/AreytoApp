@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Atajos de teclado globales
+- Última feature completada: Settings persistentes
 - Fecha de última actualización: 2026-05-22
 
 ## Features completadas
@@ -437,6 +437,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-077 a D-081 documentadas arriba en Reabrir capítulo terminado
 - D-082 a D-085 documentadas arriba en Fix D-079 - Re-cerrar capítulo reabierto
 - D-086 a D-090 documentadas arriba en Atajos de teclado globales
+- D-091 a D-097 documentadas arriba en Settings persistentes
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -461,6 +462,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Renombrar el repo en GitHub (opcional, disruptivo)
   - Landing page en areyto.io
   - Trademark search USPTO eventual (no urgente)
+- Bugs encontrados: ninguno
+
+### 2026-05-22 - Settings persistentes
+- Qué se hizo: persistencia automática del último proyecto abierto, último capítulo activo dentro del proyecto, y tamaños de los paneles. Storage en dos lugares: global en ~/Library/Application Support/Areyto/settings.json y per-project en <proyecto>/.areyto/state.json. Al arrancar la app, se muestra "Cargando…" brevemente mientras se restaura la sesión. Si el proyecto guardado ya no existe, WelcomeScreen muestra mensaje informativo. .areyto/ se agrega automáticamente al .gitignore del proyecto.
+- Archivos creados/modificados:
+  - src-tauri/src/settings.rs (nuevo: 4 Tauri commands)
+  - src-tauri/src/lib.rs (mod settings registrado)
+  - src/lib/settings.ts (nuevo: wrapper TS — readGlobalSettings, writeGlobalSettings, readProjectState, writeProjectState, pathExists)
+  - src/lib/settings.test.ts (nuevo: 6 tests)
+  - src/lib/open-project-flow.ts (nuevo: setupProjectInStores + openProjectByPath — extrae lógica de WelcomeScreen)
+  - src/hooks/useSettingsPersistence.ts (nuevo: debounced 300ms, persiste project + chapter + panel sizes)
+  - src/App.tsx (restore en useEffect al montar, loading state, restoreMessage)
+  - src/components/welcome/WelcomeScreen.tsx (prop restoreMessage, usa setupProjectInStores)
+- Decisiones tomadas:
+  - D-091: settings globales en ~/Library/Application Support/Areyto/settings.json
+  - D-092: estado per-project en <proyecto>/.areyto/state.json
+  - D-093: lastProjectPath inexistente muestra mensaje informativo en Welcome (no error crítico)
+  - D-094: lastActiveChapterPath inexistente cae al primer capítulo sin error
+  - D-095: persistencia debounced 300ms para evitar writes excesivos al arrastrar paneles
+  - D-096: schema versioning (version: 1) para futuras migraciones
+  - D-097: .areyto/ se agrega automáticamente al .gitignore en primer write
+- Nota: panel sizes se almacenan como percentages (igual que el store), no como pixels. El spec usaba pixels pero la impl usa los mismos valores del store para consistencia.
+- Pendientes relacionados:
+  - Settings UI para preferencias editables (futuro)
+  - Persistir tab activo entre sesiones (deuda menor, consciente)
+  - Scroll position del editor (deuda menor)
 - Bugs encontrados: ninguno
 
 ### 2026-05-22 - Atajos de teclado globales
