@@ -3,9 +3,9 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: Polish
+- Fase activa: Chapter States
 - Feature en progreso: ninguna
-- Última feature completada: Branding - Areyto
+- Última feature completada: Reabrir capítulo terminado
 - Fecha de última actualización: 2026-05-22
 
 ## Features completadas
@@ -434,6 +434,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-065 a D-068 documentadas arriba en Botón de refresh manual del sidebar
 - D-069 a D-070 documentadas arriba en Deudas resueltas (housekeeping master → main)
 - D-072 a D-076 documentadas arriba en Branding - Areyto
+- D-077 a D-081 documentadas arriba en Reabrir capítulo terminado
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -458,6 +459,27 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Renombrar el repo en GitHub (opcional, disruptivo)
   - Landing page en areyto.io
   - Trademark search USPTO eventual (no urgente)
+- Bugs encontrados: ninguno
+
+### 2026-05-22 - Reabrir capítulo terminado
+- Qué se hizo: click en item del tab Terminados abre modal de confirmación. Confirmar mueve archivo de capitulos-terminados/ a capitulos/, hace commit "reopen: cap-XX.md", refresca sidebar y lista de terminados, activa el capítulo reabierto en el editor, cambia tab activo a Capítulo Activo. Tag git cap-XX-final se mantiene intacto como marca histórica.
+- Archivos creados/modificados:
+  - src/lib/project-fs.ts (reopenChapter helper nuevo, ClosedChapter añadido al import)
+  - src/lib/reopen-chapter-flow.ts (nuevo, orquestador)
+  - src/lib/reopen-chapter-flow.test.ts (nuevo, 5 tests)
+  - src/components/terminados/ReopenChapterModal.tsx (nuevo)
+  - src/components/terminados/TerminadosListItem.tsx (clickeable con hover)
+  - src/components/terminados/TerminadosList.tsx (maneja modal state, recibe project prop)
+  - src/components/layout/FinishedTabContent.tsx (pasa project a TerminadosList)
+- Decisiones tomadas:
+  - D-077: click en item del tab Terminados abre modal. Patrón consistente con otros modales del proyecto.
+  - D-078: tag git cap-XX-final se MANTIENE al reabrir. Marca histórica del momento donde el capítulo estuvo terminado.
+  - D-079: re-cerrar un capítulo ya reabierto crea conflicto con tag existente (tag ya existe). Esta task NO maneja ese edge case. Deuda futura.
+  - D-080: commit del movimiento como "reopen: cap-XX.md" via commitAll. Mensaje simétrico a "close: cap-XX.md".
+  - D-081: después de reabrir, capítulo se activa automáticamente y tab cambia a Capítulo Activo (layoutStore.setActiveTab).
+- Pendientes relacionados:
+  - Manejar re-cerrar de un capítulo ya reabierto (deuda D-079, tag conflict)
+  - Reabrir desde el sidebar (out of scope por decisión UX)
 - Bugs encontrados: ninguno
 
 ## Bugs conocidos
