@@ -1,5 +1,6 @@
 mod git;
 mod project_fs;
+mod terminal;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -11,6 +12,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .manage(std::sync::Mutex::new(None::<terminal::PtySession>))
         .invoke_handler(tauri::generate_handler![
             greet,
             project_fs::read_text_file,
@@ -26,6 +28,10 @@ pub fn run() {
             git::git_commit_file,
             git::git_log_file,
             git::git_show_file_at_commit,
+            terminal::pty_spawn,
+            terminal::pty_write,
+            terminal::pty_resize,
+            terminal::pty_kill,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
