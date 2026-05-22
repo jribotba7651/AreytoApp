@@ -432,9 +432,19 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-052 a D-058 documentadas arriba en Terminal base con xterm.js + portable-pty
 - D-059 a D-064 documentadas arriba en Marcar capítulo como terminado
 - D-065 a D-068 documentadas arriba en Botón de refresh manual del sidebar
+- D-069 a D-070 documentadas arriba en Deudas resueltas (housekeeping master → main)
 
 ## Bugs conocidos
 Ninguno actualmente.
+
+### Deudas resueltas
+- 2026-05-21: Rama default era `master` en vez de `main`. Resuelto:
+  - `src-tauri/src/git.rs` ahora usa `git init --initial-branch=main` (D-069, D-070)
+  - Repo del proyecto (Writers_Den) ya estaba en `main` (estaba resuelto antes de esta task)
+  - Repo de test-libro renombrado de `master` a `main` con `git branch -m`
+  - Proyectos nuevos creados por la app desde ahora usan `main` automáticamente
+  - D-069: rama default explícita en el código, no dependemos del config global del usuario
+  - D-070: `--initial-branch=main` como flag de `git init`, no como config local post-init
 
 ### Bugs resueltos
 - 2026-05-21: TerminadosListItem mostraba "Invalid Date". `git_tag_info` y `git_list_chapter_tags` usaban `%(creatordate:iso8601)` que retorna `"2026-05-21 17:04:08 -0700"` (espacio, no T) que JS `new Date()` no parsea. Resuelto cambiando a `iso8601-strict`. Helper `formatRelativeTime` unificado en `src/lib/format-relative-time.ts` — antes duplicado en `CommitListItem` y `TerminadosListItem`. Fix en commit 1c64a7d.
