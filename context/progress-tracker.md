@@ -3,10 +3,9 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: MVP Editor
+- Fase activa: MVP Editor (polish menor)
 - Feature en progreso: ninguna
-- Fase activa: Chapter States
-- Última feature completada: Marcar capítulo como terminado
+- Última feature completada: Botón de refresh manual del sidebar
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -401,6 +400,38 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-052 a D-058 documentadas arriba en Terminal base con xterm.js + portable-pty
 - D-059 a D-064 documentadas arriba en Marcar capítulo como terminado
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
+
+### 2026-05-21 - Botón de refresh manual del sidebar
+- Qué se hizo: icono RefreshCw al lado del header "CAPÍTULOS". Click ejecuta listChapters y actualiza el store con capítulos in-progress. Spin animation durante refresh. Útil cuando algo externo (Claude Code embebido, otros editores) modifica archivos sin que la app se entere. Solución intermedia hasta file watcher automático.
+- Archivos creados/modificados:
+  - src/lib/refresh-chapters.ts (nuevo)
+  - src/lib/refresh-chapters.test.ts (nuevo)
+  - src/components/sidebar/RefreshChaptersButton.tsx (nuevo)
+  - src/components/panels/SidebarPanel.tsx (header extendido con el botón)
+- Decisiones tomadas:
+  - D-065: botón en header como icono pequeño (12px), no botón con texto. Pattern estándar del proyecto.
+  - D-066: helper refreshChapters() separado y reutilizable cuando llegue file watcher automático.
+  - D-067: spin animation con setTimeout 400ms para que el feedback sea visible incluso en operaciones rápidas.
+  - D-068: sin keyboard shortcut en esta task. Cmd+R va en task "Atajos de teclado globales".
+- Pendientes relacionados:
+  - File watcher automático (task de mayor scope, esta es solución intermedia)
+  - Cmd+R como shortcut (task "Atajos de teclado globales")
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
+- D-038 a D-043 documentadas arriba en Git versioning automático
+- D-044 a D-047 documentadas arriba en Restore de versión anterior
+- D-048 a D-051 documentadas arriba en Tab Libro con vista renderizada
+- D-052 a D-058 documentadas arriba en Terminal base con xterm.js + portable-pty
+- D-059 a D-064 documentadas arriba en Marcar capítulo como terminado
+- D-065 a D-068 documentadas arriba en Botón de refresh manual del sidebar
 
 ## Bugs conocidos
 Ninguno actualmente.
