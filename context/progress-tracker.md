@@ -406,6 +406,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 Ninguno actualmente.
 
 ### Bugs resueltos
+- 2026-05-21: TerminadosListItem mostraba "Invalid Date". `git_tag_info` y `git_list_chapter_tags` usaban `%(creatordate:iso8601)` que retorna `"2026-05-21 17:04:08 -0700"` (espacio, no T) que JS `new Date()` no parsea. Resuelto cambiando a `iso8601-strict`. Helper `formatRelativeTime` unificado en `src/lib/format-relative-time.ts` — antes duplicado en `CommitListItem` y `TerminadosListItem`. Fix en commit 1c64a7d.
 - 2026-05-21: `createChapter` no escribía contenido al disco cuando no se pasaba título explícito. Los capítulos creados vía botón + del sidebar quedaban vacíos, y el sidebar mostraba "cap-02" como fallback al no encontrar h1. Fix en commit be69201: el servicio ahora genera `# Capítulo N\n\n` internamente. `chapter-loader.ts` también simplificado para delegar a `createChapter` (DRY).
 
 ## Refactors pendientes
