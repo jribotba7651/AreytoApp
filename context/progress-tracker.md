@@ -5,7 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Última feature completada: Tab Libro con vista renderizada
+- Fase activa: Terminal
+- Última feature completada: Terminal base con xterm.js + portable-pty
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -313,6 +314,47 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-038 a D-043 documentadas arriba en Git versioning automático
 - D-044 a D-047 documentadas arriba en Restore de versión anterior
 - D-048 a D-051 documentadas arriba en Tab Libro con vista renderizada
+
+### 2026-05-21 - Terminal base con xterm.js + portable-pty
+- Qué se hizo: terminal embebido en el panel inferior del tab Capítulo Activo. Shell interactivo del usuario ($SHELL -i -l) cargando .zshrc. CWD = root del proyecto activo. Stream pty ↔ xterm vía Tauri events y commands. Resize automático via ResizeObserver + FitAddon. Spawn al abrir proyecto, kill al cerrar.
+- Archivos creados/modificados:
+  - src-tauri/Cargo.toml (portable-pty 0.9)
+  - src-tauri/src/terminal.rs (nuevo: pty_spawn, pty_write, pty_resize, pty_kill)
+  - src-tauri/src/lib.rs (PtyState managed, commands registrados)
+  - package.json (@xterm/xterm 6.0, @xterm/addon-fit 0.11)
+  - src/main.tsx (import @xterm/xterm/css/xterm.css)
+  - src/types/terminal.ts (nuevo: TerminalDimensions)
+  - src/hooks/useTerminal.ts (nuevo)
+  - src/components/terminal/TerminalView.tsx (nuevo)
+  - src/components/panels/TerminalPanel.tsx (reescrito)
+- Decisiones tomadas:
+  - D-052: callback ref (useState para el div) en vez de useRef, para evitar que container sea null en primer render.
+  - D-053: portable-pty como crate Rust. Sin alternativas evaluadas.
+  - D-054: shell interactivo + login ($SHELL -i -l). Carga .zshrc del usuario para PATH completo.
+  - D-055: un solo terminal en esta task. Tabs en task separada.
+  - D-056: spawn al abrir proyecto (cwd cambia), kill al cerrar (cwd → null).
+  - D-057: stream via Tauri events (pty:output) y commands (input/resize).
+  - D-058: TERMINAL_THEME usa hex hardcodeados porque xterm no soporta CSS vars. Excepción documentada.
+- Pendientes relacionados:
+  - Sistema de tabs en el terminal (task existente)
+  - El terminal se reinicia al cambiar de tab (ChapterTabContent se desmonta). Aceptable para MVP, resolver con persistencia del componente en task futura.
+  - Webview como tab adicional
+  - Atajos de teclado para alternar foco editor/terminal
+  - Settings de fuente y tamaño del terminal
+- Bugs encontrados: ninguno (registrar post smoke test si aparece algo)
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
+- D-038 a D-043 documentadas arriba en Git versioning automático
+- D-044 a D-047 documentadas arriba en Restore de versión anterior
+- D-048 a D-051 documentadas arriba en Tab Libro con vista renderizada
+- D-052 a D-058 documentadas arriba en Terminal base con xterm.js + portable-pty
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
