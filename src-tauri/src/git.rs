@@ -38,7 +38,7 @@ pub fn git_repo_exists(repo_path: String) -> bool {
 
 #[tauri::command]
 pub fn git_init(repo_path: String) -> Result<(), String> {
-    git(&repo_path, &["init"])?;
+    git(&repo_path, &["init", "--initial-branch=main"])?;
     let _ = git(&repo_path, &["config", "user.email", "writersden@local"]);
     let _ = git(&repo_path, &["config", "user.name", "Writers Den"]);
     Ok(())
