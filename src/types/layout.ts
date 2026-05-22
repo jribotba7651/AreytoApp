@@ -11,4 +11,5 @@ export interface LayoutState {
   activeTab: Tab;
   sizes: PanelSizes;
   isVersionsCollapsed: boolean;
+  showCloseChapterModal: boolean;
 }

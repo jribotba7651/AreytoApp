@@ -7,12 +7,13 @@ import type { SaveStatus } from '@/stores/projectStore';
 interface TabDef {
   id: Tab;
   label: string;
+  shortcutHint: string;
 }
 
 const TABS: TabDef[] = [
-  { id: 'capitulo', label: 'Capítulo Activo' },
-  { id: 'libro', label: 'Libro' },
-  { id: 'terminados', label: 'Terminados' },
+  { id: 'capitulo', label: 'Capítulo Activo', shortcutHint: '⌘1' },
+  { id: 'libro', label: 'Libro', shortcutHint: '⌘2' },
+  { id: 'terminados', label: 'Terminados', shortcutHint: '⌘3' },
 ];
 
 const STATUS_LABEL: Record<SaveStatus, string> = {
@@ -39,6 +40,7 @@ function TopTabs() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
+            title={`${tab.label} (${tab.shortcutHint})`}
             className={[
               'px-4 py-2 text-sm transition-colors duration-150 border-b-2 -mb-px',
               isActive
@@ -69,6 +71,7 @@ function TopTabs() {
             <button
               onClick={closeProject}
               aria-label="Cerrar proyecto"
+              title="Cerrar proyecto (⌘⇧W)"
               className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
             >
               <X size={14} />

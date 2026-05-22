@@ -5,10 +5,12 @@ import FinishedTabContent from '@/components/layout/FinishedTabContent';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 function App() {
   const activeTab = useLayoutStore((s) => s.activeTab);
   const currentProject = useProjectStore((s) => s.currentProject);
+  useKeyboardShortcuts();
 
   if (!currentProject) {
     return <WelcomeScreen />;

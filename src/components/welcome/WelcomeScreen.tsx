@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { openProject } from '@/lib/project-fs';
 import { loadInitialChapter } from '@/lib/chapter-loader';
@@ -6,6 +6,7 @@ import { ensureGitInit } from '@/lib/versioning';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import { useProjectStore } from '@/stores/projectStore';
 import CreateProjectModal from './CreateProjectModal';
+import ShortcutHint from '@/components/shared/ShortcutHint';
 import type { Project } from '@/types/project';
 
 function WelcomeScreen() {
@@ -13,11 +14,12 @@ function WelcomeScreen() {
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const setChapters = useProjectStore((s) => s.setChapters);
   const setCommits = useProjectStore((s) => s.setCommits);
+  const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleOpen() {
+  const handleOpen = useCallback(async () => {
     setError('');
     setLoading(true);
 
@@ -67,7 +69,12 @@ function WelcomeScreen() {
 
     setError('No se pudo abrir el proyecto. Intenta de nuevo.');
     setLoading(false);
-  }
+  }, [setActiveChapter, setChapters, setCommits, setCurrentProject]);
+
+  useEffect(() => {
+    setTriggerOpenProject(handleOpen);
+    return () => setTriggerOpenProject(null);
+  }, [handleOpen, setTriggerOpenProject]);
 
   function handleCreated(project: Project) {
     setPendingPath(null);
@@ -83,7 +90,7 @@ function WelcomeScreen() {
         Editor de escritura por capítulos
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 flex items-center gap-3">
         <button
           onClick={handleOpen}
           disabled={loading}
@@ -91,6 +98,7 @@ function WelcomeScreen() {
         >
           {loading ? 'Abriendo…' : 'Abrir proyecto'}
         </button>
+        <ShortcutHint text="⌘⇧O" />
       </div>
 
       {error && (

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
 import { createChapter, updateProjectMeta, readChapter } from '@/lib/project-fs';
+import ShortcutHint from '@/components/shared/ShortcutHint';
 
 function NewChapterButton() {
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -38,6 +39,7 @@ function NewChapterButton() {
     >
       <Plus size={14} />
       <span>Nuevo capítulo</span>
+      <ShortcutHint text="⌘N" className="ml-auto" />
     </button>
   );
 }

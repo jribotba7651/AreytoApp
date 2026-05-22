@@ -5,6 +5,7 @@ interface LayoutActions {
   setActiveTab: (tab: Tab) => void;
   setSizes: (partial: Partial<PanelSizes>) => void;
   toggleVersionsPanel: () => void;
+  setShowCloseChapterModal: (show: boolean) => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -20,6 +21,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   activeTab: 'capitulo',
   sizes: DEFAULT_SIZES,
   isVersionsCollapsed: false,
+  showCloseChapterModal: false,
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -28,4 +30,6 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
 
   toggleVersionsPanel: () =>
     set((state) => ({ isVersionsCollapsed: !state.isVersionsCollapsed })),
+
+  setShowCloseChapterModal: (show: boolean) => set({ showCloseChapterModal: show }),
 }));

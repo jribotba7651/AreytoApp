@@ -15,6 +15,7 @@ interface ProjectState {
   editorVersion: number;
   flushAutosave: (() => Promise<void>) | null;
   syncAutosaveSaved: ((content: string) => void) | null;
+  triggerOpenProject: (() => void) | null;
   setCurrentProject: (project: Project | null) => void;
   closeProject: () => void;
   setActiveChapter: (path: string, content: string) => void;
@@ -29,6 +30,7 @@ interface ProjectState {
   incrementEditorVersion: () => void;
   setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
+  setTriggerOpenProject: (fn: (() => void) | null) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -42,6 +44,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   editorVersion: 0,
   flushAutosave: null,
   syncAutosaveSaved: null,
+  triggerOpenProject: null,
 
   setCurrentProject: (project: Project | null) => set({ currentProject: project }),
 
@@ -91,4 +94,6 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) =>
     set({ syncAutosaveSaved: fn }),
+
+  setTriggerOpenProject: (fn: (() => void) | null) => set({ triggerOpenProject: fn }),
 }));

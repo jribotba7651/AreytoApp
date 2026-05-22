@@ -20,7 +20,7 @@ function RefreshChaptersButton() {
     <button
       onClick={handleClick}
       disabled={refreshing}
-      title="Recargar lista"
+      title="Recargar lista (⌘R)"
       aria-label="Recargar lista de capítulos"
       className="text-text-tertiary hover:text-text-secondary disabled:opacity-50 p-1 cursor-pointer"
     >
