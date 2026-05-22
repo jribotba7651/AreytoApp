@@ -3,10 +3,10 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: MVP Editor (polish menor)
+- Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Botón de refresh manual del sidebar
-- Fecha de última actualización: 2026-05-21
+- Última feature completada: Branding - Areyto
+- Fecha de última actualización: 2026-05-22
 
 ## Features completadas
 
@@ -433,6 +433,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-059 a D-064 documentadas arriba en Marcar capítulo como terminado
 - D-065 a D-068 documentadas arriba en Botón de refresh manual del sidebar
 - D-069 a D-070 documentadas arriba en Deudas resueltas (housekeeping master → main)
+- D-072 a D-076 documentadas arriba en Branding - Areyto
+
+### 2026-05-22 - Branding - Areyto
+- Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
+- Archivos creados/modificados:
+  - src-tauri/tauri.conf.json (productName, identifier, window title)
+  - src-tauri/Cargo.toml (name del crate y del lib, description, authors)
+  - src-tauri/src/main.rs (referencia al lib crate actualizada)
+  - package.json (name)
+  - index.html (title)
+  - README.md (reescrito con párrafo del nombre taíno + atribución JELA LLC)
+- Decisiones tomadas:
+  - D-072: nombre definitivo del producto "Areyto" (palabra taína, ceremonia de narración). Decisión de marca firme.
+  - D-073: bundle identifier com.jibaroenlaluna.areyto.
+  - D-074: rename del crate Rust y paquete npm a "areyto". Carpeta del repo (Writers_Den) y nombre en GitHub se mantienen por ahora para no ser disruptivo.
+  - D-075: dominios areyto.io (primario), areyto.net y areyto.org (defensivos) registrados. Handles bloqueados en X, GitHub, Instagram, TikTok.
+  - D-076: trademark search USPTO no realizado. Juan acepta el riesgo conscientemente y procede con branding antes de validación legal formal.
+- Pendientes relacionados:
+  - Logo y app icon (.icns) — proyecto aparte de Juan
+  - Splash screen
+  - About window con info de la app y atribución a Jíbaro en la Luna LLC
+  - Renombrar carpeta del repo de Writers_Den a areyto (opcional, disruptivo)
+  - Renombrar el repo en GitHub (opcional, disruptivo)
+  - Landing page en areyto.io
+  - Trademark search USPTO eventual (no urgente)
+- Bugs encontrados: ninguno
 
 ## Bugs conocidos
 Ninguno actualmente.
