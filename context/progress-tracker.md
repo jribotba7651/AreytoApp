@@ -3,9 +3,9 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: Chapter States
+- Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Fix D-079 - Re-cerrar capítulo reabierto
+- Última feature completada: Atajos de teclado globales
 - Fecha de última actualización: 2026-05-22
 
 ## Features completadas
@@ -436,6 +436,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-072 a D-076 documentadas arriba en Branding - Areyto
 - D-077 a D-081 documentadas arriba en Reabrir capítulo terminado
 - D-082 a D-085 documentadas arriba en Fix D-079 - Re-cerrar capítulo reabierto
+- D-086 a D-090 documentadas arriba en Atajos de teclado globales
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -460,6 +461,34 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Renombrar el repo en GitHub (opcional, disruptivo)
   - Landing page en areyto.io
   - Trademark search USPTO eventual (no urgente)
+- Bugs encontrados: ninguno
+
+### 2026-05-22 - Atajos de teclado globales
+- Qué se hizo: 9 atajos globales (⌘S, ⌘N, ⌘⇧T, ⌘R, ⌘1/2/3, ⌘⇧O, ⌘⇧W) con hints visibles en tooltips y al lado de botones. Hook useKeyboardShortcuts montado en App.tsx. Modal abierto bloquea todos los atajos excepto ⌘S (always-on). CloseChapterButton refactorizado a layoutStore para que ⌘⇧T pueda abrir el modal desde cualquier parte. WelcomeScreen registra triggerOpenProject en el store para que ⌘⇧O funcione.
+- Archivos creados/modificados:
+  - src/lib/keyboard-shortcuts.ts (nuevo: SHORTCUTS, formatShortcut, matchShortcut)
+  - src/lib/keyboard-shortcuts.test.ts (nuevo: 6 tests)
+  - src/hooks/useKeyboardShortcuts.ts (nuevo: hook global)
+  - src/components/shared/ShortcutHint.tsx (nuevo: componente reutilizable)
+  - src/types/layout.ts (showCloseChapterModal añadido)
+  - src/stores/layoutStore.ts (showCloseChapterModal + setShowCloseChapterModal)
+  - src/stores/projectStore.ts (triggerOpenProject + setTriggerOpenProject)
+  - src/App.tsx (useKeyboardShortcuts montado)
+  - src/components/sidebar/NewChapterButton.tsx (ShortcutHint ⌘N)
+  - src/components/sidebar/CloseChapterButton.tsx (refactor a store, ShortcutHint ⌘⇧T)
+  - src/components/sidebar/RefreshChaptersButton.tsx (tooltip ⌘R)
+  - src/components/layout/TopTabs.tsx (title tooltips en tabs y botón cerrar)
+  - src/components/welcome/WelcomeScreen.tsx (triggerOpenProject registrado, ShortcutHint ⌘⇧O)
+- Decisiones tomadas:
+  - D-086: atajos via useEffect + window.addEventListener. Sin librerías externas.
+  - D-087: hints visibles con sintaxis "⌘N", "⌘⇧T" para descubribilidad.
+  - D-088: ⌘⇧T para cerrar capítulo (no ⌘W, choca con cerrar ventana macOS).
+  - D-089: modal abierto bloquea todos los atajos excepto ⌘S (always-on).
+  - D-090: atajos NO personalizables en esta task. Personalización va a Settings (futuro).
+- Nota: ⌘R via teclado refresca la lista correctamente pero no activa el spin del icono (el spin es estado local del componente, no del store). Comportamiento aceptable, documentado.
+- Pendientes relacionados:
+  - Atajos personalizables en Settings (futuro)
+  - Modal de ayuda con todos los atajos ⌘? (futuro)
 - Bugs encontrados: ninguno
 
 ### 2026-05-22 - Fix D-079: Re-cerrar capítulo reabierto
