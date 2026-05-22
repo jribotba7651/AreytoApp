@@ -1,19 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { openProject } from '@/lib/project-fs';
-import { loadInitialChapter } from '@/lib/chapter-loader';
-import { ensureGitInit } from '@/lib/versioning';
-import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
+import { setupProjectInStores } from '@/lib/open-project-flow';
 import { useProjectStore } from '@/stores/projectStore';
 import CreateProjectModal from './CreateProjectModal';
 import ShortcutHint from '@/components/shared/ShortcutHint';
 import type { Project } from '@/types/project';
 
-function WelcomeScreen() {
+interface WelcomeScreenProps {
+  restoreMessage?: string | null;
+}
+
+function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
-  const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
-  const setChapters = useProjectStore((s) => s.setChapters);
-  const setCommits = useProjectStore((s) => s.setCommits);
   const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -25,7 +24,11 @@ function WelcomeScreen() {
 
     let selected: string | string[] | null;
     try {
-      selected = await open({ directory: true, multiple: false, title: 'Selecciona la carpeta del proyecto' });
+      selected = await open({
+        directory: true,
+        multiple: false,
+        title: 'Selecciona la carpeta del proyecto',
+      });
     } catch {
       setLoading(false);
       return;
@@ -40,24 +43,12 @@ function WelcomeScreen() {
     const result = await openProject(path);
 
     if (result.ok) {
-      const chapter = await loadInitialChapter(result.value);
-      if (!chapter.ok) {
+      try {
+        await setupProjectInStores(result.value);
+      } catch {
         setError('No se pudo cargar el capítulo activo.');
-        setLoading(false);
-        return;
       }
-      setActiveChapter(chapter.value.activeChapter.path, chapter.value.activeChapter.content);
-      setChapters(chapter.value.allChapters);
-      setCurrentProject(result.value);
-
-      const gitInit = await ensureGitInit(result.value.rootPath);
-      if (!gitInit.ok) console.warn('Git init warning:', gitInit.error);
-
-      const commitsResult = await loadCommitsForActiveChapter(
-        result.value.rootPath,
-        chapter.value.activeChapter.path
-      );
-      if (commitsResult.ok) setCommits(commitsResult.value);
+      setLoading(false);
       return;
     }
 
@@ -69,7 +60,7 @@ function WelcomeScreen() {
 
     setError('No se pudo abrir el proyecto. Intenta de nuevo.');
     setLoading(false);
-  }, [setActiveChapter, setChapters, setCommits, setCurrentProject]);
+  }, []);
 
   useEffect(() => {
     setTriggerOpenProject(handleOpen);
@@ -89,6 +80,12 @@ function WelcomeScreen() {
       <p className="text-sm text-text-secondary">
         Editor de escritura por capítulos
       </p>
+
+      {restoreMessage && (
+        <p className="text-sm text-text-secondary mt-1 max-w-sm text-center">
+          {restoreMessage}. Selecciona uno nuevo abajo.
+        </p>
+      )}
 
       <div className="mt-6 flex items-center gap-3">
         <button

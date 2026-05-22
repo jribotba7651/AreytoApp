@@ -1,5 +1,6 @@
 mod git;
 mod project_fs;
+mod settings;
 mod terminal;
 
 #[tauri::command]
@@ -34,6 +35,10 @@ pub fn run() {
             git::git_tag_info,
             git::git_list_chapter_tags,
             git::git_commit_all,
+            settings::read_global_settings,
+            settings::write_global_settings,
+            settings::read_project_state,
+            settings::write_project_state,
             terminal::pty_spawn,
             terminal::pty_write,
             terminal::pty_resize,
