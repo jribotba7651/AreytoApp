@@ -3,11 +3,18 @@ import { formatRelativeTime } from '@/lib/format-relative-time';
 
 interface TerminadosListItemProps {
   chapter: ClosedChapter;
+  onClick: (chapter: ClosedChapter) => void;
 }
 
-function TerminadosListItem({ chapter }: TerminadosListItemProps) {
+function TerminadosListItem({ chapter, onClick }: TerminadosListItemProps) {
   return (
-    <div className="border border-border-default rounded p-4 mb-3">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onClick(chapter)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(chapter); }}
+      className="border border-border-default rounded p-4 mb-3 cursor-pointer hover:bg-bg-tertiary transition-colors duration-150"
+    >
       <p className="font-serif text-base text-text-primary">
         {chapter.filename.replace(/\.md$/, '')}
       </p>

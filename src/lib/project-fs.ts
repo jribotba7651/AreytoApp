@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { Chapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
+import type { Chapter, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
 
 interface ProyectoJson {
   nombre: string;
@@ -232,6 +232,24 @@ export async function markChapterFinished(
     : chapterFilename.replace(/\.md$/, '');
 
   return ok({ path: to, filename: chapterFilename, title, status: 'finished' });
+}
+
+export async function reopenChapter(
+  closedChapter: ClosedChapter
+): Promise<ProjectResult<{ newPath: string }>> {
+  if (!closedChapter.absolutePath.includes('/capitulos-terminados/')) {
+    return fail({ kind: 'WriteFailed', path: closedChapter.absolutePath, reason: 'Chapter is not in capitulos-terminados/' });
+  }
+
+  const newPath = closedChapter.absolutePath.replace('/capitulos-terminados/', '/capitulos/');
+
+  try {
+    await invoke('rename_path', { from: closedChapter.absolutePath, to: newPath });
+  } catch (e) {
+    return fail({ kind: 'WriteFailed', path: newPath, reason: String(e) });
+  }
+
+  return ok({ newPath });
 }
 
 export async function closeChapter(

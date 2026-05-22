@@ -43,7 +43,7 @@ function FinishedTabContent() {
         <p className="text-sm text-text-tertiary font-sans mb-8">
           {closedChapters.length} {closedChapters.length === 1 ? 'capítulo' : 'capítulos'}
         </p>
-        <TerminadosList chapters={closedChapters} />
+        <TerminadosList chapters={closedChapters} project={currentProject} />
       </div>
     </div>
   );
