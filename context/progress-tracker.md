@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Chapter States
 - Feature en progreso: ninguna
-- Última feature completada: Reabrir capítulo terminado
+- Última feature completada: Fix D-079 - Re-cerrar capítulo reabierto
 - Fecha de última actualización: 2026-05-22
 
 ## Features completadas
@@ -435,6 +435,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-069 a D-070 documentadas arriba en Deudas resueltas (housekeeping master → main)
 - D-072 a D-076 documentadas arriba en Branding - Areyto
 - D-077 a D-081 documentadas arriba en Reabrir capítulo terminado
+- D-082 a D-085 documentadas arriba en Fix D-079 - Re-cerrar capítulo reabierto
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -459,6 +460,24 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Renombrar el repo en GitHub (opcional, disruptivo)
   - Landing page en areyto.io
   - Trademark search USPTO eventual (no urgente)
+- Bugs encontrados: ninguno
+
+### 2026-05-22 - Fix D-079: Re-cerrar capítulo reabierto
+- Qué se hizo: cuando el usuario intenta cerrar un capítulo cuyo tag git ya existe (porque fue cerrado y reabierto antes), el modal detecta el conflicto al montar, calcula el siguiente sufijo incremental disponible (cap-XX-final-2, -3, etc), y le muestra al usuario el tag que se creará. El botón primario cambia a "Crear cap-XX-final-N". Cancelar no tiene efectos secundarios. Tags históricos se mantienen.
+- Archivos creados/modificados:
+  - src-tauri/src/git.rs (git_tag_exists, git_list_tags_matching — 2 commands nuevos)
+  - src-tauri/src/lib.rs (commands registrados)
+  - src/lib/versioning.ts (tagExists, findNextAvailableTag; tagChapter extendido con explicitTagName)
+  - src/lib/versioning.test.ts (tests extendidos: tagExists, findNextAvailableTag, tagChapter con explicit)
+  - src/lib/close-chapter-flow.ts (checkCloseConflict, performCloseChapter con explicitTagName)
+  - src/lib/close-chapter-flow.test.ts (nuevo, 5 tests)
+  - src/components/sidebar/CloseChapterModal.tsx (checkCloseConflict en useEffect, UI dinámica)
+- Decisiones tomadas:
+  - D-082: detectar tag existente antes de ejecutar. Sin sobreescritura silenciosa ni error oscuro.
+  - D-083: sufijo incremental progresivo (cap-XX-final-2, -3, -N). Escalable a N cierres.
+  - D-084: modal detecta conflicto al montar con useEffect. Muestra "Verificando…" hasta resolver. Botón disabled hasta que el check termina.
+  - D-085: cancelar no tiene efectos secundarios. El check es read-only.
+- Pendientes relacionados: ninguno
 - Bugs encontrados: ninguno
 
 ### 2026-05-22 - Reabrir capítulo terminado
