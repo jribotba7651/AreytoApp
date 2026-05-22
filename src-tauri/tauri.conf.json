@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "writing-ide-scaffold",
+  "productName": "Areyto",
   "version": "0.1.0",
-  "identifier": "com.jibaroenlaluna.writingide",
+  "identifier": "com.jibaroenlaluna.areyto",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "writing-ide-scaffold",
+        "title": "Areyto",
         "width": 800,
         "height": 600
       }
