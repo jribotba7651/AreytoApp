@@ -25,3 +25,10 @@ export type ProjectFsError =
 export type ProjectResult<T> =
   | { ok: true; value: T }
   | { ok: false; error: ProjectFsError };
+
+export interface ClosedChapter {
+  filename: string;
+  absolutePath: string;
+  tagName: string;
+  closedAt: string;
+}

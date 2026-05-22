@@ -3,6 +3,13 @@ use std::path::Path;
 use std::process::Command;
 
 #[derive(Serialize)]
+pub struct TagInfo {
+    pub name: String,
+    pub timestamp: String,
+    pub commit_subject: String,
+}
+
+#[derive(Serialize)]
 pub struct CommitInfo {
     pub hash: String,
     pub short_hash: String,
@@ -124,4 +131,55 @@ pub fn git_show_file_at_commit(
     file_path: String,
 ) -> Result<String, String> {
     git(&repo_path, &["show", &format!("{commit_hash}:{file_path}")])
+}
+
+#[tauri::command]
+pub fn git_tag(repo_path: String, tag_name: String) -> Result<(), String> {
+    git(&repo_path, &["tag", &tag_name])?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn git_tag_info(repo_path: String, tag_name: String) -> Result<TagInfo, String> {
+    let refspec = format!("refs/tags/{tag_name}");
+    let out = git(
+        &repo_path,
+        &["for-each-ref", "--format=%(refname:short)|%(creatordate:iso8601)|%(subject)", &refspec],
+    )?;
+    parse_tag_line(out.trim()).ok_or_else(|| format!("tag not found: {tag_name}"))
+}
+
+#[tauri::command]
+pub fn git_list_chapter_tags(repo_path: String) -> Result<Vec<TagInfo>, String> {
+    let out = git(
+        &repo_path,
+        &[
+            "for-each-ref",
+            "--format=%(refname:short)|%(creatordate:iso8601)|%(subject)",
+            "--sort=-creatordate",
+            "refs/tags/cap-*-final",
+        ],
+    )?;
+    let tags = out.lines().filter(|l| !l.is_empty()).filter_map(parse_tag_line).collect();
+    Ok(tags)
+}
+
+#[tauri::command]
+pub fn git_commit_all(repo_path: String, message: String) -> Result<(), String> {
+    let status = git(&repo_path, &["status", "--porcelain"])?;
+    if status.trim().is_empty() {
+        return Ok(());
+    }
+    git(&repo_path, &["add", "-A"])?;
+    git(&repo_path, &["commit", "-m", &message])?;
+    Ok(())
+}
+
+fn parse_tag_line(line: &str) -> Option<TagInfo> {
+    let mut parts = line.splitn(3, '|');
+    Some(TagInfo {
+        name: parts.next()?.to_owned(),
+        timestamp: parts.next()?.to_owned(),
+        commit_subject: parts.next()?.to_owned(),
+    })
 }

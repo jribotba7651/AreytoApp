@@ -233,3 +233,21 @@ export async function markChapterFinished(
 
   return ok({ path: to, filename: chapterFilename, title, status: 'finished' });
 }
+
+export async function closeChapter(
+  _project: Project,
+  chapter: Chapter
+): Promise<ProjectResult<{ newPath: string }>> {
+  if (!chapter.path.includes('/capitulos/')) {
+    return fail({ kind: 'WriteFailed', path: chapter.path, reason: 'Chapter is not in capitulos/' });
+  }
+  const newPath = chapter.path.replace('/capitulos/', '/capitulos-terminados/');
+
+  try {
+    await invoke('rename_path', { from: chapter.path, to: newPath });
+  } catch (e) {
+    return fail({ kind: 'WriteFailed', path: newPath, reason: String(e) });
+  }
+
+  return ok({ newPath });
+}

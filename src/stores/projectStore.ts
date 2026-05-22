@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Chapter, Project } from '@/types/project';
+import type { Chapter, ClosedChapter, Project } from '@/types/project';
 import type { Commit } from '@/types/git';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -11,6 +11,7 @@ interface ProjectState {
   saveStatus: SaveStatus;
   chapters: Chapter[];
   commits: Commit[];
+  closedChapters: ClosedChapter[];
   editorVersion: number;
   flushAutosave: (() => Promise<void>) | null;
   syncAutosaveSaved: ((content: string) => void) | null;
@@ -23,6 +24,8 @@ interface ProjectState {
   addChapter: (chapter: Chapter) => void;
   setCommits: (commits: Commit[]) => void;
   prependCommit: (commit: Commit) => void;
+  setClosedChapters: (chapters: ClosedChapter[]) => void;
+  clearActiveChapter: () => void;
   incrementEditorVersion: () => void;
   setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
@@ -35,6 +38,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   saveStatus: 'idle',
   chapters: [],
   commits: [],
+  closedChapters: [],
   editorVersion: 0,
   flushAutosave: null,
   syncAutosaveSaved: null,
@@ -49,6 +53,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       saveStatus: 'idle',
       chapters: [],
       commits: [],
+      closedChapters: [],
       editorVersion: 0,
     }),
 
@@ -73,6 +78,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   prependCommit: (commit: Commit) =>
     set((state) => ({ commits: [commit, ...state.commits] })),
+
+  setClosedChapters: (chapters: ClosedChapter[]) => set({ closedChapters: chapters }),
+
+  clearActiveChapter: () =>
+    set({ activeChapterPath: null, activeChapterContent: '', saveStatus: 'idle', commits: [] }),
 
   incrementEditorVersion: () =>
     set((state) => ({ editorVersion: state.editorVersion + 1 })),

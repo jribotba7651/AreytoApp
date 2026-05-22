@@ -1,6 +1,7 @@
 import { useProjectStore } from '@/stores/projectStore';
 import ChapterList from '@/components/sidebar/ChapterList';
 import NewChapterButton from '@/components/sidebar/NewChapterButton';
+import CloseChapterButton from '@/components/sidebar/CloseChapterButton';
 
 function SidebarPanel() {
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -27,6 +28,7 @@ function SidebarPanel() {
 
       <div className="shrink-0 border-t border-border-subtle">
         <NewChapterButton />
+        <CloseChapterButton />
       </div>
     </div>
   );

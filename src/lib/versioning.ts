@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { Commit, GitError, GitResult } from '@/types/git';
+import type { Commit, GitError, GitResult, TagInfo } from '@/types/git';
 import { writeChapter } from './project-fs';
 
 interface CommitInfo {
@@ -146,4 +146,50 @@ export async function restoreFile(
   };
 
   return ok({ commit, content: read.value });
+}
+
+// --- Tag operations ---
+
+interface RawTagInfo {
+  name: string;
+  timestamp: string;
+  commit_subject: string;
+}
+
+function mapTagInfo(raw: RawTagInfo): TagInfo {
+  return { name: raw.name, timestamp: raw.timestamp, commitSubject: raw.commit_subject };
+}
+
+export async function tagChapter(
+  projectPath: string,
+  filename: string
+): Promise<GitResult<string>> {
+  const match = /^cap-(\d+)\.md$/.exec(filename);
+  if (!match?.[1]) return fail({ kind: 'TagFailed', reason: 'invalid filename' });
+
+  const tagName = `cap-${match[1]}-final`;
+  try {
+    await invoke('git_tag', { repoPath: projectPath, tagName });
+    return ok(tagName);
+  } catch (e) {
+    return fail({ kind: 'TagFailed', reason: String(e) });
+  }
+}
+
+export async function listChapterTags(projectPath: string): Promise<GitResult<TagInfo[]>> {
+  try {
+    const raw = await invoke<RawTagInfo[]>('git_list_chapter_tags', { repoPath: projectPath });
+    return ok(raw.map(mapTagInfo));
+  } catch (e) {
+    return fail({ kind: 'TagFailed', reason: String(e) });
+  }
+}
+
+export async function commitAll(projectPath: string, message: string): Promise<GitResult<void>> {
+  try {
+    await invoke('git_commit_all', { repoPath: projectPath, message });
+    return ok(undefined);
+  } catch (e) {
+    return fail({ kind: 'CommitFailed', reason: String(e) });
+  }
 }
