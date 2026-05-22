@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: MVP Editor
 - Feature en progreso: ninguna
-- Fase activa: Terminal
-- Última feature completada: Terminal base con xterm.js + portable-pty
+- Fase activa: Chapter States
+- Última feature completada: Marcar capítulo como terminado
 - Fecha de última actualización: 2026-05-21
 
 ## Features completadas
@@ -355,6 +355,51 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-044 a D-047 documentadas arriba en Restore de versión anterior
 - D-048 a D-051 documentadas arriba en Tab Libro con vista renderizada
 - D-052 a D-058 documentadas arriba en Terminal base con xterm.js + portable-pty
+
+### 2026-05-21 - Marcar capítulo como terminado (cerrar)
+- Qué se hizo: botón "Cerrar capítulo activo" en sidebar. Click abre modal de confirmación. Confirmar: flush autosave → tag git cap-XX-final → mover archivo a capitulos-terminados/ → commit "close: cap-XX.md" → activar siguiente capítulo o limpiar activo. Tab Terminados muestra lista simple de capítulos cerrados (nombre, tag, fecha).
+- Archivos creados/modificados:
+  - src-tauri/src/git.rs (4 commands: git_tag, git_tag_info, git_list_chapter_tags, git_commit_all)
+  - src/types/git.ts (TagInfo, TagFailed error kind)
+  - src/types/project.ts (ClosedChapter)
+  - src/lib/versioning.ts (tagChapter, listChapterTags, commitAll)
+  - src/lib/project-fs.ts (closeChapter)
+  - src/lib/close-chapter-flow.ts (nuevo: orchestrador)
+  - src/lib/closed-chapters-loader.ts (nuevo)
+  - src/stores/projectStore.ts (closedChapters, setClosedChapters, clearActiveChapter)
+  - src/components/sidebar/CloseChapterButton.tsx (nuevo)
+  - src/components/sidebar/CloseChapterModal.tsx (nuevo)
+  - src/components/panels/SidebarPanel.tsx (CloseChapterButton añadido)
+  - src/components/terminados/TerminadosList.tsx (nuevo)
+  - src/components/terminados/TerminadosListItem.tsx (nuevo)
+  - src/components/terminados/TerminadosEmptyState.tsx (nuevo)
+  - src/components/layout/FinishedTabContent.tsx (reescrito)
+- Decisiones tomadas:
+  - D-059: botón fijo en sidebar abajo del + Nuevo, visible solo con capítulo activo.
+  - D-060: modal de confirmación obligatorio.
+  - D-061: tag git cap-XX-final con padding del filename original.
+  - D-062: commit "close: cap-XX.md" via git add -A (maneja rename).
+  - D-063: tab Terminados con lista simple en esta task. Render markdown completo es task futura.
+  - D-064: después de cerrar, activo pasa al siguiente capítulo disponible o null.
+- Pendientes relacionados:
+  - Reabrir capítulo terminado (task existente)
+  - Tab Terminados con render markdown completo (task futura)
+  - Botón refresh manual del sidebar (no needed, sidebar se actualiza en estado)
+- Bugs encontrados: ninguno
+
+## Decisiones arquitectónicas (acumuladas)
+- D-001 a D-009 documentadas arriba en F0
+- D-010 a D-012 documentadas arriba en Layout de 3 paneles
+- D-013 a D-016 documentadas arriba en Editor base sin persistencia
+- D-017 a D-021 documentadas arriba en Filesystem service
+- D-022 a D-028 documentadas arriba en Selector de proyecto
+- D-029 a D-033 documentadas arriba en Editor conectado al proyecto
+- D-034 a D-037 documentadas arriba en Sidebar de capítulos
+- D-038 a D-043 documentadas arriba en Git versioning automático
+- D-044 a D-047 documentadas arriba en Restore de versión anterior
+- D-048 a D-051 documentadas arriba en Tab Libro con vista renderizada
+- D-052 a D-058 documentadas arriba en Terminal base con xterm.js + portable-pty
+- D-059 a D-064 documentadas arriba en Marcar capítulo como terminado
 - Tailwind v4 cambia la configuración respecto a lo descrito en architecture.md: no hay tailwind.config.js, el tema se define con @theme {} en globals.css, el plugin de Vite es @tailwindcss/vite
 
 ## Bugs conocidos
