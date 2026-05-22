@@ -77,7 +77,7 @@ function WelcomeScreen() {
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-bg-primary gap-3">
       <h1 className="font-serif text-4xl text-text-primary tracking-tight">
-        Writers Den
+        Areyto
       </h1>
       <p className="text-sm text-text-secondary">
         Editor de escritura por capítulos
