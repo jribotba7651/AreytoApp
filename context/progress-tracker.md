@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Centrar botón Abrir proyecto en Welcome
+- Última feature completada: F22 - Toggle vista Markdown / Normal en editor
 - Fecha de última actualización: 2026-05-23
 
 ## Features completadas
@@ -441,6 +441,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-098 a D-099 documentadas arriba en Diagnosis bug F19
 - D-100 a D-102 documentadas arriba en Mejorar contraste tema oscuro
 - D-103 a D-104 documentadas arriba en Centrar botón Abrir proyecto
+- D-105 a D-112 documentadas arriba en F22 Toggle vista Markdown / Normal en editor
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -596,6 +597,35 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Pendientes relacionados:
   - F19 oficialmente COMPLETA — restore de proyecto, capítulo activo y tamaños de paneles funcional
 - Bugs encontrados: ninguno nuevo
+
+### 2026-05-23 - F22: Toggle vista Markdown / Normal en editor
+- Qué se hizo: en el tab Capítulo Activo, el panel del editor ahora tiene un header mínimo con botón icono (Eye/Pencil) y atajo ⌘E para alternar entre el editor CodeMirror y una vista preview renderizada del markdown. El editor se mantiene montado (visibility:hidden) en modo preview para preservar el scroll. La vista preview usa el mismo componente BookMarkdown (maxWidth 900px). El modo se persiste en settings.json global. Se extrajo BookMarkdown como componente compartido usado por BookChapter (tab Libro) y el nuevo preview del editor.
+- Archivos creados/modificados:
+  - src/types/layout.ts (EditorViewMode type + campo en LayoutState)
+  - src/stores/layoutStore.ts (editorViewMode state + setEditorViewMode + toggleEditorViewMode)
+  - src/stores/layoutStore.test.ts (4 tests nuevos para editorViewMode)
+  - src/lib/settings.ts (editorViewMode?: 'edit' | 'preview' en GlobalSettings)
+  - src-tauri/src/settings.rs (editor_view_mode: Option<String> en GlobalSettings)
+  - src/hooks/useSettingsPersistence.ts (editorViewMode selector + incluido en persistGlobal + deps)
+  - src/App.tsx (restore de editorViewMode en restoreSession)
+  - src/lib/keyboard-shortcuts.ts (TOGGLE_EDITOR_VIEW: ⌘E)
+  - src/hooks/useKeyboardShortcuts.ts (handler ⌘E con scope check activeTab === 'capitulo')
+  - src/components/book/BookMarkdown.tsx (nuevo: componente compartido MD→HTML con maxWidth prop)
+  - src/components/book/BookChapter.tsx (refactorizado para usar BookMarkdown maxWidth=700)
+  - src/components/panels/EditorPanel.tsx (header con toggle + dual-view editor/preview)
+- Decisiones tomadas:
+  - D-105: componente BookMarkdown compartido extraído de BookChapter. Single source of truth para el render de markdown. Tab Libro usa maxWidth=700, editor preview usa maxWidth=900.
+  - D-106: editor CodeMirror se mantiene montado en modo preview con visibility:hidden + pointer-events:none. Alternativa a unmount/remount para preservar scroll y evitar re-hidratación del editor.
+  - D-107: flushAutosave antes del toggle (en handleToggle y en el atajo ⌘E). Garantiza que el contenido del preview es el último guardado.
+  - D-108: header del editor siempre visible con toggle (Eye/Pencil), sin ocultar nunca. Muestra ⌘E como ShortcutHint para descubribilidad.
+  - D-109: atajo ⌘E con scope check layout.activeTab === 'capitulo'. No toggle si está en tab Libro o Terminados.
+  - D-110: editorViewMode persiste en settings.json global (no per-project). El modo de vista es preferencia del usuario, no del proyecto.
+  - D-111: restore del modo de vista en restoreSession de App.tsx, con validación estricta ('edit' | 'preview'). Valores corruptos caen al default 'edit'.
+  - D-112: layout del EditorPanel: flex-col con header shrink-0 + área de contenido flex-1 min-h-0. El area de contenido usa relative para superponer editor (invisible) y preview (visible) cuando está en modo preview.
+- Pendientes relacionados:
+  - Shortcut ⌘E podría propagarse a CodeMirror (intercepción nativa). A monitorear.
+  - Scroll position del preview no se sincroniza con el editor (no es objetivo del MVP).
+- Bugs encontrados: ninguno
 
 ## Bugs conocidos
 Ninguno actualmente.
