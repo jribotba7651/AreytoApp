@@ -1,4 +1,5 @@
 export type Tab = 'capitulo' | 'libro' | 'terminados';
+export type EditorViewMode = 'edit' | 'preview';
 
 export interface PanelSizes {
   sidebar: number;
@@ -12,4 +13,5 @@ export interface LayoutState {
   sizes: PanelSizes;
   isVersionsCollapsed: boolean;
   showCloseChapterModal: boolean;
+  editorViewMode: EditorViewMode;
 }

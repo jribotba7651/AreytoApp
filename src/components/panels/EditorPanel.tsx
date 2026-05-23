@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
+import { Eye, Pencil } from 'lucide-react';
 import ChapterEditor from '@/components/editor/ChapterEditor';
+import BookMarkdown from '@/components/book/BookMarkdown';
+import ShortcutHint from '@/components/shared/ShortcutHint';
 import { useProjectStore } from '@/stores/projectStore';
+import { useLayoutStore } from '@/stores/layoutStore';
 import { useAutosave } from '@/hooks/useAutosave';
 
 function EditorPanel() {
@@ -14,6 +18,10 @@ function EditorPanel() {
   const setFlushAutosave = useProjectStore((s) => s.setFlushAutosave);
   const setSyncAutosaveSaved = useProjectStore((s) => s.setSyncAutosaveSaved);
 
+  const editorViewMode = useLayoutStore((s) => s.editorViewMode);
+  const toggleEditorViewMode = useLayoutStore((s) => s.toggleEditorViewMode);
+  const flushAutosave = useProjectStore((s) => s.flushAutosave);
+
   const { flush, syncSaved } = useAutosave({
     content: activeChapterContent,
     chapterPath: activeChapterPath,
@@ -22,7 +30,6 @@ function EditorPanel() {
     delay: 500,
   });
 
-  // Register flush and syncSaved in store so restore flow can access them
   useEffect(() => {
     setFlushAutosave(flush);
     setSyncAutosaveSaved(syncSaved);
@@ -32,7 +39,6 @@ function EditorPanel() {
     };
   }, [flush, syncSaved, setFlushAutosave, setSyncAutosaveSaved]);
 
-  // Auto-reset 'saved' → 'idle' después de 2s
   useEffect(() => {
     if (saveStatus !== 'saved') return;
     const timer = setTimeout(() => setSaveStatus('idle'), 2000);
@@ -47,13 +53,50 @@ function EditorPanel() {
     );
   }
 
+  async function handleToggle() {
+    await flushAutosave?.();
+    toggleEditorViewMode();
+  }
+
+  const isPreview = editorViewMode === 'preview';
+
   return (
-    <div className="h-full bg-bg-editor">
-      <ChapterEditor
-        key={`${activeChapterPath}:${editorVersion}`}
-        initialContent={activeChapterContent}
-        onChange={updateContent}
-      />
+    <div className="h-full flex flex-col bg-bg-editor">
+      <div className="flex items-center justify-end px-3 py-1.5 border-b border-border-subtle shrink-0">
+        <div className="relative flex items-center">
+          <button
+            onClick={handleToggle}
+            className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
+            title={isPreview ? 'Cambiar a edición' : 'Vista previa'}
+          >
+            {isPreview ? (
+              <Pencil size={14} />
+            ) : (
+              <Eye size={14} />
+            )}
+            <span>{isPreview ? 'Editar' : 'Previsualizar'}</span>
+          </button>
+          <div className="pl-1.5">
+            <ShortcutHint text="⌘E" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 relative">
+        <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
+          <ChapterEditor
+            key={`${activeChapterPath}:${editorVersion}`}
+            initialContent={activeChapterContent}
+            onChange={updateContent}
+          />
+        </div>
+
+        {isPreview && (
+          <div className="h-full overflow-y-auto">
+            <BookMarkdown content={activeChapterContent} maxWidth={900} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

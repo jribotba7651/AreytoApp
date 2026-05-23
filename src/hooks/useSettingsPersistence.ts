@@ -19,6 +19,7 @@ export function useSettingsPersistence() {
   const editorSize = useLayoutStore((s) => s.sizes.editor);
   const terminalSize = useLayoutStore((s) => s.sizes.terminal);
   const versionsSize = useLayoutStore((s) => s.sizes.versions);
+  const editorViewMode = useLayoutStore((s) => s.editorViewMode);
 
   const persistGlobal = useRef(
     debounce((settings: GlobalSettings) => {
@@ -46,9 +47,10 @@ export function useSettingsPersistence() {
         terminal: terminalSize,
         versions: versionsSize,
       },
+      editorViewMode,
       version: 1,
     });
-  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize]);
+  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode]);
 
   useEffect(() => {
     if (!currentProjectPath || !activeChapterPath) return;

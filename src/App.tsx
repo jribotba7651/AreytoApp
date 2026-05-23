@@ -37,6 +37,10 @@ function App() {
           }
         }
 
+        if (settings.editorViewMode === 'edit' || settings.editorViewMode === 'preview') {
+          useLayoutStore.getState().setEditorViewMode(settings.editorViewMode);
+        }
+
         if (settings.lastProjectPath) {
           const exists = await pathExists(settings.lastProjectPath);
           if (!exists) {

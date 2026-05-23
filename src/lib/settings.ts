@@ -10,6 +10,7 @@ export interface PanelSizes {
 export interface GlobalSettings {
   lastProjectPath?: string;
   panels: PanelSizes;
+  editorViewMode?: 'edit' | 'preview';
   version: number;
 }
 

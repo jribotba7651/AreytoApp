@@ -72,6 +72,12 @@ export function useKeyboardShortcuts() {
         project.closeProject();
         return;
       }
+      if (matchShortcut(e, SHORTCUTS.TOGGLE_EDITOR_VIEW) && layout.activeTab === 'capitulo') {
+        e.preventDefault();
+        await project.flushAutosave?.();
+        layout.toggleEditorViewMode();
+        return;
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown);

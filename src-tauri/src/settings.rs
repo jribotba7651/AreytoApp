@@ -23,6 +23,8 @@ pub struct GlobalSettings {
     pub last_project_path: Option<String>,
     #[serde(default)]
     pub panels: PanelSizes,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub editor_view_mode: Option<String>,
     #[serde(default = "default_version")]
     pub version: u32,
 }

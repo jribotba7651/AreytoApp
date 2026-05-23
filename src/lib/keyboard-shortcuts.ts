@@ -13,8 +13,9 @@ export const SHORTCUTS = {
   TAB_CHAPTER:   { key: '1', mod: true },
   TAB_BOOK:      { key: '2', mod: true },
   TAB_FINISHED:  { key: '3', mod: true },
-  OPEN_PROJECT:  { key: 'o', mod: true, shift: true },
-  CLOSE_PROJECT: { key: 'w', mod: true, shift: true },
+  OPEN_PROJECT:        { key: 'o', mod: true, shift: true },
+  CLOSE_PROJECT:       { key: 'w', mod: true, shift: true },
+  TOGGLE_EDITOR_VIEW:  { key: 'e', mod: true },
 } as const satisfies Record<string, ShortcutDef>;
 
 export type ShortcutId = keyof typeof SHORTCUTS;
