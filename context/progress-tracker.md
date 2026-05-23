@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Settings persistentes
-- Fecha de última actualización: 2026-05-22
+- Última feature completada: Settings persistentes (F19 completa, diagnosis confirmada 2026-05-23)
+- Fecha de última actualización: 2026-05-23
 
 ## Features completadas
 
@@ -476,7 +476,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - src/App.tsx (restore en useEffect al montar, loading state, restoreMessage)
   - src/components/welcome/WelcomeScreen.tsx (prop restoreMessage, usa setupProjectInStores)
 - Decisiones tomadas:
-  - D-091: settings globales en ~/Library/Application Support/Areyto/settings.json
+  - D-091: settings globales en ~/Library/Application Support/com.jibaroenlaluna.areyto/settings.json (Tauri 2.x usa el bundle identifier, no el productName — path corregido en diagnosis D-098)
   - D-092: estado per-project en <proyecto>/.areyto/state.json
   - D-093: lastProjectPath inexistente muestra mensaje informativo en Welcome (no error crítico)
   - D-094: lastActiveChapterPath inexistente cae al primer capítulo sin error
