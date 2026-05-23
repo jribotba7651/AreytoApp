@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Settings persistentes (F19 completa, diagnosis confirmada 2026-05-23)
+- Última feature completada: Mejorar contraste tema oscuro
 - Fecha de última actualización: 2026-05-23
 
 ## Features completadas
@@ -439,6 +439,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-086 a D-090 documentadas arriba en Atajos de teclado globales
 - D-091 a D-097 documentadas arriba en Settings persistentes
 - D-098 a D-099 documentadas arriba en Diagnosis bug F19
+- D-100 a D-102 documentadas arriba en Mejorar contraste tema oscuro
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -556,6 +557,20 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Pendientes relacionados:
   - Manejar re-cerrar de un capítulo ya reabierto (deuda D-079, tag conflict)
   - Reabrir desde el sidebar (out of scope por decisión UX)
+- Bugs encontrados: ninguno
+
+### 2026-05-23 - Mejorar contraste tema oscuro
+- Qué se hizo: subir un tono los fondos principales (bg-primary, bg-secondary, bg-tertiary) en globals.css para mejorar legibilidad. Respuesta a feedback directo del usuario: "hay que cambiarle el negro al app casi no se puede leer así" (2026-05-23). También se ajustó bg-editor para mantener la jerarquía visual (editor ≥ primary). Text colors, borders y accents sin cambios. ui-context.md actualizado para reflejar los valores nuevos.
+- Archivos modificados:
+  - src/styles/globals.css (4 tokens de fondo: bg-primary, bg-secondary, bg-tertiary, bg-editor)
+  - context/ui-context.md (valores actualizados para sincronía)
+- Decisiones tomadas:
+  - D-100: bg-primary #0d0d0f → #18181b, bg-secondary #161618 → #1f1f23, bg-tertiary #1d1d20 → #27272a. Zona zinc-900 de Tailwind. Contraste WCAG con text-primary: 14.6:1, 13.4:1, 12.2:1 respectivamente.
+  - D-101: text colors no se tocaron (el problema era el fondo, no el texto). bg-terminal tampoco — los terminales más oscuros siguen siendo intencional.
+  - D-102: bg-editor #131316 → #1b1b1f para mantener jerarquía visual (editor queda entre primary y secondary, no más oscuro que primary). Cambio necesario, no scope creep.
+- Pendientes relacionados:
+  - Sistema de temas con selector (futuro, si decidimos)
+  - Botón "Abrir proyecto" no centrado en Welcome (task aparte)
 - Bugs encontrados: ninguno
 
 ### 2026-05-23 - Diagnosis bug F19 global settings.json
