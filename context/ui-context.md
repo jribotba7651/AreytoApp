@@ -6,10 +6,10 @@ Editor técnico que respira como un libro. Dark mode por default (estamos escrib
 ## Tema (dark mode por default)
 
 ### Colores base
-- --bg-primary: #0d0d0f (fondo principal de la app)
-- --bg-secondary: #161618 (paneles, sidebar)
-- --bg-tertiary: #1d1d20 (cards, modales)
-- --bg-editor: #131316 (área del editor, ligeramente diferente para foco)
+- --bg-primary: #18181b (fondo principal de la app)
+- --bg-secondary: #1f1f23 (paneles, sidebar)
+- --bg-tertiary: #27272a (cards, modales)
+- --bg-editor: #1b1b1f (área del editor, ligeramente diferente para foco)
 - --bg-terminal: #0a0a0c (terminales más oscuros)
 
 ### Borders

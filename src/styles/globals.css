@@ -2,10 +2,10 @@
 
 @theme {
   /* Background */
-  --color-bg-primary: #0d0d0f;
-  --color-bg-secondary: #161618;
-  --color-bg-tertiary: #1d1d20;
-  --color-bg-editor: #131316;
+  --color-bg-primary: #18181b;
+  --color-bg-secondary: #1f1f23;
+  --color-bg-tertiary: #27272a;
+  --color-bg-editor: #1b1b1f;
   --color-bg-terminal: #0a0a0c;
 
   /* Borders */
@@ -37,10 +37,10 @@
 }
 
 :root {
-  --bg-primary: #0d0d0f;
-  --bg-secondary: #161618;
-  --bg-tertiary: #1d1d20;
-  --bg-editor: #131316;
+  --bg-primary: #18181b;
+  --bg-secondary: #1f1f23;
+  --bg-tertiary: #27272a;
+  --bg-editor: #1b1b1f;
   --bg-terminal: #0a0a0c;
   --border-subtle: #26262a;
   --border-default: #34343a;
