@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: Mejorar contraste tema oscuro
+- Última feature completada: Centrar botón Abrir proyecto en Welcome
 - Fecha de última actualización: 2026-05-23
 
 ## Features completadas
@@ -440,6 +440,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-091 a D-097 documentadas arriba en Settings persistentes
 - D-098 a D-099 documentadas arriba en Diagnosis bug F19
 - D-100 a D-102 documentadas arriba en Mejorar contraste tema oscuro
+- D-103 a D-104 documentadas arriba en Centrar botón Abrir proyecto
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -557,6 +558,18 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Pendientes relacionados:
   - Manejar re-cerrar de un capítulo ya reabierto (deuda D-079, tag conflict)
   - Reabrir desde el sidebar (out of scope por decisión UX)
+- Bugs encontrados: ninguno
+
+### 2026-05-23 - Centrar botón Abrir proyecto en Welcome
+- Qué se hizo: fix visual del botón "Abrir proyecto" en Welcome screen. Aparecía a la izquierda del centro porque el div `flex gap-3` que envolvía botón + ShortcutHint centraba el bloque completo, no el botón solo. Fix: el div contenedor pasa a `relative` (sin flex), el botón queda solo en el flujo normal (el padre `items-center` lo centra por su ancho propio), y el ShortcutHint se posiciona absolute con `left-full` al lado derecho fuera del flujo.
+- Archivos modificados:
+  - src/components/welcome/WelcomeScreen.tsx (cambio de 2 clases + estructura del hint)
+- Decisiones tomadas:
+  - D-103: causa raíz del descentrado: ShortcutHint dentro del flex row empujaba el botón a la izquierda del eje central al añadir ancho a la derecha del bloque centrado.
+  - D-104: fix con position absolute para el hint (left-full top-1/2 -translate-y-1/2 pl-2). Mantiene el hint visible y alineado verticalmente al botón sin afectar el centrado.
+- Pendientes relacionados:
+  - Logo en Welcome (proyecto aparte de Juan)
+  - Splash screen al arrancar (futuro)
 - Bugs encontrados: ninguno
 
 ### 2026-05-23 - Mejorar contraste tema oscuro
