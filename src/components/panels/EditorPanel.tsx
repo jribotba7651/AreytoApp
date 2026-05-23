@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Eye, Pencil } from 'lucide-react';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import BookMarkdown from '@/components/book/BookMarkdown';
@@ -21,6 +21,8 @@ function EditorPanel() {
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
   const toggleEditorViewMode = useLayoutStore((s) => s.toggleEditorViewMode);
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
+
+  const previewScrollRef = useRef<HTMLDivElement>(null);
 
   const { flush, syncSaved } = useAutosave({
     content: activeChapterContent,
@@ -91,11 +93,15 @@ function EditorPanel() {
           />
         </div>
 
-        {isPreview && (
-          <div className="h-full overflow-y-auto">
-            <BookMarkdown content={activeChapterContent} maxWidth={900} />
-          </div>
-        )}
+        <div
+          ref={previewScrollRef}
+          className={[
+            'absolute inset-0 overflow-y-auto',
+            isPreview ? '' : 'invisible pointer-events-none',
+          ].join(' ')}
+        >
+          <BookMarkdown content={activeChapterContent} maxWidth={900} />
+        </div>
       </div>
     </div>
   );
