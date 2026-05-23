@@ -69,7 +69,7 @@ function EditorPanel() {
           <button
             onClick={handleToggle}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
-            title={isPreview ? 'Cambiar a edición' : 'Vista previa'}
+            title={isPreview ? 'Editar (⌘E)' : 'Vista previa (⌘E)'}
           >
             {isPreview ? (
               <Pencil size={14} />
