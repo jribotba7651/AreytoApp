@@ -87,7 +87,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
         </p>
       )}
 
-      <div className="mt-6 flex items-center gap-3">
+      <div className="mt-6 relative">
         <button
           onClick={handleOpen}
           disabled={loading}
@@ -95,7 +95,9 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
         >
           {loading ? 'Abriendo…' : 'Abrir proyecto'}
         </button>
-        <ShortcutHint text="⌘⇧O" />
+        <div className="absolute top-1/2 left-full -translate-y-1/2 pl-2">
+          <ShortcutHint text="⌘⇧O" />
+        </div>
       </div>
 
       {error && (
