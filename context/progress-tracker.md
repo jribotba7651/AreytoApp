@@ -438,6 +438,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-082 a D-085 documentadas arriba en Fix D-079 - Re-cerrar capítulo reabierto
 - D-086 a D-090 documentadas arriba en Atajos de teclado globales
 - D-091 a D-097 documentadas arriba en Settings persistentes
+- D-098 a D-099 documentadas arriba en Diagnosis bug F19
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
@@ -556,6 +557,17 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Manejar re-cerrar de un capítulo ya reabierto (deuda D-079, tag conflict)
   - Reabrir desde el sidebar (out of scope por decisión UX)
 - Bugs encontrados: ninguno
+
+### 2026-05-23 - Diagnosis bug F19 global settings.json
+- Qué se hizo: diagnosis del bug detectado en smoke test del viernes 22-may. El smoke test buscó en ~/Library/Application Support/Areyto/ pero Tauri 2.x usa el bundle identifier (com.jibaroenlaluna.areyto) en app_local_data_dir(). El archivo SÍ existe y se escribe correctamente en ~/Library/Application Support/com.jibaroenlaluna.areyto/settings.json — contenido verificado: lastProjectPath correcto, panel sizes correctos. El state.json per-project también correcto (lastActiveChapterPath: capitulos/cap-03.md). Restore verificado via code review del flujo en open-project-flow.ts y filesystem inspection. Ningún cambio de código necesario. D-091 corregido.
+- Archivos modificados:
+  - context/progress-tracker.md (corrección D-091, entrada de diagnosis)
+- Decisiones tomadas:
+  - D-098: Tauri 2.x app_local_data_dir() en macOS usa el bundle identifier (com.jibaroenlaluna.areyto), no el productName (Areyto). Path real de global settings: ~/Library/Application Support/com.jibaroenlaluna.areyto/settings.json. Corrección de D-091.
+  - D-099: la implementación de F19 (commit 2a5e5ad) era correcta end-to-end. El smoke test del viernes 22-may chequeó el path incorrecto. No se requirió fix de código.
+- Pendientes relacionados:
+  - F19 oficialmente COMPLETA — restore de proyecto, capítulo activo y tamaños de paneles funcional
+- Bugs encontrados: ninguno nuevo
 
 ## Bugs conocidos
 Ninguno actualmente.
