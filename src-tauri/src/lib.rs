@@ -1,3 +1,4 @@
+mod export;
 mod git;
 mod project_fs;
 mod settings;
@@ -35,6 +36,7 @@ pub fn run() {
             git::git_tag_info,
             git::git_list_chapter_tags,
             git::git_commit_all,
+            export::export_book_markdown,
             settings::read_global_settings,
             settings::write_global_settings,
             settings::read_project_state,
