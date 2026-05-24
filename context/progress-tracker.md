@@ -470,12 +470,14 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Bugs encontrados: tests Rust con process::id() compartían directorio en parallel — corregido con AtomicUsize counter por test. Smoke test reveló dos bugs adicionales cerrados en F23-fix (ver abajo).
 
 ### 2026-05-24 - F23-fix - Bugs filtro en-progreso y orden Ambos
-- Qué se hizo: corregido el filtro de scope "Solo en progreso" que devolvía todos los capítulos (incluyendo terminados). Corregido el orden del branch "Ambos" para respetar D-116 (terminados primero, en progreso después, cada grupo lexicográfico). La lógica del comando Rust ya era correcta; el bug era que los tests existentes no lo detectarían — el test `terminados_antes_que_en_progreso_en_ambos` usaba `cap-01.md` en terminados y `cap-02.md` en en-progreso, por lo que un sort global por nombre también lo pasaría. El test correcto invierte los nombres (`cap-01` en en-progreso, `cap-02` en terminados) para forzar que el orden de grupos se respete sin importar el nombre de archivo.
+- Qué se hizo: investigados los 2 bugs reportados en smoke test de F23. Verificación (2026-05-24): `cargo test export` → 8/8 ok, `vitest run export` → 16/16 ok. La lógica de export.rs ya era correcta desde el commit original (dos colectores separados, terminados primero). El problema era la cobertura de tests, no el código: el test `terminados_antes_que_en_progreso_en_ambos` usaba cap-01 en terminados y cap-02 en en-progreso — los filenames coincidían con el orden esperado, así que un sort global buggy también lo pasaría. Cerrado añadiendo tests de regresión correctos en 71fd5bb.
 - Archivos modificados:
   - src-tauri/src/export.rs (tests añadidos: `ambos_terminados_primero_independientemente_del_nombre`, `en_progreso_excluye_terminados`)
   - src/lib/export-service.test.ts (test añadido: `scope en-progreso no llama list_dir en capitulos-terminados`)
-- Decisiones tomadas: ninguna nueva. Ratifica D-116.
-- Bugs encontrados: los dos del smoke test del 2026-05-23. El test original `terminados_antes_que_en_progreso_en_ambos` era un falso positivo (pasaba aunque el código fuera buggy). Cerrados.
+- Decisiones tomadas:
+  - D-121: diagnóstico de smoke-test-vs-unit-test: el código era correcto pero la suite tenía un falso positivo. Fix = tests correctos, no cambio de lógica.
+- Bugs encontrados: ninguno en código. Bug de cobertura de tests, resuelto.
+- Status: Done
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
