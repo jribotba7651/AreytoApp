@@ -193,6 +193,56 @@ mod tests {
         cleanup(&project);
     }
 
+    // Regresión: cap-01 en en-progreso, cap-02 en terminados.
+    // Un sort global por nombre pondría cap-01 (en-progreso) primero — bug.
+    // El código correcto pone terminados (cap-02) antes sin importar el nombre.
+    #[test]
+    fn ambos_terminados_primero_independientemente_del_nombre() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "En progreso cap 1").unwrap();
+        fs::write(project.join("capitulos-terminados").join("cap-02.md"), "Terminado cap 2").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            true,
+            true,
+            out.to_str().unwrap().to_string(),
+        )
+        .unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        let pos_term = content.find("Terminado cap 2").unwrap();
+        let pos_prog = content.find("En progreso cap 1").unwrap();
+        assert!(
+            pos_term < pos_prog,
+            "Terminados deben preceder a en-progreso independientemente del nombre de archivo"
+        );
+        cleanup(&project);
+    }
+
+    // Regresión: scope en-progreso no debe incluir contenido de capitulos-terminados/.
+    #[test]
+    fn en_progreso_excluye_terminados() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos-terminados").join("cap-01.md"), "Capitulo terminado").unwrap();
+        fs::write(project.join("capitulos").join("cap-02.md"), "Capitulo en progreso").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false, // no incluir terminados
+            true,  // si incluir en progreso
+            out.to_str().unwrap().to_string(),
+        )
+        .unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        assert!(content.contains("Capitulo en progreso"), "Debe incluir el capítulo en progreso");
+        assert!(!content.contains("Capitulo terminado"), "No debe incluir capítulos terminados");
+        cleanup(&project);
+    }
+
     #[test]
     fn carpeta_inexistente_tratada_como_vacia() {
         let project = make_temp_project();

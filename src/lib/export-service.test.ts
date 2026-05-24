@@ -105,4 +105,15 @@ describe('countExportableFiles', () => {
     const count = await countExportableFiles('/proyecto', { scope: 'terminados' });
     expect(count).toBe(1);
   });
+
+  // Regresión: scope en-progreso no debe consultar capitulos-terminados/.
+  it('scope en-progreso no llama list_dir en capitulos-terminados', async () => {
+    mockInvoke.mockResolvedValueOnce([
+      { name: 'cap-02.md', is_file: true, is_dir: false },
+    ]);
+    await countExportableFiles('/proyecto', { scope: 'en-progreso' });
+    const calledPaths = mockInvoke.mock.calls.map((c) => (c[1] as { path: string }).path);
+    expect(calledPaths).not.toContain('/proyecto/capitulos-terminados');
+    expect(calledPaths).toContain('/proyecto/capitulos');
+  });
 });
