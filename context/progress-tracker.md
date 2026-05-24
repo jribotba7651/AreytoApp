@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F22 - Toggle vista Markdown / Normal en editor
+- Última feature completada: F23 - Export del libro completo a markdown unificado
 - Fecha de última actualización: 2026-05-23
 
 ## Features completadas
@@ -442,6 +442,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-100 a D-102 documentadas arriba en Mejorar contraste tema oscuro
 - D-103 a D-104 documentadas arriba en Centrar botón Abrir proyecto
 - D-105 a D-112 documentadas arriba en F22 Toggle vista Markdown / Normal en editor
+- D-113 a D-120 documentadas arriba en F23 Export del libro completo a markdown
+
+### 2026-05-23 - F23: Export del libro completo a markdown unificado
+- Qué se hizo: botón "Exportar" (icono Download) en header del tab Libro. Click abre modal ExportBookDialog con 3 radio buttons (Ambos, Solo terminados, Solo en progreso, default Ambos). Confirmar valida que haya archivos, abre dialog nativo Save As (Tauri plugin-dialog) con default {proyecto}-YYYY-MM-DD.md en raíz del proyecto, invoca command Rust que lee, ordena lexicográfico, concatena con '\n\n---\n\n', escribe UTF-8 con newline final. Post-export muestra mensaje nativo con el path resultante. Casos vacíos y cancelaciones manejados sin error ni escritura.
+- Archivos creados/modificados:
+  - src-tauri/src/export.rs (nuevo: export_book_markdown command + 6 Rust unit tests)
+  - src-tauri/src/lib.rs (mod export registrado)
+  - src/lib/export-service.ts (nuevo: exportBookMarkdown + countExportableFiles)
+  - src/lib/export-service.test.ts (nuevo: 8 tests)
+  - src/components/book/ExportBookDialog.tsx (nuevo: modal 3 radios)
+  - src/components/book/ExportBookDialog.test.tsx (nuevo: 6 tests)
+  - src/components/layout/BookTabContent.tsx (refactor: header + export flow)
+- Decisiones tomadas:
+  - D-113: Trigger único = botón Download en header del tab Libro. Sin atajo de teclado en esta task.
+  - D-114: Dialog de contenido con 3 opciones radio, default "Ambos".
+  - D-115: Separador entre capítulos '\n\n---\n\n'. Cada capítulo se trim_end_matches('\n') antes del join para separador limpio.
+  - D-116: Orden lexicográfico por filename dentro de cada grupo. En "Ambos", terminados primero, en progreso después (collect llamado en ese orden).
+  - D-117: Destino = dialog nativo Tauri Save As (plugin-dialog save()) con defaultPath {proyecto}-YYYY-MM-DD.md en raíz. Null si el usuario cancela.
+  - D-118: UTF-8 con newline final (output.push('\n') después del join).
+  - D-119: Cancelar el dialog de contenido o el Save As cierra sin error ni escritura. exportLoading protege el botón durante el flujo.
+  - D-120: Notificación post-export via message() nativo de plugin-dialog. No se inventó sistema de toast — se usó el dialog nativo per spec.
+- Pendientes relacionados:
+  - Export a docx/pdf (Order 23 y Order 31 en Notion, tasks separadas)
+  - Frontmatter del libro en el export (depende de F19 frontmatter editor)
+  - Atajo de teclado ⌘⇧E (si el uso frecuente lo justifica)
+- Bugs encontrados: tests Rust con process::id() compartían directorio en parallel — corregido con AtomicUsize counter por test
 
 ### 2026-05-22 - Branding - Areyto
 - Qué se hizo: rename del nombre técnico "writing-ide-scaffold" al nombre definitivo del producto "Areyto" en todos los config files. Bundle identifier macOS de com.jibaroenlaluna.writingide a com.jibaroenlaluna.areyto. Nombre del crate Rust y del paquete npm renombrados. Window title del macOS muestra "Areyto". Sin cambios visuales (logo, icon, splash quedan en proyecto aparte que Juan maneja).
