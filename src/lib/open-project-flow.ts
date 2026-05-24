@@ -4,6 +4,8 @@ import { loadInitialChapter } from './chapter-loader';
 import { ensureGitInit } from './versioning';
 import { loadCommitsForActiveChapter } from './commit-loader';
 import { readProjectState } from './settings';
+import { ensureFrontmatterFiles } from './frontmatter-fs';
+import { ensureBackmatterFiles } from './backmatter-fs';
 import { useProjectStore } from '@/stores/projectStore';
 
 export type OpenProjectResult =
@@ -21,6 +23,14 @@ export async function setupProjectInStores(project: Project): Promise<void> {
 
   const gitInit = await ensureGitInit(project.rootPath);
   if (!gitInit.ok) console.warn('Git init warning:', gitInit.error);
+
+  await ensureFrontmatterFiles(project.rootPath).catch((e) =>
+    console.warn('Frontmatter init warning:', e)
+  );
+
+  await ensureBackmatterFiles(project.rootPath).catch((e) =>
+    console.warn('Backmatter init warning:', e)
+  );
 
   const commitsResult = await loadCommitsForActiveChapter(
     project.rootPath,

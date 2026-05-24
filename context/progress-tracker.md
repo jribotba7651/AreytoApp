@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F23 - Export del libro completo a markdown unificado
-- Fecha de última actualización: 2026-05-23
+- Última feature completada: F25 - Editores de Dedicatoria y Agradecimientos
+- Fecha de última actualización: 2026-05-24
 
 ## Features completadas
 
@@ -443,6 +443,9 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-103 a D-104 documentadas arriba en Centrar botón Abrir proyecto
 - D-105 a D-112 documentadas arriba en F22 Toggle vista Markdown / Normal en editor
 - D-113 a D-120 documentadas arriba en F23 Export del libro completo a markdown
+- D-121 documentada arriba en F23-fix Bugs filtro en-progreso y orden Ambos
+- D-122 a D-127 documentadas arriba en F24 Editor de frontmatter estructurado
+- D-128 a D-133 documentadas arriba en F25 Editores de Dedicatoria y Agradecimientos
 
 ### 2026-05-23 - F23: Export del libro completo a markdown unificado
 - Qué se hizo: botón "Exportar" (icono Download) en header del tab Libro. Click abre modal ExportBookDialog con 3 radio buttons (Ambos, Solo terminados, Solo en progreso, default Ambos). Confirmar valida que haya archivos, abre dialog nativo Save As (Tauri plugin-dialog) con default {proyecto}-YYYY-MM-DD.md en raíz del proyecto, invoca command Rust que lee, ordena lexicográfico, concatena con '\n\n---\n\n', escribe UTF-8 con newline final. Post-export muestra mensaje nativo con el path resultante. Casos vacíos y cancelaciones manejados sin error ni escritura.
@@ -468,6 +471,80 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - Frontmatter del libro en el export (depende de F19 frontmatter editor)
   - Atajo de teclado ⌘⇧E (si el uso frecuente lo justifica)
 - Bugs encontrados: tests Rust con process::id() compartían directorio en parallel — corregido con AtomicUsize counter por test. Smoke test reveló dos bugs adicionales cerrados en F23-fix (ver abajo).
+
+### 2026-05-24 - F25 - Editores de Dedicatoria y Agradecimientos
+- Qué se hizo: editores de markdown libre para frontmatter/dedicatoria.md y backmatter/agradecimientos.md. Sección BACKMATTER nueva en sidebar debajo de CAPÍTULOS. Click en "Dedicatoria" o "Agradecimientos" abre CodeMirror directamente (reutilizando ChapterEditor). Autosave 500ms debounced + git commit por archivo. Al abrir proyecto, ensureFrontmatterFiles crea dedicatoria.md vacío; ensureBackmatterFiles (nuevo) crea backmatter/agradecimientos.md vacío. Tab Libro muestra dedicatoria centrada en cursiva entre Copyright y primer capítulo, agradecimientos al final con header.
+- Archivos creados/modificados:
+  - src/types/frontmatter.ts (DedicatoriaData añadido, FrontmatterKind extendido)
+  - src/types/backmatter.ts (nuevo: AgradecimientosData, BackmatterData)
+  - src/types/book.ts (BookFrontmatter.dedicatoria, BookBackmatter, BookData.backmatter)
+  - src/lib/frontmatter-fs.ts (readDedicatoria, writeDedicatoria, ensureFrontmatterFiles extendido para dedicatoria.md)
+  - src/lib/frontmatter-fs.test.ts (3 tests nuevos: readDedicatoria, writeDedicatoria, ensureFrontmatterFiles extendido)
+  - src/lib/backmatter-fs.ts (nuevo: readAgradecimientos, writeAgradecimientos, ensureBackmatterFiles)
+  - src/lib/backmatter-fs.test.ts (nuevo: 5 tests)
+  - src/lib/book-loader.ts (carga dedicatoria y agradecimientos en parallel)
+  - src/lib/book-loader.test.ts (mocks backmatter-fs, tests extendidos)
+  - src/lib/open-project-flow.ts (llama ensureBackmatterFiles)
+  - src/stores/projectStore.ts (ActiveView extendido con frontmatter-dedicatoria, backmatter-agradecimientos)
+  - src/components/sidebar/FrontmatterItem.tsx (view: NonNullable<ActiveView> para reutilización)
+  - src/components/sidebar/FrontmatterSection.tsx (item Dedicatoria añadido)
+  - src/components/sidebar/BackmatterSection.tsx (nuevo: sección BACKMATTER con item Agradecimientos)
+  - src/components/panels/SidebarPanel.tsx (BackmatterSection añadida)
+  - src/components/frontmatter/FrontmatterDedicatoriaEditor.tsx (nuevo: CodeMirror + autosave + commit)
+  - src/components/backmatter/BackmatterAgradecimientosEditor.tsx (nuevo: CodeMirror + autosave + commit)
+  - src/components/panels/EditorPanel.tsx (2 nuevos casos en el switch de activeView)
+  - src/components/book/BookFrontmatterDedicatoria.tsx (nuevo: centrada, cursiva, vacío → no renderiza)
+  - src/components/book/BookBackmatterAgradecimientos.tsx (nuevo: header + markdown, vacío → no renderiza)
+  - src/components/layout/BookTabContent.tsx (orden: Título → Copyright → Dedicatoria → capítulos → Agradecimientos)
+- Decisiones tomadas:
+  - D-128: prosa libre con CodeMirror, no form. Markdown plano sin YAML (a diferencia de titulo/copyright).
+  - D-129: dedicatoria en frontmatter/, agradecimientos en backmatter/ (sigue architecture.md).
+  - D-130: sección BACKMATTER nueva en sidebar debajo de CAPÍTULOS, paralela a FRONTMATTER arriba.
+  - D-131: orden libro: Título → Copyright → Dedicatoria → capítulos → Agradecimientos.
+  - D-132: ChapterEditor reutilizado directamente (sin MarkdownTextEditor genérico). ChapterEditor ya es paramétrico (initialContent + onChange), sin dependencias específicas de capítulo. Crear un wrapper genérico duplicaría 55 líneas sin ganancia.
+  - D-133: ensureFrontmatterFiles extendido (dedicatoria.md) + ensureBackmatterFiles nuevo, ambos idempotentes, crean archivos vacíos si no existen. FrontmatterItem generalizado a NonNullable<ActiveView> para reutilizar en BackmatterSection sin duplicar el componente.
+- Pendientes relacionados:
+  - TOC auto-generado (F26)
+  - Export del frontmatter/backmatter en markdown unificado (heredado F23)
+  - Backmatter genérico (bibliografía, notas)
+- Bugs encontrados: ninguno
+
+### 2026-05-24 - F24 - Editor de frontmatter estructurado (título + copyright)
+- Qué se hizo: sección FRONTMATTER en sidebar con dos ítems clickeables (Título y autor, Copyright). Click en ítem activa un formulario estructurado en el panel editor (en vez del CodeMirror). Los formularios autosaven con debounce 500ms via writeTitulo/writeCopyright a `frontmatter/titulo.md` y `frontmatter/copyright.md` (YAML con delimitadores ---). Al abrir proyecto, ensureFrontmatterFiles crea los archivos si no existen. Tab Libro usa BookFrontmatterTitle (título, subtítulo, autor centrados) en vez de BookHeader si hay datos, y muestra BookFrontmatterCopyright al pie si hay copyright definido. js-yaml para parse/serialize.
+- Archivos creados/modificados:
+  - package.json (js-yaml 4.1.1 + @types/js-yaml 4.0.9)
+  - src/types/frontmatter.ts (nuevo: FrontmatterKind, TituloData, CopyrightData, FrontmatterData)
+  - src/types/book.ts (BookFrontmatter añadido, BookData.frontmatter)
+  - src/lib/yaml-frontmatter.ts (nuevo: parseTitulo, parseCopyright, serializeTitulo, serializeCopyright, defaults)
+  - src/lib/yaml-frontmatter.test.ts (nuevo: 17 tests)
+  - src/lib/frontmatter-fs.ts (nuevo: readTitulo, readCopyright, writeTitulo, writeCopyright, ensureFrontmatterFiles)
+  - src/lib/frontmatter-fs.test.ts (nuevo: 9 tests)
+  - src/lib/book-loader.ts (lee frontmatter en parallel con chapters via Promise.all)
+  - src/lib/book-loader.test.ts (mock frontmatter-fs, 3 tests nuevos)
+  - src/lib/open-project-flow.ts (llama ensureFrontmatterFiles tras ensureGitInit)
+  - src/stores/projectStore.ts (ActiveView type, activeView field, setActiveView action, setActiveChapter establece activeView='chapter', closeProject resetea a null)
+  - src/stores/projectStore.test.ts (beforeEach con activeView, 3 tests nuevos)
+  - src/components/sidebar/FrontmatterItem.tsx (nuevo: item clickeable con estilos de active/hover)
+  - src/components/sidebar/FrontmatterSection.tsx (nuevo: sección FRONTMATTER con 2 items)
+  - src/components/panels/SidebarPanel.tsx (FrontmatterSection encima de Capítulos, divisor border-t)
+  - src/components/frontmatter/FrontmatterTituloEditor.tsx (nuevo: formulario título+subtítulo+autor, autosave 500ms)
+  - src/components/frontmatter/FrontmatterCopyrightEditor.tsx (nuevo: formulario año+titular+licencia+notas, autosave 500ms)
+  - src/components/panels/EditorPanel.tsx (refactor: extrae ChapterView, EditorPanel enruta según activeView)
+  - src/components/book/BookFrontmatterTitle.tsx (nuevo: título/subtítulo/autor centrados para tab Libro)
+  - src/components/book/BookFrontmatterCopyright.tsx (nuevo: nota de copyright al pie del libro)
+  - src/components/layout/BookTabContent.tsx (usa BookFrontmatterTitle si hay titulo, BookFrontmatterCopyright al final)
+- Decisiones tomadas:
+  - D-122: YAML con delimitadores --- en archivos .md (pandoc/jekyll/hugo standard). Sin frontmatter embedded en capítulos — archivos dedicados en frontmatter/.
+  - D-123: formulario estructurado (inputs), no editor de texto libre. Validación mínima (tipo correcto). Sin markdown en frontmatter.
+  - D-124: autosave debounce 500ms igual que editor de capítulos. Sin botón de guardar explícito.
+  - D-125: ensureFrontmatterFiles al abrir proyecto (no al crear). Crea archivos con defaults vacíos si no existen. No sobreescribe si ya existen.
+  - D-126: tab Libro muestra BookFrontmatterTitle en vez de BookHeader si titulo.titulo no está vacío. BookFrontmatterCopyright al pie si titular o licencia están definidos.
+  - D-127: activeView en projectStore (no en layoutStore) porque depende del proyecto, no del layout global.
+- Pendientes relacionados:
+  - Frontmatter en el export markdown (pendiente de F23)
+  - Backmatter editor (agradecimientos, bibliografía) — futura feature similar a esta
+  - Validación de año (rango razonable) — deuda menor
+- Bugs encontrados: tsc rechazó `yaml.load(match[1])` con `string | undefined`. Corregido con guard `match[1] === undefined` antes del load.
 
 ### 2026-05-24 - F23-fix - Bugs filtro en-progreso y orden Ambos
 - Qué se hizo: investigados los 2 bugs reportados en smoke test de F23. Verificación (2026-05-24): `cargo test export` → 8/8 ok, `vitest run export` → 16/16 ok. La lógica de export.rs ya era correcta desde el commit original (dos colectores separados, terminados primero). El problema era la cobertura de tests, no el código: el test `terminados_antes_que_en_progreso_en_ambos` usaba cap-01 en terminados y cap-02 en en-progreso — los filenames coincidían con el orden esperado, así que un sort global buggy también lo pasaría. Cerrado añadiendo tests de regresión correctos en 71fd5bb.

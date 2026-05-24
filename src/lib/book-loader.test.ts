@@ -7,9 +7,25 @@ vi.mock('./project-fs', () => ({
   readChapter: vi.fn(),
 }));
 
+vi.mock('./frontmatter-fs', () => ({
+  readTitulo: vi.fn(),
+  readCopyright: vi.fn(),
+  readDedicatoria: vi.fn(),
+}));
+
+vi.mock('./backmatter-fs', () => ({
+  readAgradecimientos: vi.fn(),
+}));
+
 import { listChapters, readChapter } from './project-fs';
+import { readTitulo, readCopyright, readDedicatoria } from './frontmatter-fs';
+import { readAgradecimientos } from './backmatter-fs';
 const mockListChapters = vi.mocked(listChapters);
 const mockReadChapter = vi.mocked(readChapter);
+const mockReadTitulo = vi.mocked(readTitulo);
+const mockReadCopyright = vi.mocked(readCopyright);
+const mockReadDedicatoria = vi.mocked(readDedicatoria);
+const mockReadAgradecimientos = vi.mocked(readAgradecimientos);
 
 const PROJECT: Project = {
   rootPath: '/tmp/mi-libro',
@@ -27,6 +43,10 @@ const makeChapter = (filename: string, status: 'in-progress' | 'finished' = 'in-
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockReadTitulo.mockResolvedValue(null);
+  mockReadCopyright.mockResolvedValue(null);
+  mockReadDedicatoria.mockResolvedValue(null);
+  mockReadAgradecimientos.mockResolvedValue(null);
 });
 
 describe('loadBook', () => {
@@ -40,6 +60,41 @@ describe('loadBook', () => {
 
     expect(result.projectName).toBe('Mi Libro');
     expect(result.sections).toHaveLength(0);
+    expect(result.frontmatter).toEqual({ titulo: null, copyright: null, dedicatoria: null });
+    expect(result.backmatter).toEqual({ agradecimientos: null });
+  });
+
+  it('incluye frontmatter cuando los archivos existen', async () => {
+    mockListChapters.mockResolvedValueOnce({ ok: true, value: [] });
+    mockReadTitulo.mockResolvedValueOnce({ titulo: 'Mi Libro', autor: 'Yo' });
+    mockReadCopyright.mockResolvedValueOnce({ ano: 2025, titular: 'Yo', licencia: 'MIT' });
+    mockReadDedicatoria.mockResolvedValueOnce({ contenido: 'Para ti.' });
+
+    const result = await loadBook(PROJECT);
+
+    expect(result.frontmatter.titulo).toEqual({ titulo: 'Mi Libro', autor: 'Yo' });
+    expect(result.frontmatter.copyright).toEqual({ ano: 2025, titular: 'Yo', licencia: 'MIT' });
+    expect(result.frontmatter.dedicatoria).toEqual({ contenido: 'Para ti.' });
+  });
+
+  it('incluye backmatter cuando el archivo existe', async () => {
+    mockListChapters.mockResolvedValueOnce({ ok: true, value: [] });
+    mockReadAgradecimientos.mockResolvedValueOnce({ contenido: 'Gracias a todos.' });
+
+    const result = await loadBook(PROJECT);
+
+    expect(result.backmatter.agradecimientos).toEqual({ contenido: 'Gracias a todos.' });
+  });
+
+  it('frontmatter y backmatter null cuando los archivos no existen', async () => {
+    mockListChapters.mockResolvedValueOnce({ ok: true, value: [] });
+
+    const result = await loadBook(PROJECT);
+
+    expect(result.frontmatter.titulo).toBeNull();
+    expect(result.frontmatter.copyright).toBeNull();
+    expect(result.frontmatter.dedicatoria).toBeNull();
+    expect(result.backmatter.agradecimientos).toBeNull();
   });
 
   it('ordena los capítulos por filename ascendente', async () => {

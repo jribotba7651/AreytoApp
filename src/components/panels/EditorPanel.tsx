@@ -3,11 +3,15 @@ import { Eye, Pencil } from 'lucide-react';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import BookMarkdown from '@/components/book/BookMarkdown';
 import ShortcutHint from '@/components/shared/ShortcutHint';
+import FrontmatterTituloEditor from '@/components/frontmatter/FrontmatterTituloEditor';
+import FrontmatterCopyrightEditor from '@/components/frontmatter/FrontmatterCopyrightEditor';
+import FrontmatterDedicatoriaEditor from '@/components/frontmatter/FrontmatterDedicatoriaEditor';
+import BackmatterAgradecimientosEditor from '@/components/backmatter/BackmatterAgradecimientosEditor';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useAutosave } from '@/hooks/useAutosave';
 
-function EditorPanel() {
+function ChapterView() {
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -46,14 +50,6 @@ function EditorPanel() {
     const timer = setTimeout(() => setSaveStatus('idle'), 2000);
     return () => clearTimeout(timer);
   }, [saveStatus, setSaveStatus]);
-
-  if (!activeChapterPath) {
-    return (
-      <div className="h-full bg-bg-editor flex items-center justify-center">
-        <p className="font-serif text-base text-text-tertiary">No hay capítulo activo</p>
-      </div>
-    );
-  }
 
   async function handleToggle() {
     await flushAutosave?.();
@@ -105,6 +101,37 @@ function EditorPanel() {
       </div>
     </div>
   );
+}
+
+function EditorPanel() {
+  const activeView = useProjectStore((s) => s.activeView);
+  const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
+
+  if (activeView === 'frontmatter-titulo') {
+    return <FrontmatterTituloEditor />;
+  }
+
+  if (activeView === 'frontmatter-copyright') {
+    return <FrontmatterCopyrightEditor />;
+  }
+
+  if (activeView === 'frontmatter-dedicatoria') {
+    return <FrontmatterDedicatoriaEditor />;
+  }
+
+  if (activeView === 'backmatter-agradecimientos') {
+    return <BackmatterAgradecimientosEditor />;
+  }
+
+  if (!activeChapterPath) {
+    return (
+      <div className="h-full bg-bg-editor flex items-center justify-center">
+        <p className="font-serif text-base text-text-tertiary">No hay capítulo activo</p>
+      </div>
+    );
+  }
+
+  return <ChapterView />;
 }
 
 export default EditorPanel;

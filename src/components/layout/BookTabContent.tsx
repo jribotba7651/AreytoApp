@@ -9,6 +9,10 @@ import BookHeader from '@/components/book/BookHeader';
 import BookChapter from '@/components/book/BookChapter';
 import BookChapterError from '@/components/book/BookChapterError';
 import BookEmptyState from '@/components/book/BookEmptyState';
+import BookFrontmatterTitle from '@/components/book/BookFrontmatterTitle';
+import BookFrontmatterCopyright from '@/components/book/BookFrontmatterCopyright';
+import BookFrontmatterDedicatoria from '@/components/book/BookFrontmatterDedicatoria';
+import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgradecimientos';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import type { BookData } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
@@ -103,10 +107,20 @@ function BookTabContent() {
     }
 
     const validCount = bookData.sections.filter((s) => s.kind === 'chapter').length;
+    const { titulo, copyright, dedicatoria } = bookData.frontmatter;
+    const { agradecimientos } = bookData.backmatter;
 
     return (
       <>
-        <BookHeader projectName={bookData.projectName} chapterCount={validCount} />
+        {titulo && titulo.titulo ? (
+          <BookFrontmatterTitle titulo={titulo} />
+        ) : (
+          <BookHeader projectName={bookData.projectName} chapterCount={validCount} />
+        )}
+        {copyright && (copyright.titular || copyright.licencia) && (
+          <BookFrontmatterCopyright copyright={copyright} />
+        )}
+        {dedicatoria && <BookFrontmatterDedicatoria dedicatoria={dedicatoria} />}
         <div className="pb-24">
           {bookData.sections.map((section, idx) => {
             const isLast = idx === bookData.sections.length - 1;
@@ -128,6 +142,7 @@ function BookTabContent() {
             );
           })}
         </div>
+        {agradecimientos && <BookBackmatterAgradecimientos agradecimientos={agradecimientos} />}
       </>
     );
   }

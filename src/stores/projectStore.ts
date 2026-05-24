@@ -3,11 +3,19 @@ import type { Chapter, ClosedChapter, Project } from '@/types/project';
 import type { Commit } from '@/types/git';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type ActiveView =
+  | 'chapter'
+  | 'frontmatter-titulo'
+  | 'frontmatter-copyright'
+  | 'frontmatter-dedicatoria'
+  | 'backmatter-agradecimientos'
+  | null;
 
 interface ProjectState {
   currentProject: Project | null;
   activeChapterPath: string | null;
   activeChapterContent: string;
+  activeView: ActiveView;
   saveStatus: SaveStatus;
   chapters: Chapter[];
   commits: Commit[];
@@ -19,6 +27,7 @@ interface ProjectState {
   setCurrentProject: (project: Project | null) => void;
   closeProject: () => void;
   setActiveChapter: (path: string, content: string) => void;
+  setActiveView: (view: ActiveView) => void;
   updateContent: (content: string) => void;
   setSaveStatus: (status: SaveStatus) => void;
   setChapters: (chapters: Chapter[]) => void;
@@ -37,6 +46,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   currentProject: null,
   activeChapterPath: null,
   activeChapterContent: '',
+  activeView: null,
   saveStatus: 'idle',
   chapters: [],
   commits: [],
@@ -53,6 +63,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       currentProject: null,
       activeChapterPath: null,
       activeChapterContent: '',
+      activeView: null,
       saveStatus: 'idle',
       chapters: [],
       commits: [],
@@ -61,7 +72,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }),
 
   setActiveChapter: (path: string, content: string) =>
-    set({ activeChapterPath: path, activeChapterContent: content, saveStatus: 'idle', commits: [] }),
+    set({ activeChapterPath: path, activeChapterContent: content, activeView: 'chapter', saveStatus: 'idle', commits: [] }),
+
+  setActiveView: (view: ActiveView) => set({ activeView: view }),
 
   updateContent: (content: string) => set({ activeChapterContent: content }),
 

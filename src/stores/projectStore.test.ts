@@ -21,6 +21,7 @@ beforeEach(() => {
     currentProject: null,
     activeChapterPath: null,
     activeChapterContent: '',
+    activeView: null,
     saveStatus: 'idle',
     chapters: [],
   });
@@ -52,11 +53,25 @@ describe('projectStore', () => {
     expect(state.chapters).toEqual([]);
   });
 
-  it('setea el capítulo activo con path y contenido', () => {
+  it('setea el capítulo activo con path y contenido y activa la vista chapter', () => {
     useProjectStore.getState().setActiveChapter('/tmp/cap-01.md', '# Capítulo 1');
     const state = useProjectStore.getState();
     expect(state.activeChapterPath).toBe('/tmp/cap-01.md');
     expect(state.activeChapterContent).toBe('# Capítulo 1');
+    expect(state.activeView).toBe('chapter');
+  });
+
+  it('setActiveView cambia la vista activa', () => {
+    useProjectStore.getState().setActiveView('frontmatter-titulo');
+    expect(useProjectStore.getState().activeView).toBe('frontmatter-titulo');
+    useProjectStore.getState().setActiveView('frontmatter-copyright');
+    expect(useProjectStore.getState().activeView).toBe('frontmatter-copyright');
+  });
+
+  it('closeProject resetea activeView a null', () => {
+    useProjectStore.getState().setActiveView('frontmatter-titulo');
+    useProjectStore.getState().closeProject();
+    expect(useProjectStore.getState().activeView).toBeNull();
   });
 
   it('actualiza solo el contenido sin tocar el path', () => {
