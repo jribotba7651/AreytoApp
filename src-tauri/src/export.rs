@@ -30,32 +30,47 @@ pub fn export_book_markdown(
     include_terminados: bool,
     include_en_progreso: bool,
     output_path: String,
+    prepend_content: Option<String>,
+    append_content: Option<String>,
 ) -> Result<(), String> {
-    let mut files: Vec<PathBuf> = Vec::new();
+    let mut all_parts: Vec<String> = Vec::new();
+
+    if let Some(pre) = prepend_content {
+        let trimmed = pre.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
 
     // terminados primero (D-116)
+    let mut chapter_files: Vec<PathBuf> = Vec::new();
     if include_terminados {
         let dir = PathBuf::from(&project_path).join("capitulos-terminados");
-        collect_md_files(&dir, &mut files)?;
+        collect_md_files(&dir, &mut chapter_files)?;
     }
-
     if include_en_progreso {
         let dir = PathBuf::from(&project_path).join("capitulos");
-        collect_md_files(&dir, &mut files)?;
+        collect_md_files(&dir, &mut chapter_files)?;
     }
 
-    if files.is_empty() {
-        return Err("No hay capítulos para exportar".to_string());
-    }
-
-    let mut parts: Vec<String> = Vec::new();
-    for file in &files {
+    for file in &chapter_files {
         let content = fs::read_to_string(file)
             .map_err(|e| format!("No se pudo leer {}: {}", file.display(), e))?;
-        parts.push(content.trim_end_matches('\n').to_string());
+        all_parts.push(content.trim_end_matches('\n').to_string());
     }
 
-    let mut output = parts.join("\n\n---\n\n");
+    if let Some(app) = append_content {
+        let trimmed = app.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
+
+    if all_parts.is_empty() {
+        return Err("No hay contenido para exportar".to_string());
+    }
+
+    let mut output = all_parts.join("\n\n---\n\n");
     output.push('\n');
 
     if let Some(parent) = PathBuf::from(&output_path).parent() {
@@ -90,6 +105,19 @@ mod tests {
         let _ = fs::remove_dir_all(dir);
     }
 
+    fn export_simple(project: &PathBuf, include_terminados: bool, include_en_progreso: bool, out: &PathBuf) -> Result<(), String> {
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            include_terminados,
+            include_en_progreso,
+            out.to_str().unwrap().to_string(),
+            None,
+            None,
+        )
+    }
+
+    // ── tests F23 originales (adaptados a la nueva firma) ─────────────────────
+
     #[test]
     fn concatena_con_separador() {
         let project = make_temp_project();
@@ -98,13 +126,7 @@ mod tests {
         fs::write(cap_dir.join("cap-02.md"), "# Capítulo 2\n\nContenido dos.").unwrap();
 
         let out = project.join("salida.md");
-        export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            false,
-            true,
-            out.to_str().unwrap().to_string(),
-        )
-        .unwrap();
+        export_simple(&project, false, true, &out).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
         assert!(content.contains("\n\n---\n\n"));
@@ -122,13 +144,7 @@ mod tests {
         fs::write(cap_dir.join("cap-02.md"), "Cap dos").unwrap();
 
         let out = project.join("salida.md");
-        export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            false,
-            true,
-            out.to_str().unwrap().to_string(),
-        )
-        .unwrap();
+        export_simple(&project, false, true, &out).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
         let pos1 = content.find("Cap uno").unwrap();
@@ -145,13 +161,7 @@ mod tests {
         fs::write(project.join("capitulos").join("cap-02.md"), "En progreso").unwrap();
 
         let out = project.join("salida.md");
-        export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            true,
-            true,
-            out.to_str().unwrap().to_string(),
-        )
-        .unwrap();
+        export_simple(&project, true, true, &out).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
         let pos_term = content.find("Terminado").unwrap();
@@ -166,13 +176,7 @@ mod tests {
         fs::write(project.join("capitulos").join("cap-01.md"), "Contenido").unwrap();
 
         let out = project.join("salida.md");
-        export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            false,
-            true,
-            out.to_str().unwrap().to_string(),
-        )
-        .unwrap();
+        export_simple(&project, false, true, &out).unwrap();
 
         let bytes = fs::read(&out).unwrap();
         assert_eq!(*bytes.last().unwrap(), b'\n');
@@ -180,22 +184,14 @@ mod tests {
     }
 
     #[test]
-    fn error_si_sin_archivos() {
+    fn error_si_sin_archivos_y_sin_prepend_append() {
         let project = make_temp_project();
         let out = project.join("salida.md");
-        let result = export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            false,
-            true,
-            out.to_str().unwrap().to_string(),
-        );
+        let result = export_simple(&project, false, true, &out);
         assert!(result.is_err());
         cleanup(&project);
     }
 
-    // Regresión: cap-01 en en-progreso, cap-02 en terminados.
-    // Un sort global por nombre pondría cap-01 (en-progreso) primero — bug.
-    // El código correcto pone terminados (cap-02) antes sin importar el nombre.
     #[test]
     fn ambos_terminados_primero_independientemente_del_nombre() {
         let project = make_temp_project();
@@ -203,13 +199,7 @@ mod tests {
         fs::write(project.join("capitulos-terminados").join("cap-02.md"), "Terminado cap 2").unwrap();
 
         let out = project.join("salida.md");
-        export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            true,
-            true,
-            out.to_str().unwrap().to_string(),
-        )
-        .unwrap();
+        export_simple(&project, true, true, &out).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
         let pos_term = content.find("Terminado cap 2").unwrap();
@@ -221,7 +211,6 @@ mod tests {
         cleanup(&project);
     }
 
-    // Regresión: scope en-progreso no debe incluir contenido de capitulos-terminados/.
     #[test]
     fn en_progreso_excluye_terminados() {
         let project = make_temp_project();
@@ -229,33 +218,127 @@ mod tests {
         fs::write(project.join("capitulos").join("cap-02.md"), "Capitulo en progreso").unwrap();
 
         let out = project.join("salida.md");
-        export_book_markdown(
-            project.to_str().unwrap().to_string(),
-            false, // no incluir terminados
-            true,  // si incluir en progreso
-            out.to_str().unwrap().to_string(),
-        )
-        .unwrap();
+        export_simple(&project, false, true, &out).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
-        assert!(content.contains("Capitulo en progreso"), "Debe incluir el capítulo en progreso");
-        assert!(!content.contains("Capitulo terminado"), "No debe incluir capítulos terminados");
+        assert!(content.contains("Capitulo en progreso"));
+        assert!(!content.contains("Capitulo terminado"));
         cleanup(&project);
     }
 
     #[test]
     fn carpeta_inexistente_tratada_como_vacia() {
         let project = make_temp_project();
-        // carpeta capitulos-terminados existe pero no tiene archivos
-        // y capitulos tampoco
+        let out = project.join("salida.md");
+        let result = export_simple(&project, true, false, &out);
+        assert!(result.is_err());
+        cleanup(&project);
+    }
+
+    // ── tests F26 nuevos ───────────────────────────────────────────────────────
+
+    #[test]
+    fn prepend_incluido_antes_de_capitulos() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "# Capítulo 1").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            Some("# Mi libro\n\n**Autor**".to_string()),
+            None,
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        let pos_portada = content.find("# Mi libro").unwrap();
+        let pos_cap = content.find("# Capítulo 1").unwrap();
+        assert!(pos_portada < pos_cap, "portada debe preceder a los capítulos");
+        assert!(content.contains("\n\n---\n\n"));
+        cleanup(&project);
+    }
+
+    #[test]
+    fn append_incluido_despues_de_capitulos() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "# Capítulo 1").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            None,
+            Some("## Agradecimientos\n\nGracias a todos.".to_string()),
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        let pos_cap = content.find("# Capítulo 1").unwrap();
+        let pos_agr = content.find("## Agradecimientos").unwrap();
+        assert!(pos_cap < pos_agr, "agradecimientos deben ir después de los capítulos");
+        assert!(content.contains("\n\n---\n\n"));
+        cleanup(&project);
+    }
+
+    #[test]
+    fn prepend_whitespace_solo_omitido() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "Contenido").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            Some("   \n  ".to_string()),
+            None,
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        // no separator before content (prepend was skipped)
+        assert!(!content.starts_with("\n\n---\n\n"));
+        assert!(content.starts_with("Contenido"));
+        cleanup(&project);
+    }
+
+    #[test]
+    fn sin_capitulos_pero_con_prepend_ok() {
+        let project = make_temp_project();
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            Some("# Solo portada".to_string()),
+            None,
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        assert!(content.contains("# Solo portada"));
+        assert_eq!(content.chars().last().unwrap(), '\n');
+        cleanup(&project);
+    }
+
+    #[test]
+    fn todo_vacio_sin_prepend_sin_capitulos_sin_append_error() {
+        let project = make_temp_project();
         let out = project.join("salida.md");
         let result = export_book_markdown(
             project.to_str().unwrap().to_string(),
-            true,
             false,
+            true,
             out.to_str().unwrap().to_string(),
+            None,
+            None,
         );
-        assert!(result.is_err()); // vacía → error esperado
+        assert!(result.is_err());
+        let msg = result.unwrap_err();
+        assert!(msg.contains("No hay contenido"), "mensaje de error esperado, got: {}", msg);
         cleanup(&project);
     }
 }

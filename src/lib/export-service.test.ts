@@ -4,15 +4,31 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
+vi.mock('@/lib/frontmatter-fs', () => ({
+  readTitulo: vi.fn().mockResolvedValue(null),
+  readCopyright: vi.fn().mockResolvedValue(null),
+  readDedicatoria: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock('@/lib/backmatter-fs', () => ({
+  readAgradecimientos: vi.fn().mockResolvedValue(null),
+}));
+
 import { invoke } from '@tauri-apps/api/core';
-import { exportBookMarkdown, countExportableFiles } from './export-service';
+import { readTitulo, readCopyright, readDedicatoria } from '@/lib/frontmatter-fs';
+import { readAgradecimientos } from '@/lib/backmatter-fs';
+import { exportBookMarkdown, countExportableFiles, buildExportAdditions } from './export-service';
 
 const mockInvoke = vi.mocked(invoke);
+const mockReadTitulo = vi.mocked(readTitulo);
+const mockReadCopyright = vi.mocked(readCopyright);
+const mockReadDedicatoria = vi.mocked(readDedicatoria);
+const mockReadAgradecimientos = vi.mocked(readAgradecimientos);
 
 beforeEach(() => vi.clearAllMocks());
 
 describe('exportBookMarkdown', () => {
-  it('scope ambos → includeTerminados=true, includeEnProgreso=true', async () => {
+  it('scope ambos → includeTerminados=true, includeEnProgreso=true, sin frontmatter/backmatter', async () => {
     mockInvoke.mockResolvedValueOnce(undefined);
     await exportBookMarkdown('/proyecto', { scope: 'ambos' }, '/out.md');
     expect(mockInvoke).toHaveBeenCalledWith('export_book_markdown', {
@@ -20,6 +36,8 @@ describe('exportBookMarkdown', () => {
       includeTerminados: true,
       includeEnProgreso: true,
       outputPath: '/out.md',
+      prependContent: null,
+      appendContent: null,
     });
   });
 
@@ -31,6 +49,8 @@ describe('exportBookMarkdown', () => {
       includeTerminados: true,
       includeEnProgreso: false,
       outputPath: '/out.md',
+      prependContent: null,
+      appendContent: null,
     });
   });
 
@@ -42,6 +62,8 @@ describe('exportBookMarkdown', () => {
       includeTerminados: false,
       includeEnProgreso: true,
       outputPath: '/out.md',
+      prependContent: null,
+      appendContent: null,
     });
   });
 
@@ -50,6 +72,70 @@ describe('exportBookMarkdown', () => {
     await expect(
       exportBookMarkdown('/proyecto', { scope: 'ambos' }, '/out.md')
     ).rejects.toThrow('write failed');
+  });
+
+  it('con frontmatter lleno pasa prependContent al command', async () => {
+    mockReadTitulo.mockResolvedValueOnce({ titulo: 'Mi libro', autor: 'Juan', subtitulo: undefined });
+    mockReadCopyright.mockResolvedValueOnce({ ano: 2024, titular: 'Juan', licencia: 'Todos los derechos reservados' });
+    mockInvoke.mockResolvedValueOnce(undefined);
+
+    await exportBookMarkdown('/proyecto', { scope: 'ambos' }, '/out.md');
+
+    const callArgs = mockInvoke.mock.calls[0]![1] as Record<string, unknown>;
+    expect(typeof callArgs.prependContent).toBe('string');
+    expect((callArgs.prependContent as string)).toContain('# Mi libro');
+    expect((callArgs.prependContent as string)).toContain('**Juan**');
+    expect(callArgs.appendContent).toBeNull();
+  });
+
+  it('con backmatter lleno pasa appendContent al command', async () => {
+    mockReadAgradecimientos.mockResolvedValueOnce({ contenido: 'Gracias a todos.' });
+    mockInvoke.mockResolvedValueOnce(undefined);
+
+    await exportBookMarkdown('/proyecto', { scope: 'ambos' }, '/out.md');
+
+    const callArgs = mockInvoke.mock.calls[0]![1] as Record<string, unknown>;
+    expect(callArgs.prependContent).toBeNull();
+    expect(callArgs.appendContent).toContain('## Agradecimientos');
+    expect(callArgs.appendContent).toContain('Gracias a todos.');
+  });
+});
+
+describe('buildExportAdditions', () => {
+  it('frontmatter y backmatter null → prependContent y appendContent null', async () => {
+    const result = await buildExportAdditions('/proyecto');
+    expect(result.prependContent).toBeNull();
+    expect(result.appendContent).toBeNull();
+  });
+
+  it('titulo presente + sin backmatter → prependContent con portada, appendContent null', async () => {
+    mockReadTitulo.mockResolvedValueOnce({ titulo: 'El libro', autor: 'Autor', subtitulo: undefined });
+    const result = await buildExportAdditions('/proyecto');
+    expect(result.prependContent).toContain('# El libro');
+    expect(result.appendContent).toBeNull();
+  });
+
+  it('sin frontmatter + agradecimientos presente → prependContent null, appendContent con header', async () => {
+    mockReadAgradecimientos.mockResolvedValueOnce({ contenido: 'Gracias.' });
+    const result = await buildExportAdditions('/proyecto');
+    expect(result.prependContent).toBeNull();
+    expect(result.appendContent).toContain('## Agradecimientos');
+  });
+
+  it('portada + dedicatoria → prependContent con ambas separadas por ---', async () => {
+    mockReadTitulo.mockResolvedValueOnce({ titulo: 'El libro', autor: 'Autor', subtitulo: undefined });
+    mockReadDedicatoria.mockResolvedValueOnce({ contenido: 'Para ti.' });
+    const result = await buildExportAdditions('/proyecto');
+    expect(result.prependContent).toContain('# El libro');
+    expect(result.prependContent).toContain('\n\n---\n\n');
+    expect(result.prependContent).toContain('## Dedicatoria');
+    expect(result.prependContent).toContain('Para ti.');
+  });
+
+  it('dedicatoria whitespace only → prependContent null aunque solo dedicatoria existe', async () => {
+    mockReadDedicatoria.mockResolvedValueOnce({ contenido: '   ' });
+    const result = await buildExportAdditions('/proyecto');
+    expect(result.prependContent).toBeNull();
   });
 });
 
@@ -106,7 +192,6 @@ describe('countExportableFiles', () => {
     expect(count).toBe(1);
   });
 
-  // Regresión: scope en-progreso no debe consultar capitulos-terminados/.
   it('scope en-progreso no llama list_dir en capitulos-terminados', async () => {
     mockInvoke.mockResolvedValueOnce([
       { name: 'cap-02.md', is_file: true, is_dir: false },

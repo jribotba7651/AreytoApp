@@ -4,7 +4,7 @@ import { save, message } from '@tauri-apps/plugin-dialog';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { loadBook } from '@/lib/book-loader';
-import { exportBookMarkdown, countExportableFiles } from '@/lib/export-service';
+import { exportBookMarkdown } from '@/lib/export-service';
 import BookHeader from '@/components/book/BookHeader';
 import BookChapter from '@/components/book/BookChapter';
 import BookChapterError from '@/components/book/BookChapterError';
@@ -42,18 +42,6 @@ function BookTabContent() {
     setExportLoading(true);
 
     try {
-      const count = await countExportableFiles(currentProject.rootPath, { scope });
-
-      if (count === 0) {
-        setShowExportDialog(false);
-        setExportLoading(false);
-        await message('No hay capítulos para exportar con la selección actual.', {
-          title: 'Sin capítulos',
-          kind: 'info',
-        });
-        return;
-      }
-
       const today = new Date().toISOString().slice(0, 10);
       const defaultPath = `${currentProject.rootPath}/${currentProject.nombre}-${today}.md`;
 

@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F25 - Editores de Dedicatoria y Agradecimientos
+- Última feature completada: F26 - Export markdown completo (frontmatter + backmatter)
 - Fecha de última actualización: 2026-05-24
 
 ## Features completadas
@@ -446,6 +446,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-121 documentada arriba en F23-fix Bugs filtro en-progreso y orden Ambos
 - D-122 a D-127 documentadas arriba en F24 Editor de frontmatter estructurado
 - D-128 a D-133 documentadas arriba en F25 Editores de Dedicatoria y Agradecimientos
+- D-134 a D-141 documentadas arriba en F26 Export markdown completo
 
 ### 2026-05-23 - F23: Export del libro completo a markdown unificado
 - Qué se hizo: botón "Exportar" (icono Download) en header del tab Libro. Click abre modal ExportBookDialog con 3 radio buttons (Ambos, Solo terminados, Solo en progreso, default Ambos). Confirmar valida que haya archivos, abre dialog nativo Save As (Tauri plugin-dialog) con default {proyecto}-YYYY-MM-DD.md en raíz del proyecto, invoca command Rust que lee, ordena lexicográfico, concatena con '\n\n---\n\n', escribe UTF-8 con newline final. Post-export muestra mensaje nativo con el path resultante. Casos vacíos y cancelaciones manejados sin error ni escritura.
@@ -504,10 +505,34 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - D-132: ChapterEditor reutilizado directamente (sin MarkdownTextEditor genérico). ChapterEditor ya es paramétrico (initialContent + onChange), sin dependencias específicas de capítulo. Crear un wrapper genérico duplicaría 55 líneas sin ganancia.
   - D-133: ensureFrontmatterFiles extendido (dedicatoria.md) + ensureBackmatterFiles nuevo, ambos idempotentes, crean archivos vacíos si no existen. FrontmatterItem generalizado a NonNullable<ActiveView> para reutilizar en BackmatterSection sin duplicar el componente.
 - Pendientes relacionados:
-  - TOC auto-generado (F26)
-  - Export del frontmatter/backmatter en markdown unificado (heredado F23)
+  - TOC auto-generado (F27 - renumerado, F26 es el export completo)
   - Backmatter genérico (bibliografía, notas)
 - Bugs encontrados: ninguno
+
+### 2026-05-24 - F26 - Export markdown completo: incluir frontmatter y backmatter
+- Qué se hizo: deuda heredada de F23. El export ahora incluye título+copyright como portada (H1+H2+bold autor+italic copyright+italic notas), dedicatoria.md con header "## Dedicatoria" inyectado, y agradecimientos.md con header "## Agradecimientos" inyectado. Orden: portada → dedicatoria → capítulos filtrados → agradecimientos. Separador \n\n---\n\n consistente con F23. Filtro del modal aplica solo a capítulos. Archivos ausentes/vacíos/whitespace-only omitidos silenciosamente. YAML inválido (manejado por yaml-frontmatter.ts existente con try/catch) produce defaults vacíos → portada omitida sin abortar.
+- Archivos creados/modificados:
+  - src/lib/export-composer.ts (nuevo: buildPortadaSection, buildDedicatoriaSection, buildAgradecimientosSection, SECTION_SEPARATOR — funciones puras sin Tauri)
+  - src/lib/export-composer.test.ts (nuevo: 21 tests unitarios puros)
+  - src/lib/export-service.ts (buildExportAdditions nueva función; exportBookMarkdown lee frontmatter/backmatter y pasa prependContent/appendContent al command Rust; countExportableFiles sin cambios)
+  - src/lib/export-service.test.ts (mocks de frontmatter-fs y backmatter-fs añadidos; 4 tests exportBookMarkdown actualizados con nuevos params; 2 tests nuevos; 5 tests buildExportAdditions nuevos; 6 tests countExportableFiles sin cambios)
+  - src-tauri/src/export.rs (export_book_markdown extendido con prepend_content: Option<String> y append_content: Option<String>; assembly lógico [prepend, chapters, append].filter(nonEmpty).join(sep); error si todo vacío; helper export_simple en tests; 5 tests nuevos F26)
+  - src/components/layout/BookTabContent.tsx (eliminado check count===0 y import de countExportableFiles — el Rust command maneja el caso "sin contenido")
+- Decisiones tomadas:
+  - D-134: Export incluye frontmatter y backmatter, no solo capítulos.
+  - D-135: Headers inyectados por el export. # {título} para portada, ## Dedicatoria, ## Agradecimientos. Independientes del contenido escrito por el usuario.
+  - D-136-bis: Copyright renderizado desde los 4 campos estructurados de CopyrightData (ano, titular, licencia, notas). Formato: _© {ano} {titular}. {licencia}._ en cursiva. Notas en línea separada también en cursiva. Línea copyright omitida si ano=null + titular='' + (licencia='' o licencia='Todos los derechos reservados').
+  - D-137: Frontmatter y backmatter siempre incluidos, ignoran el filtro del modal F23. El filtro aplica solo a capítulos.
+  - D-138: Orden final: portada → dedicatoria → capítulos filtrados → agradecimientos. Mismo separador \n\n---\n\n que F23.
+  - D-139: Archivos vacíos o ausentes se omiten silenciosamente. YAML inválido omite portada sin abortar. Copyright vacío con título válido renderiza solo # {title}. notas whitespace-only omitida.
+  - D-140-bis: Frontend (export-service.ts) prepara prependContent y appendContent como strings o null usando funciones puras de export-composer.ts. El command Rust recibe ambos como Option<String> y solo ensambla + escribe. Lógica de formato completamente en TypeScript.
+  - D-141: Portada incluye subtítulo (H2) si existe, autor (bold) si no vacío, además de titulo (H1) y copyright. Orden: H1 → H2 → autor → copyright → notas.
+- Pendientes relacionados:
+  - F27: TOC auto-generado
+  - Export a docx/pdf (tasks separadas, orden Notion 23/31)
+  - Frontmatter en el export de backmatter genérico (bibliografía)
+- Bugs encontrados: ninguno
+- Status: Done
 
 ### 2026-05-24 - F24 - Editor de frontmatter estructurado (título + copyright)
 - Qué se hizo: sección FRONTMATTER en sidebar con dos ítems clickeables (Título y autor, Copyright). Click en ítem activa un formulario estructurado en el panel editor (en vez del CodeMirror). Los formularios autosaven con debounce 500ms via writeTitulo/writeCopyright a `frontmatter/titulo.md` y `frontmatter/copyright.md` (YAML con delimitadores ---). Al abrir proyecto, ensureFrontmatterFiles crea los archivos si no existen. Tab Libro usa BookFrontmatterTitle (título, subtítulo, autor centrados) en vez de BookHeader si hay datos, y muestra BookFrontmatterCopyright al pie si hay copyright definido. js-yaml para parse/serialize.
