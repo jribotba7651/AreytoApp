@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { loadBook } from '@/lib/book-loader';
-import { exportBookMarkdown } from '@/lib/export-service';
+import { exportBookMarkdown, exportBookDocx } from '@/lib/export-service';
 import { slugify } from '@/lib/export-composer';
 import BookHeader from '@/components/book/BookHeader';
 import BookChapter from '@/components/book/BookChapter';
@@ -16,6 +16,7 @@ import BookFrontmatterDedicatoria from '@/components/book/BookFrontmatterDedicat
 import BookIndice from '@/components/book/BookIndice';
 import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgradecimientos';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
+import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import type { BookData } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
 
@@ -26,6 +27,8 @@ function BookTabContent() {
   const [loading, setLoading] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [showDocxDialog, setShowDocxDialog] = useState(false);
+  const [docxLoading, setDocxLoading] = useState(false);
 
   useEffect(() => {
     if (activeTab !== 'libro' || !currentProject) {
@@ -68,6 +71,42 @@ function BookTabContent() {
       });
     } catch (err) {
       setExportLoading(false);
+      await message(`Error al exportar: ${String(err)}`, {
+        title: 'Error de exportación',
+        kind: 'error',
+      });
+    }
+  }
+
+  async function handleExportDocx(scope: ExportScope) {
+    if (!currentProject) return;
+    setDocxLoading(true);
+
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const defaultPath = `${currentProject.rootPath}/${currentProject.nombre}-${today}.docx`;
+
+      const outputPath = await save({
+        defaultPath,
+        filters: [{ name: 'Word', extensions: ['docx'] }],
+      });
+
+      if (!outputPath) {
+        setDocxLoading(false);
+        return;
+      }
+
+      await exportBookDocx(currentProject.rootPath, { scope }, outputPath);
+
+      setShowDocxDialog(false);
+      setDocxLoading(false);
+
+      await message(`Libro exportado en:\n${outputPath}`, {
+        title: 'Exportación completada',
+        kind: 'info',
+      });
+    } catch (err) {
+      setDocxLoading(false);
       await message(`Error al exportar: ${String(err)}`, {
         title: 'Error de exportación',
         kind: 'error',
@@ -149,7 +188,16 @@ function BookTabContent() {
 
   return (
     <div className="h-full flex flex-col bg-bg-primary">
-      <div className="flex items-center justify-end px-4 py-2 border-b border-border-subtle shrink-0">
+      <div className="flex items-center justify-end gap-2 px-4 py-2 border-b border-border-subtle shrink-0">
+        <button
+          onClick={() => setShowDocxDialog(true)}
+          disabled={docxLoading}
+          className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
+          title="Exportar libro a Word (.docx)"
+        >
+          <FileText size={14} />
+          <span>Exportar a Word</span>
+        </button>
         <button
           onClick={() => setShowExportDialog(true)}
           disabled={exportLoading}
@@ -170,6 +218,13 @@ function BookTabContent() {
           onClose={() => { if (!exportLoading) setShowExportDialog(false); }}
           onExport={handleExport}
           loading={exportLoading}
+        />
+      )}
+      {showDocxDialog && (
+        <ExportBookDocxDialog
+          onClose={() => { if (!docxLoading) setShowDocxDialog(false); }}
+          onExport={handleExportDocx}
+          loading={docxLoading}
         />
       )}
     </div>

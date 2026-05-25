@@ -122,6 +122,29 @@ export async function exportBookMarkdown(
   });
 }
 
+export async function exportBookDocx(
+  projectPath: string,
+  opts: ExportOptions,
+  outputPath: string
+): Promise<void> {
+  const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
+  const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
+  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs } =
+    await buildExportAdditions(projectPath, opts);
+
+  await invoke('export_book_docx', {
+    projectPath,
+    includeTerminados,
+    includeEnProgreso,
+    outputPath,
+    pandocFrontmatterBlock,
+    prependContent,
+    appendContent,
+    indiceContent,
+    chapterSlugs,
+  });
+}
+
 async function countMdInDir(dirPath: string): Promise<number> {
   try {
     const entries = await invoke<RawDirEntry[]>('list_dir', { path: dirPath });

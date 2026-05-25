@@ -2,6 +2,85 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
+// D-169: única fuente de verdad para el orden de secciones del export.
+fn build_full_markdown(
+    project_path: &str,
+    include_terminados: bool,
+    include_en_progreso: bool,
+    pandoc_frontmatter: Option<String>,
+    prepend_content: Option<String>,
+    append_content: Option<String>,
+    indice_content: Option<String>,
+    chapter_slugs: Option<HashMap<String, String>>,
+) -> Result<String, String> {
+    let mut all_parts: Vec<String> = Vec::new();
+
+    // D-157: pandoc frontmatter block va PRIMERO, antes de la portada visible
+    if let Some(fm) = pandoc_frontmatter {
+        let trimmed = fm.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
+
+    if let Some(pre) = prepend_content {
+        let trimmed = pre.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
+
+    if let Some(indice) = indice_content {
+        let trimmed = indice.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
+
+    // terminados primero (D-116)
+    let mut chapter_files: Vec<PathBuf> = Vec::new();
+    if include_terminados {
+        let dir = PathBuf::from(project_path).join("capitulos-terminados");
+        collect_md_files(&dir, &mut chapter_files)?;
+    }
+    if include_en_progreso {
+        let dir = PathBuf::from(project_path).join("capitulos");
+        collect_md_files(&dir, &mut chapter_files)?;
+    }
+
+    let slugs = chapter_slugs.unwrap_or_default();
+
+    for file in &chapter_files {
+        let content = fs::read_to_string(file)
+            .map_err(|e| format!("No se pudo leer {}: {}", file.display(), e))?;
+        let trimmed = content.trim_end_matches('\n').to_string();
+
+        let filename = file.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        let part = if let Some(slug) = slugs.get(filename) {
+            format!("<a id=\"{}\"></a>\n\n{}", slug, trimmed)
+        } else {
+            trimmed
+        };
+
+        all_parts.push(part);
+    }
+
+    if let Some(app) = append_content {
+        let trimmed = app.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
+
+    if all_parts.is_empty() {
+        return Err("No hay contenido para exportar".to_string());
+    }
+
+    let mut output = all_parts.join("\n\n---\n\n");
+    output.push('\n');
+    Ok(output)
+}
+
 fn collect_md_files(dir: &PathBuf, files: &mut Vec<PathBuf>) -> Result<(), String> {
     if !dir.exists() {
         return Ok(());
@@ -37,71 +116,16 @@ pub fn export_book_markdown(
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
-    let mut all_parts: Vec<String> = Vec::new();
-
-    // D-157: pandoc frontmatter block va PRIMERO, antes de la portada visible
-    if let Some(fm) = pandoc_frontmatter {
-        let trimmed = fm.trim_end_matches('\n').to_string();
-        if !trimmed.trim().is_empty() {
-            all_parts.push(trimmed);
-        }
-    }
-
-    if let Some(pre) = prepend_content {
-        let trimmed = pre.trim_end_matches('\n').to_string();
-        if !trimmed.trim().is_empty() {
-            all_parts.push(trimmed);
-        }
-    }
-
-    if let Some(indice) = indice_content {
-        let trimmed = indice.trim_end_matches('\n').to_string();
-        if !trimmed.trim().is_empty() {
-            all_parts.push(trimmed);
-        }
-    }
-
-    // terminados primero (D-116)
-    let mut chapter_files: Vec<PathBuf> = Vec::new();
-    if include_terminados {
-        let dir = PathBuf::from(&project_path).join("capitulos-terminados");
-        collect_md_files(&dir, &mut chapter_files)?;
-    }
-    if include_en_progreso {
-        let dir = PathBuf::from(&project_path).join("capitulos");
-        collect_md_files(&dir, &mut chapter_files)?;
-    }
-
-    let slugs = chapter_slugs.unwrap_or_default();
-
-    for file in &chapter_files {
-        let content = fs::read_to_string(file)
-            .map_err(|e| format!("No se pudo leer {}: {}", file.display(), e))?;
-        let trimmed = content.trim_end_matches('\n').to_string();
-
-        let filename = file.file_name().and_then(|n| n.to_str()).unwrap_or("");
-        let part = if let Some(slug) = slugs.get(filename) {
-            format!("<a id=\"{}\"></a>\n\n{}", slug, trimmed)
-        } else {
-            trimmed
-        };
-
-        all_parts.push(part);
-    }
-
-    if let Some(app) = append_content {
-        let trimmed = app.trim_end_matches('\n').to_string();
-        if !trimmed.trim().is_empty() {
-            all_parts.push(trimmed);
-        }
-    }
-
-    if all_parts.is_empty() {
-        return Err("No hay contenido para exportar".to_string());
-    }
-
-    let mut output = all_parts.join("\n\n---\n\n");
-    output.push('\n');
+    let output = build_full_markdown(
+        &project_path,
+        include_terminados,
+        include_en_progreso,
+        pandoc_frontmatter,
+        prepend_content,
+        append_content,
+        indice_content,
+        chapter_slugs,
+    )?;
 
     if let Some(parent) = PathBuf::from(&output_path).parent() {
         if !parent.as_os_str().is_empty() {
@@ -112,6 +136,69 @@ pub fn export_book_markdown(
 
     fs::write(&output_path, output.as_bytes())
         .map_err(|e| format!("No se pudo escribir el archivo: {}", e))
+}
+
+#[tauri::command]
+pub async fn export_book_docx(
+    app: tauri::AppHandle,
+    project_path: String,
+    include_terminados: bool,
+    include_en_progreso: bool,
+    output_path: String,
+    pandoc_frontmatter: Option<String>,
+    prepend_content: Option<String>,
+    append_content: Option<String>,
+    indice_content: Option<String>,
+    chapter_slugs: Option<HashMap<String, String>>,
+) -> Result<(), String> {
+    use tauri_plugin_shell::ShellExt;
+
+    let md_content = build_full_markdown(
+        &project_path,
+        include_terminados,
+        include_en_progreso,
+        pandoc_frontmatter,
+        prepend_content,
+        append_content,
+        indice_content,
+        chapter_slugs,
+    )?;
+
+    // D-170: escribir markdown a temp file para mejor diagnóstico de pandoc
+    let temp_path = std::env::temp_dir()
+        .join(format!("areyto-export-{}.md", std::process::id()));
+    fs::write(&temp_path, md_content.as_bytes())
+        .map_err(|e| format!("No se pudo escribir archivo temporal: {}", e))?;
+
+    if let Some(parent) = PathBuf::from(&output_path).parent() {
+        if !parent.as_os_str().is_empty() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("No se pudo crear el directorio de salida: {}", e))?;
+        }
+    }
+
+    let result = app
+        .shell()
+        .sidecar("pandoc")
+        .map_err(|e| format!("No se pudo encontrar pandoc: {}", e))?
+        .args([
+            "-f", "markdown",
+            "-t", "docx",
+            "-o", &output_path,
+            temp_path.to_str().unwrap_or(""),
+        ])
+        .output()
+        .await
+        .map_err(|e| format!("Error al ejecutar pandoc: {}", e))?;
+
+    let _ = fs::remove_file(&temp_path);
+
+    if !result.status.success() {
+        let stderr = String::from_utf8_lossy(&result.stderr).to_string();
+        return Err(format!("pandoc falló: {}", stderr));
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -505,5 +592,49 @@ mod tests {
         assert!(pos_fm < pos_portada, "bloque pandoc debe preceder a la portada visible");
         assert!(pos_portada < pos_cap, "portada visible debe preceder a los capítulos");
         cleanup(&project);
+    }
+
+    // ── tests F30 nuevos ───────────────────────────────────────────────────────
+
+    // export_book_docx evalúa build_full_markdown antes de tocar el AppHandle/sidecar,
+    // así que la ruta de error se puede probar sin runtime Tauri.
+    #[test]
+    fn test_export_docx_falla_si_no_hay_contenido() {
+        let project = make_temp_project();
+        // proyecto vacío: sin capítulos, sin prepend, sin append, sin índice
+        let result = build_full_markdown(
+            project.to_str().unwrap(),
+            false,
+            true,
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert!(result.is_err(), "debe fallar cuando no hay contenido exportable");
+        assert!(
+            result.unwrap_err().contains("No hay contenido"),
+            "mensaje de error debe mencionar falta de contenido"
+        );
+        cleanup(&project);
+    }
+
+    // Verificaría que export_book_docx produce un .docx con magic bytes "PK" (ZIP).
+    // Requiere tauri::AppHandle real + sidecar pandoc presente: no ejecutable en cargo test normal.
+    #[test]
+    #[ignore = "requiere runtime Tauri completo con sidecar pandoc; ejecutar manualmente con integración"]
+    fn test_export_docx_basico() {
+        // Con AppHandle disponible:
+        //   let project = make_temp_project();
+        //   fs::write(project.join("capitulos").join("cap-01.md"), "# Capítulo 1\n\nContenido.").unwrap();
+        //   let out = project.join("salida.docx");
+        //   export_book_docx(app_handle, project.to_str().unwrap().to_string(),
+        //       false, true, out.to_str().unwrap().to_string(),
+        //       None, None, None, None, None).await.unwrap();
+        //   let bytes = fs::read(&out).unwrap();
+        //   assert!(bytes.starts_with(b"PK"), ".docx debe tener magic bytes ZIP");
+        //   assert!(!bytes.is_empty());
+        //   cleanup(&project);
     }
 }
