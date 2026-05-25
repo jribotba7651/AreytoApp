@@ -1,11 +1,12 @@
 import type { CopyrightData } from '@/types/frontmatter';
+import { hasRealCopyright } from '@/lib/export-composer';
 
 interface Props {
   copyright: CopyrightData;
 }
 
 function BookFrontmatterCopyright({ copyright }: Props) {
-  if (!copyright.titular && !copyright.licencia) return null;
+  if (!hasRealCopyright(copyright)) return null;
 
   const yearLine = copyright.ano ? `© ${copyright.ano}` : '©';
   const creditLine = copyright.titular ? `${yearLine} ${copyright.titular}` : yearLine;

@@ -3,6 +3,7 @@ import {
   buildPortadaSection,
   buildDedicatoriaSection,
   buildAgradecimientosSection,
+  hasRealCopyright,
   SECTION_SEPARATOR,
 } from './export-composer';
 import type { TituloData, CopyrightData } from '@/types/frontmatter';
@@ -161,6 +162,40 @@ describe('buildAgradecimientosSection', () => {
 
   it('whitespace only → null', () => {
     expect(buildAgradecimientosSection('\n\n   \n')).toBeNull();
+  });
+});
+
+describe('hasRealCopyright', () => {
+  it('null → false', () => {
+    expect(hasRealCopyright(null)).toBe(false);
+  });
+
+  it('todos los campos vacíos o default → false', () => {
+    expect(hasRealCopyright({ ano: null, titular: '', licencia: '', notas: undefined })).toBe(false);
+  });
+
+  it('licencia default sin ano ni titular → false (copyright fantasma)', () => {
+    expect(hasRealCopyright({ ano: null, titular: '', licencia: 'Todos los derechos reservados' })).toBe(false);
+  });
+
+  it('solo ano lleno → true', () => {
+    expect(hasRealCopyright({ ano: 2024, titular: '', licencia: '' })).toBe(true);
+  });
+
+  it('solo titular lleno → true', () => {
+    expect(hasRealCopyright({ ano: null, titular: 'Juan García', licencia: '' })).toBe(true);
+  });
+
+  it('licencia custom (no default) → true', () => {
+    expect(hasRealCopyright({ ano: null, titular: '', licencia: 'Creative Commons BY-SA 4.0' })).toBe(true);
+  });
+
+  it('ano + titular + licencia default → true (ano y titular son suficientes)', () => {
+    expect(hasRealCopyright({ ano: 2024, titular: 'Juan', licencia: 'Todos los derechos reservados' })).toBe(true);
+  });
+
+  it('solo notas presente, resto vacío/default → false (D-143: notas no cuentan como copyright real)', () => {
+    expect(hasRealCopyright({ ano: null, titular: '', licencia: 'Todos los derechos reservados', notas: 'Primera edición' })).toBe(false);
   });
 });
 

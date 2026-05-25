@@ -2,7 +2,9 @@ import type { TituloData, CopyrightData } from '@/types/frontmatter';
 
 export const SECTION_SEPARATOR = '\n\n---\n\n';
 
-function hasCopyrightContent(copyright: CopyrightData): boolean {
+// D-141, D-143: notas son metadato auxiliar, no cuentan como afirmación de copyright.
+export function hasRealCopyright(copyright: CopyrightData | null): boolean {
+  if (!copyright) return false;
   return (
     copyright.ano !== null ||
     copyright.titular !== '' ||
@@ -11,7 +13,7 @@ function hasCopyrightContent(copyright: CopyrightData): boolean {
 }
 
 function buildCopyrightLine(copyright: CopyrightData): string | null {
-  if (!hasCopyrightContent(copyright)) return null;
+  if (!hasRealCopyright(copyright)) return null;
 
   const parts: string[] = [];
 

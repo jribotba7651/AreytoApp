@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F26 - Export markdown completo (frontmatter + backmatter)
-- Fecha de última actualización: 2026-05-24
+- Última feature completada: F27 - Copyright fantasma en tab Libro
+- Fecha de última actualización: 2026-05-25
 
 ## Features completadas
 
@@ -447,6 +447,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-122 a D-127 documentadas arriba en F24 Editor de frontmatter estructurado
 - D-128 a D-133 documentadas arriba en F25 Editores de Dedicatoria y Agradecimientos
 - D-134 a D-141 documentadas arriba en F26 Export markdown completo
+- D-142 a D-144 documentadas arriba en F27 Copyright fantasma en tab Libro
 
 ### 2026-05-23 - F23: Export del libro completo a markdown unificado
 - Qué se hizo: botón "Exportar" (icono Download) en header del tab Libro. Click abre modal ExportBookDialog con 3 radio buttons (Ambos, Solo terminados, Solo en progreso, default Ambos). Confirmar valida que haya archivos, abre dialog nativo Save As (Tauri plugin-dialog) con default {proyecto}-YYYY-MM-DD.md en raíz del proyecto, invoca command Rust que lee, ordena lexicográfico, concatena con '\n\n---\n\n', escribe UTF-8 con newline final. Post-export muestra mensaje nativo con el path resultante. Casos vacíos y cancelaciones manejados sin error ni escritura.
@@ -505,9 +506,24 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - D-132: ChapterEditor reutilizado directamente (sin MarkdownTextEditor genérico). ChapterEditor ya es paramétrico (initialContent + onChange), sin dependencias específicas de capítulo. Crear un wrapper genérico duplicaría 55 líneas sin ganancia.
   - D-133: ensureFrontmatterFiles extendido (dedicatoria.md) + ensureBackmatterFiles nuevo, ambos idempotentes, crean archivos vacíos si no existen. FrontmatterItem generalizado a NonNullable<ActiveView> para reutilizar en BackmatterSection sin duplicar el componente.
 - Pendientes relacionados:
-  - TOC auto-generado (F27 - renumerado, F26 es el export completo)
+  - TOC auto-generado (F28)
   - Backmatter genérico (bibliografía, notas)
 - Bugs encontrados: ninguno
+
+### 2026-05-25 - F27 - Copyright fantasma en tab Libro: consistencia con D-141
+- Qué se hizo: el tab Libro dejaba ver la sección de copyright cuando el único valor era la licencia default ("Todos los derechos reservados") sin año ni titular reales, inconsistente con la lógica que el export implementó en F26 (D-141). Extraída la regla a función pura exportada hasRealCopyright() en export-composer.ts. BookFrontmatterCopyright ahora usa el helper como guard. Una sola fuente de verdad para la regla en export y renderizado visual.
+- Archivos creados/modificados:
+  - src/lib/export-composer.ts (hasCopyrightContent renombrada a hasRealCopyright y exportada; signature extendida a CopyrightData | null; buildCopyrightLine actualizada para usarla)
+  - src/lib/export-composer.test.ts (import de hasRealCopyright añadido; 8 tests nuevos del helper cubren todos los casos incluido D-143)
+  - src/components/book/BookFrontmatterCopyright.tsx (guard reemplazado por hasRealCopyright; import añadido)
+  - src/components/book/BookFrontmatterCopyright.test.tsx (nuevo: 2 tests del componente — fantasma → null, real → renderiza)
+- Decisiones tomadas:
+  - D-142: hasRealCopyright extraída a export-composer.ts como función pura exportada. Reutilizada por buildPortadaSection (export) y BookFrontmatterCopyright (tab Libro). Una sola fuente de verdad para la regla del copyright fantasma.
+  - D-143: Las notas no cuentan como copyright real. Son metadato auxiliar, no afirmación de copyright. Si ano=null + titular='' + licencia es default, notas no fuerzan el render. Test refleja false en este caso.
+  - D-144: FrontmatterCopyrightEditor (UI de edición) NO aplica el helper. Siempre muestra todos los campos para que el usuario pueda llenarlos. El guard aplica solo a UI de presentación (tab Libro) y export.
+- Pendientes relacionados: ninguno
+- Bugs encontrados: ninguno
+- Status: Done
 
 ### 2026-05-24 - F26 - Export markdown completo: incluir frontmatter y backmatter
 - Qué se hizo: deuda heredada de F23. El export ahora incluye título+copyright como portada (H1+H2+bold autor+italic copyright+italic notas), dedicatoria.md con header "## Dedicatoria" inyectado, y agradecimientos.md con header "## Agradecimientos" inyectado. Orden: portada → dedicatoria → capítulos filtrados → agradecimientos. Separador \n\n---\n\n consistente con F23. Filtro del modal aplica solo a capítulos. Archivos ausentes/vacíos/whitespace-only omitidos silenciosamente. YAML inválido (manejado por yaml-frontmatter.ts existente con try/catch) produce defaults vacíos → portada omitida sin abortar.
