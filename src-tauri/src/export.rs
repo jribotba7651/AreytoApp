@@ -31,12 +31,21 @@ pub fn export_book_markdown(
     include_terminados: bool,
     include_en_progreso: bool,
     output_path: String,
+    pandoc_frontmatter: Option<String>,
     prepend_content: Option<String>,
     append_content: Option<String>,
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
     let mut all_parts: Vec<String> = Vec::new();
+
+    // D-157: pandoc frontmatter block va PRIMERO, antes de la portada visible
+    if let Some(fm) = pandoc_frontmatter {
+        let trimmed = fm.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
 
     if let Some(pre) = prepend_content {
         let trimmed = pre.trim_end_matches('\n').to_string();
@@ -132,6 +141,7 @@ mod tests {
             include_terminados,
             include_en_progreso,
             out.to_str().unwrap().to_string(),
+            None,
             None,
             None,
             None,
@@ -271,6 +281,7 @@ mod tests {
             false,
             true,
             out.to_str().unwrap().to_string(),
+            None,
             Some("# Mi libro\n\n**Autor**".to_string()),
             None,
             None,
@@ -297,6 +308,7 @@ mod tests {
             true,
             out.to_str().unwrap().to_string(),
             None,
+            None,
             Some("## Agradecimientos\n\nGracias a todos.".to_string()),
             None,
             None,
@@ -321,6 +333,7 @@ mod tests {
             false,
             true,
             out.to_str().unwrap().to_string(),
+            None,
             Some("   \n  ".to_string()),
             None,
             None,
@@ -342,6 +355,7 @@ mod tests {
             false,
             true,
             out.to_str().unwrap().to_string(),
+            None,
             Some("# Solo portada".to_string()),
             None,
             None,
@@ -367,6 +381,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         );
         assert!(result.is_err());
         let msg = result.unwrap_err();
@@ -387,6 +402,7 @@ mod tests {
             false,
             true,
             out.to_str().unwrap().to_string(),
+            None,
             Some("# Mi libro".to_string()),
             None,
             Some("## Índice\n\n- [Capítulo 1](#cap-01)".to_string()),
@@ -422,6 +438,7 @@ mod tests {
             None,
             None,
             None,
+            None,
             Some(slugs),
         ).unwrap();
 
@@ -451,12 +468,42 @@ mod tests {
             None,
             None,
             None,
+            None,
             Some(slugs),
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
         assert!(content.contains("<a id=\"cap-02\"></a>"), "cap-02 debe tener anchor");
         assert!(!content.contains("<a id=\"cap-01\"></a>"), "cap-01 sin slug no debe tener anchor");
+        cleanup(&project);
+    }
+
+    // ── tests F29 nuevos ───────────────────────────────────────────────────────
+
+    #[test]
+    fn pandoc_frontmatter_va_antes_que_prepend_y_capitulos() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "# Capítulo 1").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            Some("---\ntitle: Mi libro\nlang: es\n---".to_string()),
+            Some("# Mi libro\n\n**Autor**".to_string()),
+            None,
+            None,
+            None,
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        let pos_fm = content.find("---\ntitle:").unwrap();
+        let pos_portada = content.find("# Mi libro\n\n**Autor**").unwrap();
+        let pos_cap = content.find("# Capítulo 1").unwrap();
+        assert!(pos_fm < pos_portada, "bloque pandoc debe preceder a la portada visible");
+        assert!(pos_portada < pos_cap, "portada visible debe preceder a los capítulos");
         cleanup(&project);
     }
 }

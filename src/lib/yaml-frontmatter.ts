@@ -1,5 +1,5 @@
 import * as yaml from 'js-yaml';
-import type { TituloData, CopyrightData, FrontmatterKind } from '@/types/frontmatter';
+import type { TituloData, CopyrightData, MetadataData, FrontmatterKind } from '@/types/frontmatter';
 
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 
@@ -62,7 +62,42 @@ export function defaultCopyright(): CopyrightData {
   return { ano: null, titular: '', licencia: 'Todos los derechos reservados' };
 }
 
+export function parseMetadata(raw: string): MetadataData {
+  let body: Record<string, unknown> = {};
+  try {
+    const parsed = yaml.load(raw);
+    if (parsed && typeof parsed === 'object') {
+      body = parsed as Record<string, unknown>;
+    }
+  } catch {
+    // return defaults on parse error
+  }
+  return {
+    idioma: typeof body.idioma === 'string' ? body.idioma : 'en',
+    descripcion: typeof body.descripcion === 'string' ? body.descripcion : '',
+    editorial: typeof body.editorial === 'string' ? body.editorial : '',
+    isbn: typeof body.isbn === 'string' ? body.isbn : '',
+    genero: typeof body.genero === 'string' ? body.genero : '',
+    fechaPublicacion: typeof body.fechaPublicacion === 'string' ? body.fechaPublicacion : '',
+  };
+}
+
+export function serializeMetadata(data: MetadataData): string {
+  const obj: Record<string, unknown> = { idioma: data.idioma };
+  if (data.descripcion) obj.descripcion = data.descripcion;
+  if (data.editorial) obj.editorial = data.editorial;
+  if (data.isbn) obj.isbn = data.isbn;
+  if (data.genero) obj.genero = data.genero;
+  if (data.fechaPublicacion) obj.fechaPublicacion = data.fechaPublicacion;
+  return yaml.dump(obj, { lineWidth: -1 }).trimEnd();
+}
+
+export function defaultMetadata(): MetadataData {
+  return { idioma: 'en', descripcion: '', editorial: '', isbn: '', genero: '', fechaPublicacion: '' };
+}
+
 export function defaultContent(kind: FrontmatterKind): string {
   if (kind === 'titulo') return serializeTitulo(defaultTitulo());
+  if (kind === 'metadata') return serializeMetadata(defaultMetadata());
   return serializeCopyright(defaultCopyright());
 }

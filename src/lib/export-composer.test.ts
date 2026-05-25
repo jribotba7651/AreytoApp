@@ -8,8 +8,9 @@ import {
   extractChapterTitle,
   slugify,
   buildIndiceSection,
+  buildPandocFrontmatterBlock,
 } from './export-composer';
-import type { TituloData, CopyrightData } from '@/types/frontmatter';
+import type { TituloData, CopyrightData, MetadataData } from '@/types/frontmatter';
 
 const fullTitulo: TituloData = {
   titulo: 'Mi libro',
@@ -296,5 +297,105 @@ describe('buildIndiceSection', () => {
   it('header siempre es ## Índice', () => {
     const result = buildIndiceSection([{ title: 'X', slug: 'x' }]);
     expect(result!.startsWith('## Índice\n\n')).toBe(true);
+  });
+});
+
+const emptyMetadata: MetadataData = {
+  idioma: 'en',
+  descripcion: '',
+  editorial: '',
+  isbn: '',
+  genero: '',
+  fechaPublicacion: '',
+};
+
+const fullMetadata: MetadataData = {
+  idioma: 'es',
+  descripcion: 'Una sinopsis',
+  editorial: 'Editorial X',
+  isbn: '978-0-000-00000-0',
+  genero: 'Novela',
+  fechaPublicacion: '2025',
+};
+
+describe('buildPandocFrontmatterBlock', () => {
+  it('todos null → null', () => {
+    expect(buildPandocFrontmatterBlock(null, null, null)).toBeNull();
+  });
+
+  it('solo metadata con idioma default y resto vacío → null (D-159)', () => {
+    expect(buildPandocFrontmatterBlock(null, null, emptyMetadata)).toBeNull();
+  });
+
+  it('titulo con título lleno → bloque mínimo con title + lang default', () => {
+    const titulo: TituloData = { titulo: 'Mi novela', autor: '' };
+    const result = buildPandocFrontmatterBlock(titulo, null, null);
+    expect(result).not.toBeNull();
+    expect(result).toMatch(/^---\n/);
+    expect(result).toMatch(/\n---$/);
+    expect(result).toContain('title:');
+    expect(result).toContain('Mi novela');
+    expect(result).toContain('lang: en');
+  });
+
+  it('todos los campos llenos → bloque completo con nombres pandoc estándar', () => {
+    const result = buildPandocFrontmatterBlock(fullTitulo, fullCopyright, fullMetadata);
+    expect(result).not.toBeNull();
+    expect(result).toContain('title:');
+    expect(result).toContain('subtitle:');
+    expect(result).toContain('author:');
+    expect(result).toContain('lang: es');
+    expect(result).toContain('publisher:');
+    expect(result).toContain('identifier:');
+    expect(result).toContain('description:');
+    expect(result).toContain('subject:');
+    expect(result).toContain('rights:');
+    expect(result).toContain('date:');
+    // nombres en español NO deben aparecer en el bloque pandoc
+    expect(result).not.toContain('titulo:');
+    expect(result).not.toContain('editorial:');
+    expect(result).not.toContain('isbn:');
+    expect(result).not.toContain('genero:');
+  });
+
+  it('solo metadata sin titulo ni copyright → bloque con lang + campos de metadata', () => {
+    const result = buildPandocFrontmatterBlock(null, null, fullMetadata);
+    expect(result).not.toBeNull();
+    expect(result).toContain('lang: es');
+    expect(result).toContain('publisher:');
+    expect(result).toContain('description:');
+    expect(result).toContain('subject:');
+    expect(result).not.toContain('title:');
+    expect(result).not.toContain('rights:');
+  });
+
+  it('idioma no-default (es) sin otros campos → bloque con solo lang', () => {
+    const result = buildPandocFrontmatterBlock(null, null, { ...emptyMetadata, idioma: 'es' });
+    expect(result).not.toBeNull();
+    expect(result).toContain('lang: es');
+  });
+
+  it('fechaPublicacion tiene prioridad sobre copyright.ano para date', () => {
+    const titulo: TituloData = { titulo: 'El libro', autor: '' };
+    const copyright: CopyrightData = { ano: 2020, titular: 'Autor', licencia: 'MIT' };
+    const meta: MetadataData = { ...emptyMetadata, fechaPublicacion: '2025' };
+    const result = buildPandocFrontmatterBlock(titulo, copyright, meta);
+    expect(result).not.toBeNull();
+    // date debe ser '2025' (fechaPublicacion), no '2020' (copyright.ano)
+    expect(result).toMatch(/date: '?2025'?/);
+    expect(result).not.toMatch(/^date: '?2020'?/m);
+    // 2020 puede aparecer en rights (correcto)
+    expect(result).toContain('rights:');
+  });
+
+  it('descripcion multilínea → YAML válido con descripcion presente', () => {
+    const titulo: TituloData = { titulo: 'El libro', autor: '' };
+    const meta: MetadataData = { ...emptyMetadata, descripcion: 'Primera línea\nSegunda línea' };
+    const result = buildPandocFrontmatterBlock(titulo, null, meta);
+    expect(result).not.toBeNull();
+    expect(result).toContain('description:');
+    // el bloque completo debe ser parseable como YAML pandoc (starts and ends with ---)
+    expect(result).toMatch(/^---\n/);
+    expect(result).toMatch(/\n---$/);
   });
 });

@@ -1,11 +1,12 @@
 import { invoke } from '@tauri-apps/api/core';
-import { readTitulo, readCopyright, readDedicatoria } from '@/lib/frontmatter-fs';
+import { readTitulo, readCopyright, readDedicatoria, readMetadata } from '@/lib/frontmatter-fs';
 import { readAgradecimientos } from '@/lib/backmatter-fs';
 import {
   buildPortadaSection,
   buildDedicatoriaSection,
   buildAgradecimientosSection,
   buildIndiceSection,
+  buildPandocFrontmatterBlock,
   extractChapterTitle,
   slugify,
   SECTION_SEPARATOR,
@@ -19,6 +20,7 @@ export interface ExportOptions {
 }
 
 export interface ExportAdditions {
+  pandocFrontmatterBlock: string | null;
   prependContent: string | null;
   appendContent: string | null;
   indiceContent: string | null;
@@ -55,11 +57,12 @@ export async function buildExportAdditions(
   projectPath: string,
   opts: ExportOptions
 ): Promise<ExportAdditions> {
-  const [titulo, copyright, dedicatoria, agradecimientos] = await Promise.all([
+  const [titulo, copyright, dedicatoria, agradecimientos, metadata] = await Promise.all([
     readTitulo(projectPath),
     readCopyright(projectPath),
     readDedicatoria(projectPath),
     readAgradecimientos(projectPath),
+    readMetadata(projectPath),
   ]);
 
   const chapterDirs: string[] = [];
@@ -88,11 +91,12 @@ export async function buildExportAdditions(
   const dedicatoriaSection = buildDedicatoriaSection(dedicatoria?.contenido);
   const agradecimientosSection = buildAgradecimientosSection(agradecimientos?.contenido);
   const indiceContent = buildIndiceSection(indiceItems);
+  const pandocFrontmatterBlock = buildPandocFrontmatterBlock(titulo, copyright, metadata);
 
   const prependParts = [portada, dedicatoriaSection].filter((s): s is string => s !== null);
   const prependContent = prependParts.length > 0 ? prependParts.join(SECTION_SEPARATOR) : null;
 
-  return { prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs };
+  return { pandocFrontmatterBlock, prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs };
 }
 
 export async function exportBookMarkdown(
@@ -102,16 +106,15 @@ export async function exportBookMarkdown(
 ): Promise<void> {
   const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
   const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
-  const { prependContent, appendContent, indiceContent, chapterSlugs } = await buildExportAdditions(
-    projectPath,
-    opts
-  );
+  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs } =
+    await buildExportAdditions(projectPath, opts);
 
   await invoke('export_book_markdown', {
     projectPath,
     includeTerminados,
     includeEnProgreso,
     outputPath,
+    pandocFrontmatterBlock,
     prependContent,
     appendContent,
     indiceContent,

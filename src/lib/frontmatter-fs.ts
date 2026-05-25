@@ -1,15 +1,25 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { FrontmatterKind, TituloData, CopyrightData, DedicatoriaData } from '@/types/frontmatter';
+import type { FrontmatterKind, TituloData, CopyrightData, DedicatoriaData, MetadataData } from '@/types/frontmatter';
 import {
   parseTitulo,
   parseCopyright,
+  parseMetadata,
   serializeTitulo,
   serializeCopyright,
+  serializeMetadata,
   defaultContent,
 } from './yaml-frontmatter';
 
+const FRONTMATTER_EXT: Record<FrontmatterKind, string> = {
+  titulo: 'md',
+  copyright: 'md',
+  dedicatoria: 'md',
+  metadata: 'yaml',
+};
+
 function frontmatterPath(rootPath: string, kind: FrontmatterKind): string {
-  return `${rootPath}/frontmatter/${kind}.md`;
+  const ext = FRONTMATTER_EXT[kind];
+  return `${rootPath}/frontmatter/${kind}.${ext}`;
 }
 
 async function readFile(path: string): Promise<string | null> {
@@ -48,6 +58,16 @@ export async function writeCopyright(rootPath: string, data: CopyrightData): Pro
   await writeFile(frontmatterPath(rootPath, 'copyright'), serializeCopyright(data));
 }
 
+export async function readMetadata(rootPath: string): Promise<MetadataData | null> {
+  const raw = await readFile(frontmatterPath(rootPath, 'metadata'));
+  if (raw === null) return null;
+  return parseMetadata(raw);
+}
+
+export async function writeMetadata(rootPath: string, data: MetadataData): Promise<void> {
+  await writeFile(frontmatterPath(rootPath, 'metadata'), serializeMetadata(data));
+}
+
 export async function readDedicatoria(rootPath: string): Promise<DedicatoriaData | null> {
   const raw = await readFile(frontmatterPath(rootPath, 'dedicatoria'));
   if (raw === null) return null;
@@ -74,5 +94,11 @@ export async function ensureFrontmatterFiles(rootPath: string): Promise<void> {
   const dedicatoriaExists = await invoke<boolean>('path_exists', { path: dedicatoriaPath });
   if (!dedicatoriaExists) {
     await writeFile(dedicatoriaPath, '');
+  }
+
+  const metadataPath = frontmatterPath(rootPath, 'metadata');
+  const metadataExists = await invoke<boolean>('path_exists', { path: metadataPath });
+  if (!metadataExists) {
+    await writeFile(metadataPath, defaultContent('metadata'));
   }
 }

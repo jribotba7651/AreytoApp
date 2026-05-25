@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F28 - Índice auto-generado (TOC) en tab Libro y export
+- Última feature completada: F29 - Editor de metadata del libro (book details)
 - Fecha de última actualización: 2026-05-25
 
 ## Features completadas
@@ -448,6 +448,40 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-128 a D-133 documentadas arriba en F25 Editores de Dedicatoria y Agradecimientos
 - D-134 a D-141 documentadas arriba en F26 Export markdown completo
 - D-142 a D-144 documentadas arriba en F27 Copyright fantasma en tab Libro
+- D-154 a D-161 documentadas arriba en F29 Editor de metadata del libro
+
+### 2026-05-25 - F29 - Editor de metadata del libro (book details)
+- Qué se hizo: editor estructurado nuevo en sidebar (sección FRONTMATTER, item "Detalles") para metadata catalográfica del libro: idioma (default 'en'), descripción, editorial, ISBN, género, fecha de publicación. Archivo nuevo `frontmatter/metadata.yaml` (YAML puro sin delimitadores, no se renderiza visualmente). Export markdown ahora incluye bloque YAML pandoc-ready al inicio del .md, combinando campos de titulo+copyright+metadata con nombres pandoc estándar. Portada visible y resto del export sin cambios. Pre-requisito de export docx (F30 futura).
+- Archivos creados/modificados:
+  - src/types/frontmatter.ts (MetadataData añadido, FrontmatterKind extendido a 'metadata', FrontmatterData union extendida)
+  - src/lib/yaml-frontmatter.ts (parseMetadata, serializeMetadata, defaultMetadata; defaultContent extendido para 'metadata')
+  - src/lib/frontmatter-fs.ts (FRONTMATTER_EXT map para extensiones; readMetadata, writeMetadata; ensureFrontmatterFiles crea metadata.yaml con defaults)
+  - src/stores/projectStore.ts (ActiveView extendida con 'frontmatter-metadata')
+  - src/components/frontmatter/FrontmatterMetadataEditor.tsx (nuevo: idioma con datalist, textarea descripcion, 4 inputs; autosave 500ms)
+  - src/components/frontmatter/FrontmatterMetadataEditor.test.tsx (nuevo: 3 tests del componente)
+  - src/components/panels/EditorPanel.tsx (caso 'frontmatter-metadata' añadido al switch)
+  - src/components/sidebar/FrontmatterSection.tsx (item "Detalles" añadido bajo Dedicatoria)
+  - src/lib/export-composer.ts (buildPandocFrontmatterBlock función pura nueva; import yaml)
+  - src/lib/export-composer.test.ts (8 tests nuevos para buildPandocFrontmatterBlock)
+  - src/lib/export-service.ts (readMetadata en Promise.all; pandocFrontmatterBlock en ExportAdditions; exportBookMarkdown pasa pandocFrontmatterBlock al command)
+  - src/lib/export-service.test.ts (mock de readMetadata añadido; pandocFrontmatterBlock:null en 3 assertions de exportBookMarkdown)
+  - src/lib/frontmatter-fs.test.ts (readMetadata, writeMetadata tests; ensureFrontmatterFiles actualizado para 4 archivos)
+  - src/lib/yaml-frontmatter.test.ts (parseMetadata: 6 tests, serializeMetadata: 4 tests, round-trip: 2 tests)
+  - src-tauri/src/export.rs (pandoc_frontmatter: Option<String> como primer parámetro; va al inicio del assembly; 1 test F29 nuevo; todos los tests existentes actualizados con nuevo parámetro)
+- Decisiones tomadas:
+  - D-154: Modelo C: archivos separados sin duplicación. titulo.md = portada visual. metadata.yaml = catalográfica. Copyright sigue en archivo propio. Export combina los 3 en el bloque pandoc.
+  - D-155: Idioma default 'en' alineado con D-004. Usuario lo cambia en segundos si publica en otro idioma.
+  - D-156: metadata.yaml es YAML puro, sin delimitadores `---`. Es config para pandoc, no se renderiza visualmente.
+  - D-157: Bloque pandoc-ready inyectado al INICIO del export, antes de portada visible. Pandoc lo consume; visualizadores no-pandoc lo muestran como código o lo ignoran.
+  - D-158: Nombres de campos en el bloque pandoc usan estándar pandoc/EPUB: title, subtitle, author, date, lang, publisher, identifier, description, subject, rights.
+  - D-159: Bloque pandoc omitido si no hay contenido real. Idioma default solo (lang: en) no califica como contenido significativo.
+  - D-160: Item "Detalles" en sidebar, bajo Dedicatoria, mismo patrón visual que F24/F25.
+  - D-161: Sin render en tab Libro. Metadata es para export profesional, no para presentación al lector.
+- Pendientes relacionados:
+  - Export docx vía pandoc (F30, Order 23) — ahora tiene el pre-requisito de metadata
+  - Smoke test visual de F29 (validar que el archivo metadata.yaml se crea, el editor guarda, el export incluye el bloque)
+- Bugs encontrados: test `fechaPublicacion tiene prioridad sobre copyright.ano para date` fallaba por assertion demasiado estricta (año aparece también en rights field). Corregido con regex más preciso.
+- Status: Done (pendiente smoke test visual)
 
 ### 2026-05-23 - F23: Export del libro completo a markdown unificado
 - Qué se hizo: botón "Exportar" (icono Download) en header del tab Libro. Click abre modal ExportBookDialog con 3 radio buttons (Ambos, Solo terminados, Solo en progreso, default Ambos). Confirmar valida que haya archivos, abre dialog nativo Save As (Tauri plugin-dialog) con default {proyecto}-YYYY-MM-DD.md en raíz del proyecto, invoca command Rust que lee, ordena lexicográfico, concatena con '\n\n---\n\n', escribe UTF-8 con newline final. Post-export muestra mensaje nativo con el path resultante. Casos vacíos y cancelaciones manejados sin error ni escritura.

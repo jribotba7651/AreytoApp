@@ -8,6 +8,7 @@ export type ActiveView =
   | 'frontmatter-titulo'
   | 'frontmatter-copyright'
   | 'frontmatter-dedicatoria'
+  | 'frontmatter-metadata'
   | 'backmatter-agradecimientos'
   | null;
 

@@ -12,6 +12,7 @@ function FrontmatterSection() {
         <FrontmatterItem view="frontmatter-titulo" label="Título y autor" />
         <FrontmatterItem view="frontmatter-copyright" label="Copyright" />
         <FrontmatterItem view="frontmatter-dedicatoria" label="Dedicatoria" />
+        <FrontmatterItem view="frontmatter-metadata" label="Detalles" />
       </div>
     </div>
   );

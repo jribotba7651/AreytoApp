@@ -6,6 +6,9 @@ import {
   serializeCopyright,
   defaultTitulo,
   defaultCopyright,
+  parseMetadata,
+  serializeMetadata,
+  defaultMetadata,
 } from './yaml-frontmatter';
 
 describe('parseTitulo', () => {
@@ -134,5 +137,103 @@ describe('defaults', () => {
     const d = defaultCopyright();
     expect(d.licencia).toBe('Todos los derechos reservados');
     expect(d.ano).toBeNull();
+  });
+});
+
+describe('parseMetadata', () => {
+  it('extrae todos los campos cuando están presentes', () => {
+    const raw = 'idioma: es\ndescripcion: Una historia\neditorial: Planeta\nisbn: 978-0-000-00000-0\ngenero: Novela\nfechaPublicacion: "2025"';
+    const result = parseMetadata(raw);
+    expect(result.idioma).toBe('es');
+    expect(result.descripcion).toBe('Una historia');
+    expect(result.editorial).toBe('Planeta');
+    expect(result.isbn).toBe('978-0-000-00000-0');
+    expect(result.genero).toBe('Novela');
+    expect(result.fechaPublicacion).toBe('2025');
+  });
+
+  it('retorna idioma "en" por default si no hay campo idioma', () => {
+    const result = parseMetadata('editorial: Planeta');
+    expect(result.idioma).toBe('en');
+  });
+
+  it('retorna strings vacíos para campos ausentes', () => {
+    const result = parseMetadata('idioma: es');
+    expect(result.descripcion).toBe('');
+    expect(result.editorial).toBe('');
+    expect(result.isbn).toBe('');
+    expect(result.genero).toBe('');
+    expect(result.fechaPublicacion).toBe('');
+  });
+
+  it('retorna defaults si el YAML es inválido', () => {
+    const result = parseMetadata('{{invalid: yaml: :');
+    expect(result.idioma).toBe('en');
+    expect(result.descripcion).toBe('');
+  });
+
+  it('retorna defaults si el raw está vacío', () => {
+    const result = parseMetadata('');
+    expect(result.idioma).toBe('en');
+    expect(result.editorial).toBe('');
+  });
+
+  it('retorna defaults si el YAML no es un objeto', () => {
+    const result = parseMetadata('- elemento1\n- elemento2');
+    expect(result.idioma).toBe('en');
+  });
+});
+
+describe('serializeMetadata', () => {
+  it('YAML puro sin delimitadores ---', () => {
+    const data = defaultMetadata();
+    const out = serializeMetadata(data);
+    expect(out).not.toMatch(/^---/);
+    expect(out).not.toMatch(/---\n?$/);
+    expect(out).toContain('idioma: en');
+  });
+
+  it('siempre incluye idioma aunque el resto esté vacío', () => {
+    const out = serializeMetadata(defaultMetadata());
+    expect(out).toContain('idioma:');
+    expect(out).not.toContain('descripcion:');
+    expect(out).not.toContain('editorial:');
+  });
+
+  it('omite campos vacíos pero incluye los rellenos', () => {
+    const data = { ...defaultMetadata(), genero: 'Novela', isbn: '978-0-0' };
+    const out = serializeMetadata(data);
+    expect(out).toContain('genero: Novela');
+    expect(out).toContain('isbn:');
+    expect(out).not.toContain('editorial:');
+  });
+
+  it('descripcion multilínea se serializa correctamente', () => {
+    const data = { ...defaultMetadata(), descripcion: 'Primera línea\nSegunda línea' };
+    const out = serializeMetadata(data);
+    expect(out).toContain('descripcion:');
+    expect(out).toMatch(/Primera línea|Primera l/);
+  });
+});
+
+describe('parseMetadata round-trip', () => {
+  it('todos los campos llenos: parse(serialize(data)) === data', () => {
+    const data = {
+      idioma: 'es',
+      descripcion: 'Una sinopsis',
+      editorial: 'Editorial X',
+      isbn: '978-0-000-00000-0',
+      genero: 'Novela',
+      fechaPublicacion: '2025',
+    };
+    const parsed = parseMetadata(serializeMetadata(data));
+    expect(parsed).toEqual(data);
+  });
+
+  it('solo idioma no-default: round-trip preserva idioma', () => {
+    const data = { ...defaultMetadata(), idioma: 'fr' };
+    const parsed = parseMetadata(serializeMetadata(data));
+    expect(parsed.idioma).toBe('fr');
+    expect(parsed.editorial).toBe('');
   });
 });

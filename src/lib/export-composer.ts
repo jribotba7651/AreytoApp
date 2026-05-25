@@ -1,4 +1,5 @@
-import type { TituloData, CopyrightData } from '@/types/frontmatter';
+import * as yaml from 'js-yaml';
+import type { TituloData, CopyrightData, MetadataData } from '@/types/frontmatter';
 import { extractChapterTitle as _extractChapterTitle } from '@/lib/project-fs';
 
 export const SECTION_SEPARATOR = '\n\n---\n\n';
@@ -96,4 +97,65 @@ export function buildDedicatoriaSection(contenido: string | null | undefined): s
 export function buildAgradecimientosSection(contenido: string | null | undefined): string | null {
   if (!contenido?.trim()) return null;
   return `## Agradecimientos\n\n${contenido.trim()}`;
+}
+
+// D-157, D-158, D-159: bloque YAML pandoc-ready al inicio del export.
+// Combina campos de titulo+copyright+metadata con nombres pandoc estándar.
+// Retorna null si no hay contenido real (solo idioma default no califica).
+export function buildPandocFrontmatterBlock(
+  titulo: TituloData | null,
+  copyright: CopyrightData | null,
+  metadata: MetadataData | null
+): string | null {
+  const obj: Record<string, unknown> = {};
+
+  if (titulo?.titulo?.trim()) obj.title = titulo.titulo.trim();
+  if (titulo?.subtitulo?.trim()) obj.subtitle = titulo.subtitulo.trim();
+  if (titulo?.autor?.trim()) obj.author = titulo.autor.trim();
+
+  if (metadata?.fechaPublicacion?.trim()) {
+    obj.date = metadata.fechaPublicacion.trim();
+  } else if (copyright?.ano !== null && copyright?.ano !== undefined) {
+    obj.date = String(copyright.ano);
+  }
+
+  const lang = metadata?.idioma?.trim() || 'en';
+  obj.lang = lang;
+
+  if (metadata?.editorial?.trim()) obj.publisher = metadata.editorial.trim();
+  if (metadata?.isbn?.trim()) obj.identifier = metadata.isbn.trim();
+  if (metadata?.descripcion?.trim()) obj.description = metadata.descripcion.trim();
+  if (metadata?.genero?.trim()) obj.subject = metadata.genero.trim();
+
+  if (hasRealCopyright(copyright)) {
+    const parts: string[] = [];
+    const hasOwner = copyright!.ano !== null || copyright!.titular !== '';
+    if (hasOwner) {
+      const ownerParts = ['©'];
+      if (copyright!.ano !== null) ownerParts.push(String(copyright!.ano));
+      if (copyright!.titular) ownerParts.push(copyright!.titular);
+      parts.push(ownerParts.join(' '));
+    }
+    if (copyright!.licencia) parts.push(copyright!.licencia);
+    const rights = parts.join('. ');
+    if (rights) obj.rights = rights;
+  }
+
+  // D-159: idioma default solo no califica como contenido significativo
+  const hasSignificantContent =
+    'title' in obj ||
+    'subtitle' in obj ||
+    'author' in obj ||
+    'date' in obj ||
+    'publisher' in obj ||
+    'identifier' in obj ||
+    'description' in obj ||
+    'subject' in obj ||
+    'rights' in obj ||
+    lang !== 'en';
+
+  if (!hasSignificantContent) return null;
+
+  const yamlContent = yaml.dump(obj, { lineWidth: -1 }).trimEnd();
+  return `---\n${yamlContent}\n---`;
 }

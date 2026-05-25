@@ -6,6 +6,7 @@ import ShortcutHint from '@/components/shared/ShortcutHint';
 import FrontmatterTituloEditor from '@/components/frontmatter/FrontmatterTituloEditor';
 import FrontmatterCopyrightEditor from '@/components/frontmatter/FrontmatterCopyrightEditor';
 import FrontmatterDedicatoriaEditor from '@/components/frontmatter/FrontmatterDedicatoriaEditor';
+import FrontmatterMetadataEditor from '@/components/frontmatter/FrontmatterMetadataEditor';
 import BackmatterAgradecimientosEditor from '@/components/backmatter/BackmatterAgradecimientosEditor';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
@@ -117,6 +118,10 @@ function EditorPanel() {
 
   if (activeView === 'frontmatter-dedicatoria') {
     return <FrontmatterDedicatoriaEditor />;
+  }
+
+  if (activeView === 'frontmatter-metadata') {
+    return <FrontmatterMetadataEditor />;
   }
 
   if (activeView === 'backmatter-agradecimientos') {

@@ -12,6 +12,8 @@ import {
   writeCopyright,
   readDedicatoria,
   writeDedicatoria,
+  readMetadata,
+  writeMetadata,
   ensureFrontmatterFiles,
 } from './frontmatter-fs';
 
@@ -104,8 +106,44 @@ describe('writeDedicatoria', () => {
   });
 });
 
+describe('readMetadata', () => {
+  it('parsea un archivo metadata.yaml existente (YAML puro sin ---)', async () => {
+    mockInvoke.mockResolvedValueOnce('idioma: es\neditorial: Planeta\n');
+    const result = await readMetadata('/proyecto');
+    expect(result).toMatchObject({ idioma: 'es', editorial: 'Planeta' });
+    expect(mockInvoke).toHaveBeenCalledWith('read_text_file', {
+      path: '/proyecto/frontmatter/metadata.yaml',
+    });
+  });
+
+  it('retorna null si el archivo no existe', async () => {
+    mockInvoke.mockRejectedValueOnce(new Error('not found'));
+    const result = await readMetadata('/proyecto');
+    expect(result).toBeNull();
+  });
+});
+
+describe('writeMetadata', () => {
+  it('escribe YAML puro en metadata.yaml (sin delimitadores ---)', async () => {
+    mockInvoke.mockResolvedValueOnce(undefined);
+    await writeMetadata('/proyecto', {
+      idioma: 'es',
+      descripcion: '',
+      editorial: 'Planeta',
+      isbn: '',
+      genero: '',
+      fechaPublicacion: '',
+    });
+    const [cmd, args] = mockInvoke.mock.calls[0] as [string, { path: string; contents: string }];
+    expect(cmd).toBe('write_text_file');
+    expect(args.path).toBe('/proyecto/frontmatter/metadata.yaml');
+    expect(args.contents).toContain('idioma: es');
+    expect(args.contents).not.toMatch(/^---/);
+  });
+});
+
 describe('ensureFrontmatterFiles', () => {
-  it('crea archivos si no existen', async () => {
+  it('crea los 4 archivos si no existen (titulo, copyright, dedicatoria, metadata)', async () => {
     mockInvoke
       .mockResolvedValueOnce(undefined) // ensure_dir
       .mockResolvedValueOnce(false)     // path_exists titulo
@@ -113,16 +151,37 @@ describe('ensureFrontmatterFiles', () => {
       .mockResolvedValueOnce(false)     // path_exists copyright
       .mockResolvedValueOnce(undefined) // write_text_file copyright
       .mockResolvedValueOnce(false)     // path_exists dedicatoria
-      .mockResolvedValueOnce(undefined); // write_text_file dedicatoria
+      .mockResolvedValueOnce(undefined) // write_text_file dedicatoria
+      .mockResolvedValueOnce(false)     // path_exists metadata
+      .mockResolvedValueOnce(undefined); // write_text_file metadata
 
     await ensureFrontmatterFiles('/proyecto');
 
     const writeCalls = mockInvoke.mock.calls.filter((c) => c[0] === 'write_text_file');
-    expect(writeCalls).toHaveLength(3);
+    expect(writeCalls).toHaveLength(4);
     const paths = writeCalls.map((c) => (c[1] as { path: string }).path);
     expect(paths).toContain('/proyecto/frontmatter/titulo.md');
     expect(paths).toContain('/proyecto/frontmatter/copyright.md');
     expect(paths).toContain('/proyecto/frontmatter/dedicatoria.md');
+    expect(paths).toContain('/proyecto/frontmatter/metadata.yaml');
+  });
+
+  it('metadata.yaml se crea con idioma: en por default', async () => {
+    mockInvoke
+      .mockResolvedValueOnce(undefined) // ensure_dir
+      .mockResolvedValueOnce(true)      // path_exists titulo → exists
+      .mockResolvedValueOnce(true)      // path_exists copyright → exists
+      .mockResolvedValueOnce(true)      // path_exists dedicatoria → exists
+      .mockResolvedValueOnce(false)     // path_exists metadata → no existe
+      .mockResolvedValueOnce(undefined); // write_text_file metadata
+
+    await ensureFrontmatterFiles('/proyecto');
+
+    const writeCalls = mockInvoke.mock.calls.filter((c) => c[0] === 'write_text_file');
+    expect(writeCalls).toHaveLength(1);
+    const contents = (writeCalls[0]![1] as { contents: string }).contents;
+    expect(contents).toContain('idioma: en');
+    expect(contents).not.toMatch(/^---/);
   });
 
   it('no sobreescribe archivos existentes', async () => {
@@ -130,7 +189,8 @@ describe('ensureFrontmatterFiles', () => {
       .mockResolvedValueOnce(undefined) // ensure_dir
       .mockResolvedValueOnce(true)      // path_exists titulo → exists
       .mockResolvedValueOnce(true)      // path_exists copyright → exists
-      .mockResolvedValueOnce(true);     // path_exists dedicatoria → exists
+      .mockResolvedValueOnce(true)      // path_exists dedicatoria → exists
+      .mockResolvedValueOnce(true);     // path_exists metadata → exists
 
     await ensureFrontmatterFiles('/proyecto');
 

@@ -8,6 +8,7 @@ vi.mock('@/lib/frontmatter-fs', () => ({
   readTitulo: vi.fn().mockResolvedValue(null),
   readCopyright: vi.fn().mockResolvedValue(null),
   readDedicatoria: vi.fn().mockResolvedValue(null),
+  readMetadata: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('@/lib/backmatter-fs', () => ({
@@ -42,6 +43,7 @@ describe('exportBookMarkdown', () => {
       includeTerminados: true,
       includeEnProgreso: true,
       outputPath: '/out.md',
+      pandocFrontmatterBlock: null,
       prependContent: null,
       appendContent: null,
       indiceContent: null,
@@ -56,6 +58,7 @@ describe('exportBookMarkdown', () => {
       includeTerminados: true,
       includeEnProgreso: false,
       outputPath: '/out.md',
+      pandocFrontmatterBlock: null,
       prependContent: null,
       appendContent: null,
       indiceContent: null,
@@ -70,6 +73,7 @@ describe('exportBookMarkdown', () => {
       includeTerminados: false,
       includeEnProgreso: true,
       outputPath: '/out.md',
+      pandocFrontmatterBlock: null,
       prependContent: null,
       appendContent: null,
       indiceContent: null,
