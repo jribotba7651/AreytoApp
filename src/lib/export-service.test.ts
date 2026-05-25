@@ -18,7 +18,7 @@ vi.mock('@/lib/backmatter-fs', () => ({
 import { invoke } from '@tauri-apps/api/core';
 import { readTitulo, readCopyright, readDedicatoria } from '@/lib/frontmatter-fs';
 import { readAgradecimientos } from '@/lib/backmatter-fs';
-import { exportBookMarkdown, countExportableFiles, buildExportAdditions } from './export-service';
+import { exportBookMarkdown, exportBookDocx, countExportableFiles, buildExportAdditions } from './export-service';
 
 const mockInvoke = vi.mocked(invoke);
 const mockReadTitulo = vi.mocked(readTitulo);
@@ -233,6 +233,78 @@ describe('buildExportAdditions', () => {
 
     const result = await buildExportAdditions('/proyecto', { scope: 'terminados' });
     expect(result.indiceContent).toContain('[cap-01](#cap-01)');
+  });
+});
+
+describe('exportBookDocx', () => {
+  it('scope ambos → invoca export_book_docx con flags correctos', async () => {
+    await exportBookDocx('/proyecto', { scope: 'ambos' }, '/out.docx');
+    expect(mockInvoke).toHaveBeenCalledWith('export_book_docx', {
+      projectPath: '/proyecto',
+      includeTerminados: true,
+      includeEnProgreso: true,
+      outputPath: '/out.docx',
+      pandocFrontmatterBlock: null,
+      prependContent: null,
+      appendContent: null,
+      indiceContent: null,
+      chapterSlugs: {},
+    });
+  });
+
+  it('scope terminados → includeTerminados=true, includeEnProgreso=false', async () => {
+    await exportBookDocx('/proyecto', { scope: 'terminados' }, '/out.docx');
+    expect(mockInvoke).toHaveBeenCalledWith('export_book_docx', {
+      projectPath: '/proyecto',
+      includeTerminados: true,
+      includeEnProgreso: false,
+      outputPath: '/out.docx',
+      pandocFrontmatterBlock: null,
+      prependContent: null,
+      appendContent: null,
+      indiceContent: null,
+      chapterSlugs: {},
+    });
+  });
+
+  it('scope en-progreso → includeTerminados=false, includeEnProgreso=true', async () => {
+    await exportBookDocx('/proyecto', { scope: 'en-progreso' }, '/out.docx');
+    expect(mockInvoke).toHaveBeenCalledWith('export_book_docx', {
+      projectPath: '/proyecto',
+      includeTerminados: false,
+      includeEnProgreso: true,
+      outputPath: '/out.docx',
+      pandocFrontmatterBlock: null,
+      prependContent: null,
+      appendContent: null,
+      indiceContent: null,
+      chapterSlugs: {},
+    });
+  });
+
+  it('propaga el error si invoke falla en export_book_docx', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'export_book_docx') return Promise.reject(new Error('pandoc falló'));
+      if (cmd === 'list_dir') return Promise.resolve([]);
+      return Promise.resolve(undefined);
+    });
+    await expect(
+      exportBookDocx('/proyecto', { scope: 'ambos' }, '/out.docx')
+    ).rejects.toThrow('pandoc falló');
+  });
+
+  it('con frontmatter lleno pasa pandocFrontmatterBlock y prependContent al command', async () => {
+    mockReadTitulo.mockResolvedValueOnce({ titulo: 'Mi libro', autor: 'Juan', subtitulo: undefined });
+    mockReadCopyright.mockResolvedValueOnce({ ano: 2024, titular: 'Juan', licencia: 'Todos los derechos reservados' });
+
+    await exportBookDocx('/proyecto', { scope: 'ambos' }, '/out.docx');
+
+    const docxCall = mockInvoke.mock.calls.find((c) => c[0] === 'export_book_docx');
+    const callArgs = docxCall![1] as Record<string, unknown>;
+    expect(typeof callArgs.pandocFrontmatterBlock).toBe('string');
+    expect(callArgs.pandocFrontmatterBlock as string).toContain('title:');
+    expect(typeof callArgs.prependContent).toBe('string');
+    expect(callArgs.prependContent as string).toContain('# Mi libro');
   });
 });
 

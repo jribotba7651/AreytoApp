@@ -14,6 +14,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
         .manage(std::sync::Mutex::new(None::<terminal::PtySession>))
         .invoke_handler(tauri::generate_handler![
             greet,
@@ -37,6 +38,7 @@ pub fn run() {
             git::git_list_chapter_tags,
             git::git_commit_all,
             export::export_book_markdown,
+            export::export_book_docx,
             settings::read_global_settings,
             settings::write_global_settings,
             settings::read_project_state,
