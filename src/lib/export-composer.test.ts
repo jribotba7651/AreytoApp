@@ -5,6 +5,9 @@ import {
   buildAgradecimientosSection,
   hasRealCopyright,
   SECTION_SEPARATOR,
+  extractChapterTitle,
+  slugify,
+  buildIndiceSection,
 } from './export-composer';
 import type { TituloData, CopyrightData } from '@/types/frontmatter';
 
@@ -202,5 +205,96 @@ describe('hasRealCopyright', () => {
 describe('SECTION_SEPARATOR', () => {
   it('es el separador F23 \\n\\n---\\n\\n', () => {
     expect(SECTION_SEPARATOR).toBe('\n\n---\n\n');
+  });
+});
+
+describe('extractChapterTitle', () => {
+  it('H1 presente → retorna el texto del H1', () => {
+    expect(extractChapterTitle('# El comienzo\n\nTexto.', 'cap01.md')).toBe('El comienzo');
+  });
+
+  it('H1 con espacios extras → trimmed', () => {
+    expect(extractChapterTitle('#   Capítulo con espacios   \n\nTexto.', 'cap01.md')).toBe('Capítulo con espacios');
+  });
+
+  it('sin H1 → fallback al filename sin extensión', () => {
+    expect(extractChapterTitle('## Solo H2\n\nTexto.', 'cap-dos.md')).toBe('cap-dos');
+  });
+
+  it('contenido vacío → fallback al filename sin extensión', () => {
+    expect(extractChapterTitle('', 'capitulo-tres.md')).toBe('capitulo-tres');
+  });
+
+  it('solo whitespace → fallback al filename sin extensión', () => {
+    expect(extractChapterTitle('   \n\n   ', 'intro.md')).toBe('intro');
+  });
+});
+
+describe('slugify', () => {
+  it('título con tildes → letras sin diacríticos', () => {
+    expect(slugify('Capítulo 1')).toBe('capitulo-1');
+  });
+
+  it('título con ñ y acentos múltiples → ASCII limpio', () => {
+    expect(slugify('Mañana será otro día')).toBe('manana-sera-otro-dia');
+  });
+
+  it('espacios múltiples → guión simple', () => {
+    expect(slugify('El   gran   capítulo')).toBe('el-gran-capitulo');
+  });
+
+  it('caracteres especiales (!@#$) → eliminados', () => {
+    expect(slugify('¡Hola! ¿Mundo?')).toBe('hola-mundo');
+  });
+
+  it('string vacío → string vacío', () => {
+    expect(slugify('')).toBe('');
+  });
+
+  it('slug ya limpio → sin cambios excepto lowercase', () => {
+    expect(slugify('capitulo-uno')).toBe('capitulo-uno');
+  });
+
+  it('guiones múltiples → guión simple', () => {
+    expect(slugify('cap--uno---dos')).toBe('cap-uno-dos');
+  });
+});
+
+describe('buildIndiceSection', () => {
+  it('lista vacía → null (no sección huérfana)', () => {
+    expect(buildIndiceSection([])).toBeNull();
+  });
+
+  it('un item → sección con header y un enlace', () => {
+    const result = buildIndiceSection([{ title: 'El comienzo', slug: 'el-comienzo' }]);
+    expect(result).toBe('## Índice\n\n- [El comienzo](#el-comienzo)');
+  });
+
+  it('múltiples items → todos los enlaces en orden', () => {
+    const items = [
+      { title: 'Capítulo 1', slug: 'capitulo-1' },
+      { title: 'Capítulo 2', slug: 'capitulo-2' },
+      { title: 'Epílogo', slug: 'epilogo' },
+    ];
+    const result = buildIndiceSection(items);
+    expect(result).toContain('## Índice');
+    expect(result).toContain('- [Capítulo 1](#capitulo-1)');
+    expect(result).toContain('- [Capítulo 2](#capitulo-2)');
+    expect(result).toContain('- [Epílogo](#epilogo)');
+    const i1 = result!.indexOf('capitulo-1');
+    const i2 = result!.indexOf('capitulo-2');
+    const i3 = result!.indexOf('epilogo');
+    expect(i1).toBeLessThan(i2);
+    expect(i2).toBeLessThan(i3);
+  });
+
+  it('título con caracteres especiales → preservado en el texto del enlace', () => {
+    const result = buildIndiceSection([{ title: '¡Introducción!', slug: 'introduccion' }]);
+    expect(result).toContain('[¡Introducción!](#introduccion)');
+  });
+
+  it('header siempre es ## Índice', () => {
+    const result = buildIndiceSection([{ title: 'X', slug: 'x' }]);
+    expect(result!.startsWith('## Índice\n\n')).toBe(true);
   });
 });

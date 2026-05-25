@@ -1,6 +1,35 @@
 import type { TituloData, CopyrightData } from '@/types/frontmatter';
+import { extractChapterTitle as _extractChapterTitle } from '@/lib/project-fs';
 
 export const SECTION_SEPARATOR = '\n\n---\n\n';
+
+// D-145: re-export from project-fs — single source of truth, discoverable from export-composer.
+export { _extractChapterTitle as extractChapterTitle };
+
+// D-151: slug determinista basado en el input (filename sin extensión en la práctica).
+export function slugify(input: string): string {
+  return input
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+export interface IndiceItem {
+  title: string;
+  slug: string;
+}
+
+// D-150: retorna null si no hay items (no header huérfano).
+export function buildIndiceSection(items: IndiceItem[]): string | null {
+  if (items.length === 0) return null;
+  const lines = items.map((item) => `- [${item.title}](#${item.slug})`);
+  return `## Índice\n\n${lines.join('\n')}`;
+}
 
 // D-141, D-143: notas son metadato auxiliar, no cuentan como afirmación de copyright.
 export function hasRealCopyright(copyright: CopyrightData | null): boolean {

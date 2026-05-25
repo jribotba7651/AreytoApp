@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -32,11 +33,20 @@ pub fn export_book_markdown(
     output_path: String,
     prepend_content: Option<String>,
     append_content: Option<String>,
+    indice_content: Option<String>,
+    chapter_slugs: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
     let mut all_parts: Vec<String> = Vec::new();
 
     if let Some(pre) = prepend_content {
         let trimmed = pre.trim_end_matches('\n').to_string();
+        if !trimmed.trim().is_empty() {
+            all_parts.push(trimmed);
+        }
+    }
+
+    if let Some(indice) = indice_content {
+        let trimmed = indice.trim_end_matches('\n').to_string();
         if !trimmed.trim().is_empty() {
             all_parts.push(trimmed);
         }
@@ -53,10 +63,21 @@ pub fn export_book_markdown(
         collect_md_files(&dir, &mut chapter_files)?;
     }
 
+    let slugs = chapter_slugs.unwrap_or_default();
+
     for file in &chapter_files {
         let content = fs::read_to_string(file)
             .map_err(|e| format!("No se pudo leer {}: {}", file.display(), e))?;
-        all_parts.push(content.trim_end_matches('\n').to_string());
+        let trimmed = content.trim_end_matches('\n').to_string();
+
+        let filename = file.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        let part = if let Some(slug) = slugs.get(filename) {
+            format!("<a id=\"{}\"></a>\n\n{}", slug, trimmed)
+        } else {
+            trimmed
+        };
+
+        all_parts.push(part);
     }
 
     if let Some(app) = append_content {
@@ -111,6 +132,8 @@ mod tests {
             include_terminados,
             include_en_progreso,
             out.to_str().unwrap().to_string(),
+            None,
+            None,
             None,
             None,
         )
@@ -250,6 +273,8 @@ mod tests {
             out.to_str().unwrap().to_string(),
             Some("# Mi libro\n\n**Autor**".to_string()),
             None,
+            None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -273,6 +298,8 @@ mod tests {
             out.to_str().unwrap().to_string(),
             None,
             Some("## Agradecimientos\n\nGracias a todos.".to_string()),
+            None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -296,10 +323,11 @@ mod tests {
             out.to_str().unwrap().to_string(),
             Some("   \n  ".to_string()),
             None,
+            None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
-        // no separator before content (prepend was skipped)
         assert!(!content.starts_with("\n\n---\n\n"));
         assert!(content.starts_with("Contenido"));
         cleanup(&project);
@@ -315,6 +343,8 @@ mod tests {
             true,
             out.to_str().unwrap().to_string(),
             Some("# Solo portada".to_string()),
+            None,
+            None,
             None,
         ).unwrap();
 
@@ -335,10 +365,98 @@ mod tests {
             out.to_str().unwrap().to_string(),
             None,
             None,
+            None,
+            None,
         );
         assert!(result.is_err());
         let msg = result.unwrap_err();
         assert!(msg.contains("No hay contenido"), "mensaje de error esperado, got: {}", msg);
+        cleanup(&project);
+    }
+
+    // ── tests F28 nuevos ───────────────────────────────────────────────────────
+
+    #[test]
+    fn indice_incluido_entre_prepend_y_capitulos() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "# Capítulo 1").unwrap();
+
+        let out = project.join("salida.md");
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            Some("# Mi libro".to_string()),
+            None,
+            Some("## Índice\n\n- [Capítulo 1](#cap-01)".to_string()),
+            None,
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        let pos_portada = content.find("# Mi libro").unwrap();
+        let pos_indice = content.find("## Índice").unwrap();
+        let pos_cap = content.find("# Capítulo 1").unwrap();
+        assert!(pos_portada < pos_indice, "índice debe ir después de la portada");
+        // pos_indice finds "## Índice" which also matches inside the TOC bullet, so verify cap is last
+        assert!(pos_cap > pos_portada, "capítulo debe ir después de la portada");
+        assert!(content.contains("## Índice"));
+        assert!(content.contains("[Capítulo 1](#cap-01)"));
+        cleanup(&project);
+    }
+
+    #[test]
+    fn anchor_id_inyectado_antes_del_capitulo() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "# El comienzo\n\nTexto.").unwrap();
+
+        let out = project.join("salida.md");
+        let mut slugs = HashMap::new();
+        slugs.insert("cap-01.md".to_string(), "cap-01".to_string());
+
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            None,
+            None,
+            None,
+            Some(slugs),
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        assert!(content.contains("<a id=\"cap-01\"></a>"), "debe inyectar anchor con el slug");
+        let pos_anchor = content.find("<a id=\"cap-01\"></a>").unwrap();
+        let pos_h1 = content.find("# El comienzo").unwrap();
+        assert!(pos_anchor < pos_h1, "el anchor debe preceder al contenido del capítulo");
+        cleanup(&project);
+    }
+
+    #[test]
+    fn capitulo_sin_slug_en_mapa_no_recibe_anchor() {
+        let project = make_temp_project();
+        fs::write(project.join("capitulos").join("cap-01.md"), "# Sin slug").unwrap();
+        fs::write(project.join("capitulos").join("cap-02.md"), "# Con slug").unwrap();
+
+        let out = project.join("salida.md");
+        let mut slugs = HashMap::new();
+        slugs.insert("cap-02.md".to_string(), "cap-02".to_string());
+
+        export_book_markdown(
+            project.to_str().unwrap().to_string(),
+            false,
+            true,
+            out.to_str().unwrap().to_string(),
+            None,
+            None,
+            None,
+            Some(slugs),
+        ).unwrap();
+
+        let content = fs::read_to_string(&out).unwrap();
+        assert!(content.contains("<a id=\"cap-02\"></a>"), "cap-02 debe tener anchor");
+        assert!(!content.contains("<a id=\"cap-01\"></a>"), "cap-01 sin slug no debe tener anchor");
         cleanup(&project);
     }
 }

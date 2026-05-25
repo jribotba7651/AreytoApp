@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F27 - Copyright fantasma en tab Libro
+- Última feature completada: F28 - Índice auto-generado (TOC) en tab Libro y export
 - Fecha de última actualización: 2026-05-25
 
 ## Features completadas
@@ -509,6 +509,34 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
   - TOC auto-generado (F28)
   - Backmatter genérico (bibliografía, notas)
 - Bugs encontrados: ninguno
+
+### 2026-05-25 - F28 - Índice auto-generado (TOC) en tab Libro y export
+- Qué se hizo: generación automática del índice (TOC) de capítulos. En el tab Libro, nueva sección "Índice" con links de ancla clickeables aparece entre la dedicatoria y los capítulos. Cada capítulo recibe un id DOM basado en el slug del filename. En el export, el índice se inyecta como sección markdown entre portada/dedicatoria y los capítulos, con anchors <a id="slug"></a> antes de cada capítulo para que los links funcionen. Slugs basados en filename-sin-extensión (estables ante cambios de título). Sección omitida si no hay capítulos.
+- Archivos creados/modificados:
+  - src/lib/export-composer.ts (slugify función pura, IndiceItem interface, buildIndiceSection, re-export extractChapterTitle desde project-fs)
+  - src/lib/export-composer.test.ts (17 tests nuevos: extractChapterTitle×5, slugify×7, buildIndiceSection×5 — total 46 tests)
+  - src/lib/export-service.ts (ExportAdditions extendida con indiceContent y chapterSlugs; buildExportAdditions acepta opts:ExportOptions, lee capítulos por scope, calcula slugs, construye TOC; exportBookMarkdown pasa los nuevos campos al command; helpers listSortedMdFilenames y readFileContent)
+  - src/lib/export-service.test.ts (beforeEach con mockImplementation para list_dir→[]; todas las expectativas de exportBookMarkdown actualizadas con indiceContent:null, chapterSlugs:{}; buildExportAdditions tests actualizados + 4 tests nuevos de TOC; countExportableFiles tests migrados a mockImplementation — total 21 tests)
+  - src-tauri/src/export.rs (use std::collections::HashMap; export_book_markdown extendido con indice_content:Option<String> y chapter_slugs:Option<HashMap<String,String>>; assembly lógico [prepend, indice, chapters(+anchors), append]; inyección <a id="slug"></a>\n\n antes de cada capítulo si slug en mapa; 3 tests nuevos F28 — total 16 tests Rust)
+  - src/components/book/BookIndice.tsx (nuevo: renderiza sección Índice con links de ancla; null si lista vacía)
+  - src/components/book/BookIndice.test.tsx (nuevo: 3 tests)
+  - src/components/book/BookChapter.tsx (prop slug?: string añadida; id={slug} en wrapper div)
+  - src/components/layout/BookTabContent.tsx (import slugify + BookIndice; tocItems computado desde bookData.sections; BookIndice renderizado después de dedicatoria; slug pasado a BookChapter)
+- Decisiones tomadas:
+  - D-145: extractChapterTitle re-exportada desde export-composer.ts (re-export de project-fs). Single source of truth, discoverable desde el módulo de export.
+  - D-146: slugify: NFD normalize + strip combining diacritical marks + lowercase + non-alphanum removed + spaces→hyphens + dedup hyphens + trim hyphens. Pura, sin side-effects.
+  - D-147: buildIndiceSection retorna null si items vacío (no header huérfano).
+  - D-148: IndiceItem = {title: string, slug: string}. Título para display, slug para href/id. Separados para estabilidad del enlace ante cambios de título.
+  - D-149: Anchor format en export: <a id="slug"></a>\n\n antes del contenido del capítulo. Compatibilidad máxima vs {#slug} (extensión Pandoc).
+  - D-150: TOC incluye solo capítulos kind='chapter' (no errors). Errores de lectura de chapter-error no aparecen en el índice.
+  - D-151: Slug basado en filename-sin-extensión (D-151). Estable ante cambios de título del capítulo. cap-01.md → cap-01.
+  - D-152: Frontend calcula todos los slugs, pasa chapterSlugs:Record<string,string> al command Rust. Rust solo inyecta texto, no tiene lógica de slugification.
+  - D-153: Orden en el export: prepend (portada+dedicatoria) → indice → capítulos (con anchors) → append (agradecimientos).
+- Pendientes relacionados:
+  - TOC con números de página o posición (si se agrega paginación en el futuro)
+  - Export a docx/pdf (tasks separadas)
+- Bugs encontrados: ninguno
+- Status: Done
 
 ### 2026-05-25 - F27 - Copyright fantasma en tab Libro: consistencia con D-141
 - Qué se hizo: el tab Libro dejaba ver la sección de copyright cuando el único valor era la licencia default ("Todos los derechos reservados") sin año ni titular reales, inconsistente con la lógica que el export implementó en F26 (D-141). Extraída la regla a función pura exportada hasRealCopyright() en export-composer.ts. BookFrontmatterCopyright ahora usa el helper como guard. Una sola fuente de verdad para la regla en export y renderizado visual.

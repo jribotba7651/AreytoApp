@@ -5,8 +5,12 @@ import {
   buildPortadaSection,
   buildDedicatoriaSection,
   buildAgradecimientosSection,
+  buildIndiceSection,
+  extractChapterTitle,
+  slugify,
   SECTION_SEPARATOR,
 } from '@/lib/export-composer';
+import type { IndiceItem } from '@/lib/export-composer';
 
 export type ExportScope = 'terminados' | 'en-progreso' | 'ambos';
 
@@ -17,9 +21,40 @@ export interface ExportOptions {
 export interface ExportAdditions {
   prependContent: string | null;
   appendContent: string | null;
+  indiceContent: string | null;
+  chapterSlugs: Record<string, string>;
 }
 
-export async function buildExportAdditions(projectPath: string): Promise<ExportAdditions> {
+interface RawDirEntry {
+  name: string;
+  is_file: boolean;
+  is_dir: boolean;
+}
+
+async function listSortedMdFilenames(dirPath: string): Promise<string[]> {
+  try {
+    const entries = await invoke<RawDirEntry[]>('list_dir', { path: dirPath });
+    return entries
+      .filter((e) => e.is_file && e.name.endsWith('.md'))
+      .map((e) => e.name)
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+async function readFileContent(filePath: string): Promise<string | null> {
+  try {
+    return await invoke<string>('read_text_file', { path: filePath });
+  } catch {
+    return null;
+  }
+}
+
+export async function buildExportAdditions(
+  projectPath: string,
+  opts: ExportOptions
+): Promise<ExportAdditions> {
   const [titulo, copyright, dedicatoria, agradecimientos] = await Promise.all([
     readTitulo(projectPath),
     readCopyright(projectPath),
@@ -27,14 +62,37 @@ export async function buildExportAdditions(projectPath: string): Promise<ExportA
     readAgradecimientos(projectPath),
   ]);
 
+  const chapterDirs: string[] = [];
+  if (opts.scope === 'terminados' || opts.scope === 'ambos') {
+    chapterDirs.push(`${projectPath}/capitulos-terminados`);
+  }
+  if (opts.scope === 'en-progreso' || opts.scope === 'ambos') {
+    chapterDirs.push(`${projectPath}/capitulos`);
+  }
+
+  const indiceItems: IndiceItem[] = [];
+  const chapterSlugs: Record<string, string> = {};
+
+  for (const dir of chapterDirs) {
+    const filenames = await listSortedMdFilenames(dir);
+    for (const filename of filenames) {
+      const content = await readFileContent(`${dir}/${filename}`);
+      const title = extractChapterTitle(content ?? '', filename);
+      const slug = slugify(filename.replace(/\.md$/, ''));
+      indiceItems.push({ title, slug });
+      chapterSlugs[filename] = slug;
+    }
+  }
+
   const portada = buildPortadaSection(titulo, copyright);
   const dedicatoriaSection = buildDedicatoriaSection(dedicatoria?.contenido);
   const agradecimientosSection = buildAgradecimientosSection(agradecimientos?.contenido);
+  const indiceContent = buildIndiceSection(indiceItems);
 
   const prependParts = [portada, dedicatoriaSection].filter((s): s is string => s !== null);
   const prependContent = prependParts.length > 0 ? prependParts.join(SECTION_SEPARATOR) : null;
 
-  return { prependContent, appendContent: agradecimientosSection };
+  return { prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs };
 }
 
 export async function exportBookMarkdown(
@@ -44,7 +102,10 @@ export async function exportBookMarkdown(
 ): Promise<void> {
   const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
   const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
-  const { prependContent, appendContent } = await buildExportAdditions(projectPath);
+  const { prependContent, appendContent, indiceContent, chapterSlugs } = await buildExportAdditions(
+    projectPath,
+    opts
+  );
 
   await invoke('export_book_markdown', {
     projectPath,
@@ -53,13 +114,9 @@ export async function exportBookMarkdown(
     outputPath,
     prependContent,
     appendContent,
+    indiceContent,
+    chapterSlugs,
   });
-}
-
-interface RawDirEntry {
-  name: string;
-  is_file: boolean;
-  is_dir: boolean;
 }
 
 async function countMdInDir(dirPath: string): Promise<number> {

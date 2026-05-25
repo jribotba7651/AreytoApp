@@ -5,6 +5,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { loadBook } from '@/lib/book-loader';
 import { exportBookMarkdown } from '@/lib/export-service';
+import { slugify } from '@/lib/export-composer';
 import BookHeader from '@/components/book/BookHeader';
 import BookChapter from '@/components/book/BookChapter';
 import BookChapterError from '@/components/book/BookChapterError';
@@ -12,6 +13,7 @@ import BookEmptyState from '@/components/book/BookEmptyState';
 import BookFrontmatterTitle from '@/components/book/BookFrontmatterTitle';
 import BookFrontmatterCopyright from '@/components/book/BookFrontmatterCopyright';
 import BookFrontmatterDedicatoria from '@/components/book/BookFrontmatterDedicatoria';
+import BookIndice from '@/components/book/BookIndice';
 import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgradecimientos';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import type { BookData } from '@/types/book';
@@ -98,6 +100,13 @@ function BookTabContent() {
     const { titulo, copyright, dedicatoria } = bookData.frontmatter;
     const { agradecimientos } = bookData.backmatter;
 
+    const tocItems = bookData.sections
+      .filter((s) => s.kind === 'chapter')
+      .map((s) => ({
+        title: s.chapter.title,
+        slug: slugify(s.chapter.filename.replace(/\.md$/, '')),
+      }));
+
     return (
       <>
         {titulo && titulo.titulo ? (
@@ -109,15 +118,18 @@ function BookTabContent() {
           <BookFrontmatterCopyright copyright={copyright} />
         )}
         {dedicatoria && <BookFrontmatterDedicatoria dedicatoria={dedicatoria} />}
+        <BookIndice items={tocItems} />
         <div className="pb-24">
           {bookData.sections.map((section, idx) => {
             const isLast = idx === bookData.sections.length - 1;
             if (section.kind === 'chapter') {
+              const slug = slugify(section.chapter.filename.replace(/\.md$/, ''));
               return (
                 <BookChapter
                   key={section.chapter.path}
                   content={section.content}
                   isLast={isLast}
+                  slug={slug}
                 />
               );
             }

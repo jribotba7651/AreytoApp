@@ -3,11 +3,12 @@ import BookMarkdown from './BookMarkdown';
 interface BookChapterProps {
   content: string;
   isLast: boolean;
+  slug?: string;
 }
 
-function BookChapter({ content, isLast }: BookChapterProps) {
+function BookChapter({ content, isLast, slug }: BookChapterProps) {
   return (
-    <div className={!isLast ? 'border-b border-border-subtle' : ''}>
+    <div id={slug} className={!isLast ? 'border-b border-border-subtle' : ''}>
       <BookMarkdown content={content} maxWidth={700} />
     </div>
   );
