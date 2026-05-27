@@ -27,6 +27,8 @@ pub struct GlobalSettings {
     pub editor_view_mode: Option<String>,
     #[serde(default = "default_version")]
     pub version: u32,
+    #[serde(default = "default_auto_commit")]
+    pub auto_commit: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -40,6 +42,10 @@ pub struct ProjectState {
 
 fn default_version() -> u32 {
     1
+}
+
+fn default_auto_commit() -> bool {
+    true
 }
 
 fn global_settings_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -61,7 +67,13 @@ pub fn read_global_settings(app: tauri::AppHandle) -> Result<GlobalSettings, Str
         });
     }
     let content = fs::read_to_string(&path).map_err(|e| format!("Read failed: {}", e))?;
-    serde_json::from_str(&content).map_err(|e| format!("Parse failed: {}", e))
+    match serde_json::from_str(&content) {
+        Ok(s) => Ok(s),
+        Err(e) => {
+            eprintln!("[areyto] settings.json parse warning: {}. Using defaults.", e);
+            Ok(GlobalSettings { version: 1, ..Default::default() })
+        }
+    }
 }
 
 #[tauri::command]
@@ -123,4 +135,35 @@ pub fn write_project_state(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_auto_commit_es_true_al_deserializar() {
+        // Cuando auto_commit falta en el JSON (archivo de versión anterior), serde usa el default (true)
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert!(s.auto_commit, "auto_commit debe ser true cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_auto_commit_false() {
+        let original = GlobalSettings {
+            version: 1,
+            auto_commit: false,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert!(!parsed.auto_commit, "auto_commit false debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn json_corrupto_retorna_error_de_serde() {
+        let result: Result<GlobalSettings, _> = serde_json::from_str("{ corrupto json !!!}");
+        assert!(result.is_err(), "JSON corrupto debe retornar error de deserialización");
+    }
 }

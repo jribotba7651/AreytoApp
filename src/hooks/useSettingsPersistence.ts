@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { writeGlobalSettings, writeProjectState } from '@/lib/settings';
 import type { GlobalSettings } from '@/lib/settings';
 
@@ -20,6 +21,7 @@ export function useSettingsPersistence() {
   const terminalSize = useLayoutStore((s) => s.sizes.terminal);
   const versionsSize = useLayoutStore((s) => s.sizes.versions);
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
+  const autoCommit = useSettingsStore((s) => s.autoCommit);
 
   const persistGlobal = useRef(
     debounce((settings: GlobalSettings) => {
@@ -48,9 +50,10 @@ export function useSettingsPersistence() {
         versions: versionsSize,
       },
       editorViewMode,
+      autoCommit,
       version: 1,
     });
-  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode]);
+  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit]);
 
   useEffect(() => {
     if (!currentProjectPath || !activeChapterPath) return;

@@ -450,6 +450,75 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - D-142 a D-144 documentadas arriba en F27 Copyright fantasma en tab Libro
 - D-154 a D-161 documentadas arriba en F29 Editor de metadata del libro
 
+### 2026-05-26 - F31 - Settings infraestructura + auto-commit toggle (V1)
+- Qué se hizo: Tab "Ajustes" nuevo en la nav (último, ⌘4). Campo `auto_commit: bool` (default true) agregado a `GlobalSettings` (Rust y TS, infraestructura existente extendida). Store Zustand `settingsStore` con `load()` y `setAutoCommit()` que persiste inmediatamente. Carga al arranque en `App.tsx`. `useSettingsPersistence` incluye `autoCommit` en sus writes globales. `useAutosave` respeta el flag: si false, guarda el archivo en disco pero no dispara commit Git; si settings no cargado todavía (loaded=false), trata como true para no perder commits durante el arranque.
+- Archivos creados:
+  - src/stores/settingsStore.ts
+  - src/stores/settingsStore.test.ts (6 tests)
+  - src/components/settings/SettingsTabContent.tsx
+- Archivos modificados:
+  - src-tauri/src/settings.rs (campo auto_commit con #[serde(default = "default_auto_commit")] → true; fix JSON corrupto cae a defaults; 3 tests nuevos)
+  - src/lib/settings.ts (autoCommit?: boolean en GlobalSettings)
+  - src/lib/settings.test.ts (4 tests nuevos)
+  - src/types/layout.ts (Tab += 'ajustes')
+  - src/components/layout/TopTabs.tsx (tab Ajustes ⌘4 al final)
+  - src/App.tsx (settingsStore.load() al arrancar)
+  - src/hooks/useSettingsPersistence.ts (autoCommit en writes globales)
+  - src/hooks/useAutosave.ts (verifica autoCommit antes de commitear)
+  - src/hooks/useAutosave.test.ts (3 tests de integración)
+- Decisiones tomadas:
+  - D-172: Settings globales por usuario. Extender `GlobalSettings` existente en vez de crear struct UserSettings paralelo (la infraestructura ya existe; duplicar sin ganancia).
+  - D-173: UI como tab nuevo en la nav (Ajustes ⌘4). Mismo patrón que tabs existentes, no ventana separada.
+  - D-174: V1 implementa infraestructura + 1 setting (autoCommit). Otros settings (tema, fuentes, idioma default, intervalo autosave, carpeta export) quedan como deuda visible para tareas XS futuras que se enchufen a la misma maquinaria.
+  - D-175: Schema versionado desde el inicio ({version:1, ...}). Cambios futuros migran v1 → v2 sin perder defaults.
+  - D-176: Defaults seguros. autoCommit=true preserva comportamiento previo. Settings null durante arranque se trata como true. No se pierde commit en la transición.
+  - D-177: Frontend decide skip-commit, Rust no cambia. El command Rust de commit sigue ejecutando cuando se invoca. Rust agnóstico de preferencias de usuario.
+- Pendientes relacionados:
+  - F-futura XS: setting intervalo de autosave (250ms/500ms/1s/2s/5s)
+  - F-futura M: setting tema (claro/oscuro/auto-sistema) con CSS variables
+  - F-futura S: setting fuente del editor (familia + tamaño)
+  - F-futura S: setting fuente del tab Libro
+  - F-futura S: setting idioma default proyectos nuevos (override del 'en' hardcoded de F29)
+  - F-futura S: setting carpeta default Save As del export
+- Tests: 260 TS + 21 Rust
+- Bugs encontrados: ninguno
+
+### 2026-05-25 - F30 - Export docx vía pandoc embebido (sidecar)
+- Qué se hizo: Botón "Exportar a Word" nuevo en header del tab Libro al lado del Exportar (markdown) existente. Click abre modal `ExportBookDocxDialog` con selector de scope (Solo terminados / Solo en progreso / Ambos). Confirmar dispara Save As con default {proyecto}-YYYY-MM-DD.docx, escribe el archivo invocando pandoc embebido en el bundle vía Tauri sidecar. Binarios pandoc 3.x ARM64 (179MB) e Intel (114MB) agregados al repo bajo git-lfs en `src-tauri/binaries/`, configurados como `externalBin` en `tauri.conf.json`. Capability `shell:allow-execute` con scope al sidecar. Refactor: `build_full_markdown` extraído como helper compartido en Rust entre `export_book_markdown` (F23/F26/F28/F29) y `export_book_docx` (F30), una sola fuente de verdad del orden de secciones del export. Input a pandoc: el mismo .md unificado que F26-F29 generan, incluyendo el bloque pandoc-ready YAML (F29) al inicio que pandoc consume automáticamente para portada y metadata catalográfica del .docx. Smoke test visual aprobado en Pages.
+- Archivos creados:
+  - src-tauri/binaries/pandoc-aarch64-apple-darwin (179MB, LFS)
+  - src-tauri/binaries/pandoc-x86_64-apple-darwin (114MB, LFS)
+  - .gitattributes (LFS pattern para los binarios)
+  - src/components/book/ExportBookDocxDialog.tsx
+  - src/components/book/ExportBookDocxDialog.test.tsx (6 tests)
+- Archivos modificados:
+  - src-tauri/src/export.rs (build_full_markdown helper extraído; export_book_docx async command con AppHandle + shell sidecar; 2 tests F30: test_export_docx_falla_si_no_hay_contenido pasa real, test_export_docx_basico #[ignore] por requerir runtime Tauri con sidecar)
+  - src-tauri/src/lib.rs (tauri_plugin_shell::init() + export_book_docx en handler)
+  - src-tauri/Cargo.toml + Cargo.lock (tauri-plugin-shell)
+  - src-tauri/tauri.conf.json (externalBin: ["binaries/pandoc"])
+  - src-tauri/capabilities/default.json (shell:allow-execute sidecar pandoc)
+  - src/lib/export-service.ts (exportBookDocx)
+  - src/lib/export-service.test.ts (5 tests nuevos)
+  - src/components/layout/BookTabContent.tsx (botón Exportar a Word + icono FileText + modal docx)
+  - package.json + pnpm-lock.yaml (@tauri-apps/plugin-shell)
+- Decisiones tomadas:
+  - D-162: Pandoc embebido en el bundle como Tauri sidecar (Opción 1). Out-of-the-box sin instalación adicional.
+  - D-163: Binarios separados para macOS Intel + Apple Silicon. No existe universal binary oficial de pandoc.
+  - D-164: Sin notarization en V1 (firma ad-hoc local). F futura para distribución pública.
+  - D-165: Invocación via Tauri sidecar (AppHandle.shell().sidecar()). Approach canónico de Tauri 2.
+  - D-166: Sin reference-doc custom de pandoc. Estilo default profesional.
+  - D-167: V1 solo docx. PDF requiere LaTeX, EPUB requiere más metadata. Tasks separadas.
+  - D-168: UI 3A: botón separado al lado del Exportar markdown existente.
+  - D-169: build_full_markdown helper compartido en Rust. Una sola fuente de verdad del orden del export.
+  - D-170: Markdown intermedio se escribe a temp file y se pasa a pandoc como argumento, no stdin. Mejor diagnóstico.
+  - D-171: git-lfs para binarios sidecar pandoc. .gitattributes con patrón src-tauri/binaries/*-apple-darwin filter=lfs. 1GB/mes gratis de GitHub.
+- Pendientes relacionados:
+  - test_export_docx_basico activado cuando exista harness de integración Tauri
+  - Notarization del bundle para distribución pública
+  - Strippear anchors <a id="cap-XX"></a> antes de pandoc si se ven feos (smoke mostró que no son visibles, deuda no urgente)
+- Tests: 247 TS + 18 Rust (1 ignored)
+- Bugs encontrados: ninguno
+
 ### 2026-05-25 - F29 - Editor de metadata del libro (book details)
 - Qué se hizo: editor estructurado nuevo en sidebar (sección FRONTMATTER, item "Detalles") para metadata catalográfica del libro: idioma (default 'en'), descripción, editorial, ISBN, género, fecha de publicación. Archivo nuevo `frontmatter/metadata.yaml` (YAML puro sin delimitadores, no se renderiza visualmente). Export markdown ahora incluye bloque YAML pandoc-ready al inicio del .md, combinando campos de titulo+copyright+metadata con nombres pandoc estándar. Portada visible y resto del export sin cambios. Pre-requisito de export docx (F30 futura).
 - Archivos creados/modificados:

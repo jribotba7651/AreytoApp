@@ -14,6 +14,7 @@ const TABS: TabDef[] = [
   { id: 'capitulo', label: 'Capítulo Activo', shortcutHint: '⌘1' },
   { id: 'libro', label: 'Libro', shortcutHint: '⌘2' },
   { id: 'terminados', label: 'Terminados', shortcutHint: '⌘3' },
+  { id: 'ajustes', label: 'Ajustes', shortcutHint: '⌘4' },
 ];
 
 const STATUS_LABEL: Record<SaveStatus, string> = {

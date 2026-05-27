@@ -3,9 +3,11 @@ import TopTabs from '@/components/layout/TopTabs';
 import ChapterTabContent from '@/components/layout/ChapterTabContent';
 import BookTabContent from '@/components/layout/BookTabContent';
 import FinishedTabContent from '@/components/layout/FinishedTabContent';
+import SettingsTabContent from '@/components/settings/SettingsTabContent';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
 import { readGlobalSettings, pathExists } from '@/lib/settings';
@@ -19,6 +21,10 @@ function App() {
 
   useKeyboardShortcuts();
   useSettingsPersistence();
+
+  useEffect(() => {
+    useSettingsStore.getState().load();
+  }, []);
 
   useEffect(() => {
     async function restoreSession() {
@@ -80,6 +86,7 @@ function App() {
         {activeTab === 'capitulo' && <ChapterTabContent />}
         {activeTab === 'libro' && <BookTabContent />}
         {activeTab === 'terminados' && <FinishedTabContent />}
+        {activeTab === 'ajustes' && <SettingsTabContent />}
       </main>
     </div>
   );
