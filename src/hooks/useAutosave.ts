@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { writeChapter } from '@/lib/project-fs';
 import { commitChanges } from '@/lib/versioning';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { SaveStatus } from '@/stores/projectStore';
 
 interface UseAutosaveOptions {
@@ -51,16 +52,20 @@ export function useAutosave({
       onStatusChangeRef.current('saved');
 
       if (saveProjPath) {
-        const commitResult = await commitChanges(saveProjPath, savePath);
-        if (commitResult.ok && commitResult.value) {
-          const hash = commitResult.value;
-          const filename = savePath.split('/').pop() ?? savePath;
-          useProjectStore.getState().prependCommit({
-            hash,
-            shortHash: hash.slice(0, 7),
-            message: `autosave: ${filename}`,
-            timestamp: new Date().toISOString(),
-          });
+        const { autoCommit, loaded } = useSettingsStore.getState();
+        const shouldCommit = !loaded || autoCommit;
+        if (shouldCommit) {
+          const commitResult = await commitChanges(saveProjPath, savePath);
+          if (commitResult.ok && commitResult.value) {
+            const hash = commitResult.value;
+            const filename = savePath.split('/').pop() ?? savePath;
+            useProjectStore.getState().prependCommit({
+              hash,
+              shortHash: hash.slice(0, 7),
+              message: `autosave: ${filename}`,
+              timestamp: new Date().toISOString(),
+            });
+          }
         }
       }
     } else {

@@ -66,3 +66,40 @@ describe('readProjectState', () => {
     expect(result.lastActiveChapterPath).toBeUndefined();
   });
 });
+
+describe('readGlobalSettings - campo autoCommit', () => {
+  it('retorna autoCommit true cuando está en los settings', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, autoCommit: true });
+
+    const result = await readGlobalSettings();
+
+    expect(result.autoCommit).toBe(true);
+  });
+
+  it('retorna autoCommit false cuando está en los settings', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, autoCommit: false });
+
+    const result = await readGlobalSettings();
+
+    expect(result.autoCommit).toBe(false);
+  });
+
+  it('retorna autoCommit undefined cuando no está en el archivo (Rust retorna default)', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    const result = await readGlobalSettings();
+
+    expect(result.autoCommit).toBeUndefined();
+  });
+});
+
+describe('writeGlobalSettings - campo autoCommit', () => {
+  it('serializa autoCommit false al llamar write', async () => {
+    mockInvoke.mockResolvedValueOnce(undefined);
+    const settings = { panels: {}, version: 1, autoCommit: false };
+
+    await writeGlobalSettings(settings);
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', { settings });
+  });
+});

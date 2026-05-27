@@ -12,6 +12,7 @@ export interface GlobalSettings {
   panels: PanelSizes;
   editorViewMode?: 'edit' | 'preview';
   version: number;
+  autoCommit?: boolean;
 }
 
 export interface ProjectState {

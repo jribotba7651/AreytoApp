@@ -6,14 +6,30 @@ vi.mock('@/lib/project-fs', () => ({
   writeChapter: vi.fn(),
 }));
 
+vi.mock('@/lib/versioning', () => ({
+  commitChanges: vi.fn(),
+}));
+
+vi.mock('@/stores/settingsStore', () => ({
+  useSettingsStore: {
+    getState: vi.fn(),
+  },
+}));
+
 import { writeChapter } from '@/lib/project-fs';
+import { commitChanges } from '@/lib/versioning';
+import { useSettingsStore } from '@/stores/settingsStore';
+
 const mockWriteChapter = vi.mocked(writeChapter);
+const mockCommitChanges = vi.mocked(commitChanges);
+const mockGetState = vi.mocked(useSettingsStore.getState);
 
 const PATH = '/tmp/mi-libro/capitulos/cap-01.md';
 
 beforeEach(() => {
   vi.clearAllMocks();
   vi.useFakeTimers();
+  mockGetState.mockReturnValue({ autoCommit: true, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
 });
 
 afterEach(() => {
@@ -127,5 +143,64 @@ describe('useAutosave', () => {
     await vi.advanceTimersByTimeAsync(2500);
 
     expect(mockWriteChapter.mock.calls.length).toBe(prevCallCount);
+  });
+});
+
+describe('useAutosave - integración con autoCommit', () => {
+  const PROJECT = '/tmp/mi-libro';
+
+  it('no invoca commitChanges si autoCommit es false', async () => {
+    mockGetState.mockReturnValue({ autoCommit: false, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
+    mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
+    const onStatusChange = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ content }: { content: string }) =>
+        useAutosave({ content, chapterPath: PATH, projectPath: PROJECT, onStatusChange, delay: 500 }),
+      { initialProps: { content: 'inicio' } }
+    );
+
+    rerender({ content: 'cambio' });
+    await vi.advanceTimersByTimeAsync(600);
+
+    expect(mockWriteChapter).toHaveBeenCalled();
+    expect(mockCommitChanges).not.toHaveBeenCalled();
+  });
+
+  it('invoca commitChanges si autoCommit es true', async () => {
+    mockGetState.mockReturnValue({ autoCommit: true, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
+    mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
+    mockCommitChanges.mockResolvedValue({ ok: true, value: 'abc1234' });
+    const onStatusChange = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ content }: { content: string }) =>
+        useAutosave({ content, chapterPath: PATH, projectPath: PROJECT, onStatusChange, delay: 500 }),
+      { initialProps: { content: 'inicio' } }
+    );
+
+    rerender({ content: 'cambio' });
+    await vi.advanceTimersByTimeAsync(600);
+
+    expect(mockWriteChapter).toHaveBeenCalled();
+    expect(mockCommitChanges).toHaveBeenCalledWith(PROJECT, PATH);
+  });
+
+  it('invoca commitChanges si settings no está cargado (loaded=false)', async () => {
+    mockGetState.mockReturnValue({ autoCommit: true, loaded: false } as ReturnType<typeof useSettingsStore.getState>);
+    mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
+    mockCommitChanges.mockResolvedValue({ ok: true, value: 'abc1234' });
+    const onStatusChange = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ content }: { content: string }) =>
+        useAutosave({ content, chapterPath: PATH, projectPath: PROJECT, onStatusChange, delay: 500 }),
+      { initialProps: { content: 'inicio' } }
+    );
+
+    rerender({ content: 'cambio' });
+    await vi.advanceTimersByTimeAsync(600);
+
+    expect(mockCommitChanges).toHaveBeenCalled();
   });
 });
