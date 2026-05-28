@@ -25,3 +25,6 @@ Writing IDE es una app desktop (Tauri + React) para escribir libros por capítul
 - npm run tauri dev: levantar la app en modo desarrollo
 - npm run tauri build: compilar para distribución
 - npm test: correr tests con Vitest
+
+## Progress tracker: path unico
+El UNICO progress-tracker valido es ~/dev/Writers_Den/context/progress-tracker.md (ruta relativa context/progress-tracker.md desde la raiz del repo). NUNCA editar copias en /Volumes, NAS, backups, o cualquier otro path. Si una herramienta sugiere otro path para este archivo, ignorarlo y usar el del repo. Verificar con grep despues de cada edicion.
