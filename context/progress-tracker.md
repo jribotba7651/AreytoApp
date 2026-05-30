@@ -947,15 +947,3 @@ Ninguno.
 ### Future tasks (descubiertas en smoke F32)
 - BUG: cmd+4 no abre tab Ajustes (regresion introducida en F31; navegacion manual si funciona)
 - UI: contraste del panel VERSIONES casi ilegible; pase de visibilidad
-
-### 2026-05-30 - F32: Intervalo de autosave configurable
-- Que se hizo: campo autosave_interval_ms en GlobalSettings (Rust+TS), serde default 500, clamp [500,300000]. settingsStore.setAutosaveIntervalMs persiste inmediato. useAutosave lee del store y re-arma el timer en vivo al cambiar; null -> fallback AUTOSAVE_DELAY_MS=500. Tab Ajustes seccion Editor con dropdown de presets fijos 2/5/15/30s, default visible 2s. Legacy 500 en disco muestra 2s sin warning.
-- Archivos: src-tauri/src/settings.rs, src/lib/settings.ts, src/stores/settingsStore.ts, src/hooks/useSettingsPersistence.ts, src/hooks/useAutosave.ts, src/components/settings/SettingsTabContent.tsx, src/components/panels/EditorPanel.tsx (+ tests)
-- Tests: 272 TS, 24 Rust (1 ignored)
-- Decisiones: D-178 clamp [500,300000]. D-179 presets fijos 2/5/15/30s, piso 2s, no se expone el default crudo. D-180 reactividad del timer en EditorPanel.
-- Commit: 396a288
-- Smoke: re-arme en vivo validado (2s rafaga vs 30s espera), persistencia OK, dropdown sin 500ms.
-
-### Future tasks (descubiertas en smoke F32)
-- BUG: cmd+4 no abre tab Ajustes (regresion introducida en F31; navegacion manual si funciona)
-- UI: contraste del panel VERSIONES casi ilegible; pase de visibilidad
