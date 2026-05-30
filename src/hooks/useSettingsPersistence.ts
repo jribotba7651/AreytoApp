@@ -22,6 +22,7 @@ export function useSettingsPersistence() {
   const versionsSize = useLayoutStore((s) => s.sizes.versions);
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
   const autoCommit = useSettingsStore((s) => s.autoCommit);
+  const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
 
   const persistGlobal = useRef(
     debounce((settings: GlobalSettings) => {
@@ -51,9 +52,10 @@ export function useSettingsPersistence() {
       },
       editorViewMode,
       autoCommit,
+      autosaveIntervalMs,
       version: 1,
     });
-  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit]);
+  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs]);
 
   useEffect(() => {
     if (!currentProjectPath || !activeChapterPath) return;

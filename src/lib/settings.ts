@@ -13,6 +13,7 @@ export interface GlobalSettings {
   editorViewMode?: 'edit' | 'preview';
   version: number;
   autoCommit?: boolean;
+  autosaveIntervalMs?: number;
 }
 
 export interface ProjectState {
