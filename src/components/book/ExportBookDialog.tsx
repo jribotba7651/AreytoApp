@@ -18,8 +18,7 @@ function ExportBookDialog({ onClose, onExport, loading }: ExportBookDialogProps)
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      className="fixed inset-0 flex items-center justify-center z-50 bg-black/60"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="bg-bg-tertiary border border-border-default rounded-lg p-6 w-full max-w-md mx-4">

@@ -952,5 +952,8 @@ Ninguno.
 - Commit: 2990f44
 - tsc: limpio
 
-### Future tasks (descubiertas en smoke F32)
-- UI: contraste del panel VERSIONES casi ilegible; pase de visibilidad
+### 2026-05-30 - F34: Tema claro neutro + sistema de design tokens
+- Qué se hizo: virar la app de oscuro a claro neutro (stone palette). Paleta nueva en globals.css (@theme + :root): bg-primary #FAFAF9, bg-secondary #F5F5F4, bg-tertiary #EDECEA, bg-editor #FFFFFF; texto primary #1C1917, secondary #57534E, tertiary #78716C, editor #292524; accent #475569, accent-muted #94A3B8; bordes #E7E5E4/#D6D3D1/#A8A29E; estados: success #16A34A, warning #B45309, error #DC2626, info #2563EB. bg-terminal #0a0a0c sin cambio (D-058). Los 5 modales con backdrop rgba inline pasados a bg-black/60 (Tailwind utility). editor-theme.ts sin cambios de código; los vars CSS actualizan la selección y coloración del editor automáticamente. ui-context.md actualizado. Bug de contraste del panel VERSIONES absorbido: text-text-secondary (#57534E) sobre bg-secondary (#F5F5F4) da 6.9:1, text-text-tertiary (#78716C, stone-500) da ~4.1:1.
+- Archivos: src/styles/globals.css, context/ui-context.md, src/components/welcome/CreateProjectModal.tsx, src/components/sidebar/CloseChapterModal.tsx, src/components/versions/RestoreConfirmModal.tsx, src/components/terminados/ReopenChapterModal.tsx, src/components/book/ExportBookDialog.tsx, src/components/book/ExportBookDocxDialog.tsx
+- Tests: 272 TS (sin cambio), Rust sin cambio
+- Decisiones: D-181 nombres de token existentes mantenidos, valores actualizados (sin renombrar para no romper componentes). D-182 text-tertiary = stone-500 (#78716C) en vez de spec stone-400 (#A8A29E) para WCAG AA en panel VERSIONES (~4.1:1 vs 2.2:1). D-183 accent-muted = slate-400 (#94A3B8): visible como fondo de botón primario (5.4:1) y selección del editor al 50% de opacidad. D-184 backdrops de modales como bg-black/60 en lugar de rgba inline, elimina últimos colores crudos en componentes.

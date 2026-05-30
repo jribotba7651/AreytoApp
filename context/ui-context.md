@@ -1,38 +1,38 @@
 # Writing IDE - UI Context
 
 ## Filosofía visual
-Editor técnico que respira como un libro. Dark mode por default (estamos escribiendo de noche o con luz baja). Tipografía serif en el área de texto, monospace en terminales, sans-serif en UI chrome. Sin gradientes, sin animaciones excesivas, sin sombras dramáticas. Quieto, enfocado, hermoso.
+Editor técnico que respira como un libro. Tema claro neutro (warm stone). Tipografía serif en el área de texto, monospace en terminales, sans-serif en UI chrome. Sin gradientes, sin animaciones excesivas, sin sombras dramáticas. Quieto, enfocado, hermoso. El terminal queda oscuro como excepción deliberada (D-058).
 
-## Tema (dark mode por default)
+## Tema (claro neutro, stone palette)
 
 ### Colores base
-- --bg-primary: #18181b (fondo principal de la app)
-- --bg-secondary: #1f1f23 (paneles, sidebar)
-- --bg-tertiary: #27272a (cards, modales)
-- --bg-editor: #1b1b1f (área del editor, ligeramente diferente para foco)
-- --bg-terminal: #0a0a0c (terminales más oscuros)
+- --bg-primary: #FAFAF9 (fondo principal de la app, stone-50)
+- --bg-secondary: #F5F5F4 (paneles, sidebar, stone-100)
+- --bg-tertiary: #EDECEA (cards, inputs, modales, stone ~150)
+- --bg-editor: #FFFFFF (área del editor, blanco limpio)
+- --bg-terminal: #0a0a0c (terminales, siempre oscuro, D-058)
 
 ### Borders
-- --border-subtle: #26262a (separadores sutiles)
-- --border-default: #34343a (bordes visibles)
-- --border-strong: #45454d (focus states)
+- --border-subtle: #E7E5E4 (separadores sutiles, stone-200)
+- --border-default: #D6D3D1 (bordes visibles, stone-300)
+- --border-strong: #A8A29E (focus states, stone-400)
 
 ### Texto
-- --text-primary: #e8e8ec (texto principal)
-- --text-secondary: #a8a8b0 (labels, metadata)
-- --text-tertiary: #6c6c75 (placeholders, disabled)
-- --text-editor: #d4d4dc (texto del editor, ligeramente más suave)
+- --text-primary: #1C1917 (texto principal, stone-900)
+- --text-secondary: #57534E (labels, metadata, stone-600)
+- --text-tertiary: #78716C (placeholders, disabled, stone-500)
+- --text-editor: #292524 (texto del editor, stone-800, softer para lectura larga)
 
 ### Accent
-- --accent: #7c8aa8 (acento principal, azul-gris apagado)
-- --accent-hover: #93a1c0
-- --accent-muted: #4a5468
+- --accent: #475569 (acento principal, slate-600)
+- --accent-hover: #334155 (slate-700)
+- --accent-muted: #94A3B8 (slate-400, fondo de botones primarios y selección del editor)
 
 ### Estados
-- --success: #6b9a7e
-- --warning: #c4a572
-- --error: #b07070
-- --info: #7a93b8
+- --success: #16A34A (green-600)
+- --warning: #B45309 (amber-700)
+- --error: #DC2626 (red-600)
+- --info: #2563EB (blue-600)
 
 ### Status de capítulo
 - En progreso: --text-primary
@@ -83,7 +83,7 @@ Escala de Tailwind con preferencia por: 1, 2, 3, 4, 6, 8, 12, 16, 24. Evitar val
 - Padding 8px 16px
 
 ### Modal/Dialog
-- Backdrop bg #000 con opacity 0.6
+- Backdrop bg-black/60 (Tailwind utility, sin colores crudos)
 - Modal bg-tertiary, border-default
 - Border-radius 8px
 - Padding 24px
