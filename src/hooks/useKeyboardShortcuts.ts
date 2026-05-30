@@ -44,6 +44,11 @@ export function useKeyboardShortcuts() {
         layout.setActiveTab('terminados');
         return;
       }
+      if (matchShortcut(e, SHORTCUTS.TAB_SETTINGS)) {
+        e.preventDefault();
+        layout.setActiveTab('ajustes');
+        return;
+      }
       if (matchShortcut(e, SHORTCUTS.REFRESH)) {
         e.preventDefault();
         await refreshChapters(project.currentProject);
