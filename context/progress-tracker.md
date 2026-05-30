@@ -949,6 +949,7 @@ Ninguno.
 - Archivos: src/lib/keyboard-shortcuts.ts, src/hooks/useKeyboardShortcuts.ts, src/lib/keyboard-shortcuts.test.ts
 - Causa: TAB_SETTINGS nunca se añadió a SHORTCUTS en F31 aunque TopTabs.tsx ya mostraba el hint ⌘4. Omisión de registro.
 - Tests: 272 TS (sin cambio de conteo; el test nuevo reemplaza línea en suite existente)
+- Commit: 2990f44
 - tsc: limpio
 
 ### Future tasks (descubiertas en smoke F32)
