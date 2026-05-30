@@ -7,11 +7,8 @@ import TerminalPanel from '@/components/panels/TerminalPanel';
 import VersionsPanel from '@/components/panels/VersionsPanel';
 import { useLayoutStore } from '@/stores/layoutStore';
 
-const HANDLE_H =
-  'w-px hover:w-1 bg-border-subtle hover:bg-border-strong cursor-col-resize transition-all duration-150';
-
-const HANDLE_V =
-  'h-px hover:h-1 bg-border-subtle hover:bg-border-strong cursor-row-resize transition-all duration-150';
+const HANDLE_H = 'resize-handle-h';
+const HANDLE_V = 'resize-handle-v';
 
 function MiddlePanels() {
   const setSizes = useLayoutStore((s) => s.setSizes);
