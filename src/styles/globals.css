@@ -58,6 +58,103 @@
   --info: #2563EB;
 }
 
+/* F35 – Panel resize handles */
+.resize-handle-h {
+  position: relative;
+  width: 9px;
+  cursor: col-resize;
+  background: transparent;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.resize-handle-h::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background-color: var(--border-subtle);
+  transition: width 150ms, background-color 150ms;
+}
+
+.resize-handle-h:hover::before,
+.resize-handle-h[data-resize-handle-state="drag"]::before {
+  width: 2px;
+  background-color: var(--accent);
+}
+
+.resize-handle-h::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  background-image: radial-gradient(circle, var(--border-default) 1.5px, transparent 1.5px);
+  background-size: 4px 8px;
+  background-repeat: repeat-y;
+  opacity: 0;
+  transition: opacity 150ms;
+  pointer-events: none;
+}
+
+.resize-handle-h:hover::after,
+.resize-handle-h[data-resize-handle-state="drag"]::after {
+  opacity: 1;
+}
+
+.resize-handle-v {
+  position: relative;
+  height: 9px;
+  cursor: row-resize;
+  background: transparent;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.resize-handle-v::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+  background-color: var(--border-subtle);
+  transition: height 150ms, background-color 150ms;
+}
+
+.resize-handle-v:hover::before,
+.resize-handle-v[data-resize-handle-state="drag"]::before {
+  height: 2px;
+  background-color: var(--accent);
+}
+
+.resize-handle-v::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 4px;
+  width: 24px;
+  transform: translate(-50%, -50%);
+  background-image: radial-gradient(circle, var(--border-default) 1.5px, transparent 1.5px);
+  background-size: 8px 4px;
+  background-repeat: repeat-x;
+  opacity: 0;
+  transition: opacity 150ms;
+  pointer-events: none;
+}
+
+.resize-handle-v:hover::after,
+.resize-handle-v[data-resize-handle-state="drag"]::after {
+  opacity: 1;
+}
+
 html,
 body {
   margin: 0;
