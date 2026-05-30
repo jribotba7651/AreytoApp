@@ -2,33 +2,33 @@
 
 @theme {
   /* Background */
-  --color-bg-primary: #18181b;
-  --color-bg-secondary: #1f1f23;
-  --color-bg-tertiary: #27272a;
-  --color-bg-editor: #1b1b1f;
+  --color-bg-primary: #FAFAF9;
+  --color-bg-secondary: #F5F5F4;
+  --color-bg-tertiary: #EDECEA;
+  --color-bg-editor: #FFFFFF;
   --color-bg-terminal: #0a0a0c;
 
   /* Borders */
-  --color-border-subtle: #26262a;
-  --color-border-default: #34343a;
-  --color-border-strong: #45454d;
+  --color-border-subtle: #E7E5E4;
+  --color-border-default: #D6D3D1;
+  --color-border-strong: #A8A29E;
 
   /* Text */
-  --color-text-primary: #e8e8ec;
-  --color-text-secondary: #a8a8b0;
-  --color-text-tertiary: #6c6c75;
-  --color-text-editor: #d4d4dc;
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #57534E;
+  --color-text-tertiary: #78716C;
+  --color-text-editor: #292524;
 
   /* Accent */
-  --color-accent: #7c8aa8;
-  --color-accent-hover: #93a1c0;
-  --color-accent-muted: #4a5468;
+  --color-accent: #475569;
+  --color-accent-hover: #334155;
+  --color-accent-muted: #94A3B8;
 
   /* States */
-  --color-success: #6b9a7e;
-  --color-warning: #c4a572;
-  --color-error: #b07070;
-  --color-info: #7a93b8;
+  --color-success: #16A34A;
+  --color-warning: #B45309;
+  --color-error: #DC2626;
+  --color-info: #2563EB;
 
   /* Typography */
   --font-sans: Inter, system-ui, sans-serif;
@@ -37,25 +37,25 @@
 }
 
 :root {
-  --bg-primary: #18181b;
-  --bg-secondary: #1f1f23;
-  --bg-tertiary: #27272a;
-  --bg-editor: #1b1b1f;
+  --bg-primary: #FAFAF9;
+  --bg-secondary: #F5F5F4;
+  --bg-tertiary: #EDECEA;
+  --bg-editor: #FFFFFF;
   --bg-terminal: #0a0a0c;
-  --border-subtle: #26262a;
-  --border-default: #34343a;
-  --border-strong: #45454d;
-  --text-primary: #e8e8ec;
-  --text-secondary: #a8a8b0;
-  --text-tertiary: #6c6c75;
-  --text-editor: #d4d4dc;
-  --accent: #7c8aa8;
-  --accent-hover: #93a1c0;
-  --accent-muted: #4a5468;
-  --success: #6b9a7e;
-  --warning: #c4a572;
-  --error: #b07070;
-  --info: #7a93b8;
+  --border-subtle: #E7E5E4;
+  --border-default: #D6D3D1;
+  --border-strong: #A8A29E;
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --text-tertiary: #78716C;
+  --text-editor: #292524;
+  --accent: #475569;
+  --accent-hover: #334155;
+  --accent-muted: #94A3B8;
+  --success: #16A34A;
+  --warning: #B45309;
+  --error: #DC2626;
+  --info: #2563EB;
 }
 
 html,
