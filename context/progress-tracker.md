@@ -944,6 +944,12 @@ Ninguno.
 - Commit: 396a288
 - Smoke: re-arme en vivo validado (2s rafaga vs 30s espera), persistencia OK, dropdown sin 500ms.
 
+### 2026-05-30 - F33: Fix ⌘4 no abría tab Ajustes
+- Qué se hizo: TAB_SETTINGS: { key: '4', mod: true } añadido a SHORTCUTS. Handler if (matchShortcut(e, SHORTCUTS.TAB_SETTINGS)) → setActiveTab('ajustes') añadido en useKeyboardShortcuts.ts al mismo nivel que ⌘1/2/3. Test de formatShortcut extendido con TAB_SETTINGS → '⌘4'.
+- Archivos: src/lib/keyboard-shortcuts.ts, src/hooks/useKeyboardShortcuts.ts, src/lib/keyboard-shortcuts.test.ts
+- Causa: TAB_SETTINGS nunca se añadió a SHORTCUTS en F31 aunque TopTabs.tsx ya mostraba el hint ⌘4. Omisión de registro.
+- Tests: 272 TS (sin cambio de conteo; el test nuevo reemplaza línea en suite existente)
+- tsc: limpio
+
 ### Future tasks (descubiertas en smoke F32)
-- BUG: cmd+4 no abre tab Ajustes (regresion introducida en F31; navegacion manual si funciona)
 - UI: contraste del panel VERSIONES casi ilegible; pase de visibilidad

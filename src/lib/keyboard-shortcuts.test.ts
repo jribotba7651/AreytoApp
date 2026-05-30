@@ -17,6 +17,7 @@ describe('formatShortcut', () => {
     expect(formatShortcut(SHORTCUTS.SAVE)).toBe('⌘S');
     expect(formatShortcut(SHORTCUTS.NEW_CHAPTER)).toBe('⌘N');
     expect(formatShortcut(SHORTCUTS.TAB_CHAPTER)).toBe('⌘1');
+    expect(formatShortcut(SHORTCUTS.TAB_SETTINGS)).toBe('⌘4');
   });
 
   it('produce string correcto para mod+shift', () => {
