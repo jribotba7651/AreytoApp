@@ -957,3 +957,4 @@ Ninguno.
 - Archivos: src/styles/globals.css, context/ui-context.md, src/components/welcome/CreateProjectModal.tsx, src/components/sidebar/CloseChapterModal.tsx, src/components/versions/RestoreConfirmModal.tsx, src/components/terminados/ReopenChapterModal.tsx, src/components/book/ExportBookDialog.tsx, src/components/book/ExportBookDocxDialog.tsx
 - Tests: 272 TS (sin cambio), Rust sin cambio
 - Decisiones: D-181 nombres de token existentes mantenidos, valores actualizados (sin renombrar para no romper componentes). D-182 text-tertiary = stone-500 (#78716C) en vez de spec stone-400 (#A8A29E) para WCAG AA en panel VERSIONES (~4.1:1 vs 2.2:1). D-183 accent-muted = slate-400 (#94A3B8): visible como fondo de botón primario (5.4:1) y selección del editor al 50% de opacidad. D-184 backdrops de modales como bg-black/60 en lugar de rgba inline, elimina últimos colores crudos en componentes.
+- Commit: 5507d58
