@@ -29,7 +29,7 @@ const PATH = '/tmp/mi-libro/capitulos/cap-01.md';
 beforeEach(() => {
   vi.clearAllMocks();
   vi.useFakeTimers();
-  mockGetState.mockReturnValue({ autoCommit: true, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
+  mockGetState.mockReturnValue({ autoCommit: true, autosaveIntervalMs: 500, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
 });
 
 afterEach(() => {
@@ -187,7 +187,7 @@ describe('useAutosave - integración con autoCommit', () => {
   });
 
   it('invoca commitChanges si settings no está cargado (loaded=false)', async () => {
-    mockGetState.mockReturnValue({ autoCommit: true, loaded: false } as ReturnType<typeof useSettingsStore.getState>);
+    mockGetState.mockReturnValue({ autoCommit: true, autosaveIntervalMs: 500, loaded: false } as ReturnType<typeof useSettingsStore.getState>);
     mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
     mockCommitChanges.mockResolvedValue({ ok: true, value: 'abc1234' });
     const onStatusChange = vi.fn();
@@ -202,5 +202,29 @@ describe('useAutosave - integración con autoCommit', () => {
     await vi.advanceTimersByTimeAsync(600);
 
     expect(mockCommitChanges).toHaveBeenCalled();
+  });
+});
+
+describe('useAutosave - re-armado del timer al cambiar delay', () => {
+  it('re-arma el timer cuando delay cambia y guarda con el nuevo intervalo', async () => {
+    mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
+    const onStatusChange = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ content, delay }: { content: string; delay: number }) =>
+        useAutosave({ content, chapterPath: PATH, projectPath: null, onStatusChange, delay }),
+      { initialProps: { content: 'inicio', delay: 5000 } }
+    );
+
+    // Cambio de contenido con delay largo — sin guardar aún
+    rerender({ content: 'cambio', delay: 5000 });
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(mockWriteChapter).not.toHaveBeenCalled();
+
+    // Cambiar delay a 1000ms — re-arma el timer con nuevo intervalo
+    rerender({ content: 'cambio', delay: 1000 });
+    await vi.advanceTimersByTimeAsync(1100);
+
+    expect(mockWriteChapter).toHaveBeenCalledWith(PATH, 'cambio');
   });
 });

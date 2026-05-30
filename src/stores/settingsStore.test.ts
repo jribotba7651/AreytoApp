@@ -5,13 +5,13 @@ vi.mock('@tauri-apps/api/core', () => ({
 }));
 
 import { invoke } from '@tauri-apps/api/core';
-import { useSettingsStore } from './settingsStore';
+import { useSettingsStore, AUTOSAVE_DELAY_MS } from './settingsStore';
 
 const mockInvoke = vi.mocked(invoke);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  useSettingsStore.setState({ autoCommit: true, loaded: false });
+  useSettingsStore.setState({ autoCommit: true, autosaveIntervalMs: AUTOSAVE_DELAY_MS, loaded: false });
 });
 
 describe('settingsStore - load', () => {
@@ -71,5 +71,54 @@ describe('settingsStore - setAutoCommit', () => {
     mockInvoke.mockRejectedValue(new Error('disk full'));
 
     await expect(useSettingsStore.getState().setAutoCommit(false)).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - load con autosaveIntervalMs', () => {
+  it('popula autosaveIntervalMs desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, autosaveIntervalMs: 5000 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().autosaveIntervalMs).toBe(5000);
+  });
+
+  it('usa AUTOSAVE_DELAY_MS como default si autosaveIntervalMs es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().autosaveIntervalMs).toBe(AUTOSAVE_DELAY_MS);
+  });
+});
+
+describe('settingsStore - setAutosaveIntervalMs', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1, autosaveIntervalMs: AUTOSAVE_DELAY_MS });
+
+    const promise = useSettingsStore.getState().setAutosaveIntervalMs(15000);
+
+    expect(useSettingsStore.getState().autosaveIntervalMs).toBe(15000);
+
+    await promise;
+  });
+
+  it('persiste el valor al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, autosaveIntervalMs: AUTOSAVE_DELAY_MS };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setAutosaveIntervalMs(30000);
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, autosaveIntervalMs: 30000 },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setAutosaveIntervalMs(5000)).resolves.toBeUndefined();
   });
 });

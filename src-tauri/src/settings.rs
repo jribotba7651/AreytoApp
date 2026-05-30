@@ -29,6 +29,8 @@ pub struct GlobalSettings {
     pub version: u32,
     #[serde(default = "default_auto_commit")]
     pub auto_commit: bool,
+    #[serde(default = "default_autosave_interval_ms")]
+    pub autosave_interval_ms: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -46,6 +48,23 @@ fn default_version() -> u32 {
 
 fn default_auto_commit() -> bool {
     true
+}
+
+fn default_autosave_interval_ms() -> u32 {
+    500
+}
+
+fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
+    const MIN_MS: u32 = 500;
+    const MAX_MS: u32 = 300_000;
+    if s.autosave_interval_ms < MIN_MS || s.autosave_interval_ms > MAX_MS {
+        eprintln!(
+            "[areyto] autosave_interval_ms {} out of range [{}, {}], using default {}.",
+            s.autosave_interval_ms, MIN_MS, MAX_MS, default_autosave_interval_ms()
+        );
+        s.autosave_interval_ms = default_autosave_interval_ms();
+    }
+    s
 }
 
 fn global_settings_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -68,7 +87,7 @@ pub fn read_global_settings(app: tauri::AppHandle) -> Result<GlobalSettings, Str
     }
     let content = fs::read_to_string(&path).map_err(|e| format!("Read failed: {}", e))?;
     match serde_json::from_str(&content) {
-        Ok(s) => Ok(s),
+        Ok(s) => Ok(validate_settings(s)),
         Err(e) => {
             eprintln!("[areyto] settings.json parse warning: {}. Using defaults.", e);
             Ok(GlobalSettings { version: 1, ..Default::default() })
@@ -165,5 +184,35 @@ mod tests {
     fn json_corrupto_retorna_error_de_serde() {
         let result: Result<GlobalSettings, _> = serde_json::from_str("{ corrupto json !!!}");
         assert!(result.is_err(), "JSON corrupto debe retornar error de deserialización");
+    }
+
+    #[test]
+    fn json_de_f31_sin_autosave_interval_deserializa_con_default() {
+        let json = r#"{"version": 1, "autoCommit": true, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.autosave_interval_ms, 500, "autosave_interval_ms debe ser 500 cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_autosave_interval_ms_valido() {
+        let original = GlobalSettings {
+            version: 1,
+            autosave_interval_ms: 5000,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.autosave_interval_ms, 5000, "autosave_interval_ms 5000 debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn autosave_interval_fuera_de_rango_cae_al_default() {
+        let s = GlobalSettings {
+            version: 1,
+            autosave_interval_ms: 50,
+            ..Default::default()
+        };
+        let validated = validate_settings(s);
+        assert_eq!(validated.autosave_interval_ms, 500, "valor fuera de rango debe caer al default 500");
     }
 }

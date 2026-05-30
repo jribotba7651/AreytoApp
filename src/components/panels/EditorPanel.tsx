@@ -10,6 +10,7 @@ import FrontmatterMetadataEditor from '@/components/frontmatter/FrontmatterMetad
 import BackmatterAgradecimientosEditor from '@/components/backmatter/BackmatterAgradecimientosEditor';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useAutosave } from '@/hooks/useAutosave';
 
 function ChapterView() {
@@ -26,6 +27,7 @@ function ChapterView() {
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
   const toggleEditorViewMode = useLayoutStore((s) => s.toggleEditorViewMode);
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
+  const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
 
   const previewScrollRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +36,7 @@ function ChapterView() {
     chapterPath: activeChapterPath,
     projectPath: currentProject?.rootPath ?? null,
     onStatusChange: setSaveStatus,
-    delay: 500,
+    delay: autosaveIntervalMs,
   });
 
   useEffect(() => {
