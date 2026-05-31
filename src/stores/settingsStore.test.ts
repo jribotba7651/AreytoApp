@@ -32,6 +32,7 @@ beforeEach(() => {
     defaultProjectLanguage: 'en',
     bookFontFamily: 'serif',
     bookFontSize: 18,
+    exportFolder: '',
     loaded: false,
   });
   document.documentElement.removeAttribute('data-theme');
@@ -518,5 +519,63 @@ describe('settingsStore - setBookFontSize', () => {
     mockInvoke.mockRejectedValue(new Error('disk full'));
 
     await expect(useSettingsStore.getState().setBookFontSize(16)).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - load con exportFolder', () => {
+  it('popula exportFolder desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, exportFolder: '/Users/juan/Documentos' });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().exportFolder).toBe('/Users/juan/Documentos');
+  });
+
+  it('usa cadena vacía como default si exportFolder es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().exportFolder).toBe('');
+  });
+});
+
+describe('settingsStore - setExportFolder', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setExportFolder('/nueva/carpeta');
+
+    expect(useSettingsStore.getState().exportFolder).toBe('/nueva/carpeta');
+
+    await promise;
+  });
+
+  it('persiste exportFolder al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, exportFolder: '' };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setExportFolder('/Users/juan/Documentos');
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, exportFolder: '/Users/juan/Documentos' },
+    });
+  });
+
+  it('acepta cadena vacía para restablecer al default', async () => {
+    useSettingsStore.setState({ exportFolder: '/alguna/carpeta' });
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1, exportFolder: '/alguna/carpeta' });
+
+    await useSettingsStore.getState().setExportFolder('');
+
+    expect(useSettingsStore.getState().exportFolder).toBe('');
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setExportFolder('/ruta')).resolves.toBeUndefined();
   });
 });

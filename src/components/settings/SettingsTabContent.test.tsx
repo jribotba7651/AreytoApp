@@ -6,6 +6,10 @@ vi.mock('@/stores/settingsStore', () => ({
   AUTOSAVE_DELAY_MS: 500,
 }));
 
+vi.mock('@tauri-apps/plugin-dialog', () => ({
+  open: vi.fn().mockResolvedValue(null),
+}));
+
 import { useSettingsStore } from '@/stores/settingsStore';
 import SettingsTabContent from './SettingsTabContent';
 
@@ -21,6 +25,7 @@ function makeState(overrides: Record<string, unknown> = {}) {
     defaultProjectLanguage: 'en',
     bookFontFamily: 'serif',
     bookFontSize: 18,
+    exportFolder: '',
     loaded: true,
     setAutoCommit: vi.fn(),
     setAutosaveIntervalMs: vi.fn().mockResolvedValue(undefined),
@@ -30,6 +35,7 @@ function makeState(overrides: Record<string, unknown> = {}) {
     setDefaultProjectLanguage: vi.fn().mockResolvedValue(undefined),
     setBookFontFamily: vi.fn().mockResolvedValue(undefined),
     setBookFontSize: vi.fn().mockResolvedValue(undefined),
+    setExportFolder: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

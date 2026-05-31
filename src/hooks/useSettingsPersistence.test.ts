@@ -46,6 +46,7 @@ function makeSettingsState(overrides: Record<string, unknown> = {}) {
     defaultProjectLanguage: 'en',
     bookFontFamily: 'serif' as const,
     bookFontSize: 18,
+    exportFolder: '',
     ...overrides,
   };
 }

@@ -43,6 +43,8 @@ pub struct GlobalSettings {
     pub book_font_family: String,
     #[serde(default = "default_book_font_size")]
     pub book_font_size: u32,
+    #[serde(default = "default_export_folder")]
+    pub export_folder: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -88,6 +90,10 @@ fn default_book_font_family() -> String {
 
 fn default_book_font_size() -> u32 {
     18
+}
+
+fn default_export_folder() -> String {
+    String::new()
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -365,6 +371,25 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.book_font_size, 22);
+    }
+
+    #[test]
+    fn default_export_folder_es_vacio_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.export_folder, "", "export_folder debe ser vacío cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_export_folder() {
+        let original = GlobalSettings {
+            version: 1,
+            export_folder: "/Users/juan/Documents".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.export_folder, "/Users/juan/Documents");
     }
 
     #[test]

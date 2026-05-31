@@ -1,3 +1,4 @@
+import { open } from '@tauri-apps/plugin-dialog';
 import { useSettingsStore, type ThemeMode, type EditorFontFamily, type BookFontFamily } from '@/stores/settingsStore';
 
 const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
@@ -75,6 +76,8 @@ function SettingsTabContent() {
   const setBookFontFamily = useSettingsStore((s) => s.setBookFontFamily);
   const bookFontSize = useSettingsStore((s) => s.bookFontSize);
   const setBookFontSize = useSettingsStore((s) => s.setBookFontSize);
+  const exportFolder = useSettingsStore((s) => s.exportFolder);
+  const setExportFolder = useSettingsStore((s) => s.setExportFolder);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -306,6 +309,44 @@ function SettingsTabContent() {
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Export
+          </h2>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Carpeta de destino
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed mb-2">
+                  Carpeta donde se abre el Save As al exportar. Se actualiza automáticamente con la última carpeta usada.
+                </span>
+                <span className="block text-xs text-text-secondary font-mono truncate">
+                  {exportFolder || 'Carpeta del proyecto (por defecto)'}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2 shrink-0">
+                <button
+                  onClick={() => void open({ directory: true, multiple: false }).then((dir) => { if (typeof dir === 'string') void setExportFolder(dir); })}
+                  className="px-3 py-1 text-sm bg-bg-tertiary border border-border-default text-text-primary rounded hover:bg-bg-primary transition-colors duration-150"
+                >
+                  Examinar…
+                </button>
+                {exportFolder && (
+                  <button
+                    onClick={() => void setExportFolder('')}
+                    className="px-3 py-1 text-sm text-text-tertiary hover:text-text-primary transition-colors duration-150 text-center"
+                  >
+                    Restablecer
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </section>
