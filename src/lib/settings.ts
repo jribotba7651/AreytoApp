@@ -18,6 +18,8 @@ export interface GlobalSettings {
   editorFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
   editorFontSize?: number;
   defaultProjectLanguage?: string;
+  bookFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
+  bookFontSize?: number;
 }
 
 export interface ProjectState {

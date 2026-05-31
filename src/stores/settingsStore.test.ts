@@ -30,11 +30,15 @@ beforeEach(() => {
     editorFontFamily: 'serif',
     editorFontSize: 16,
     defaultProjectLanguage: 'en',
+    bookFontFamily: 'serif',
+    bookFontSize: 18,
     loaded: false,
   });
   document.documentElement.removeAttribute('data-theme');
   document.documentElement.style.removeProperty('--font-editor');
   document.documentElement.style.removeProperty('--font-size-editor');
+  document.documentElement.style.removeProperty('--font-book');
+  document.documentElement.style.removeProperty('--font-size-book');
 });
 
 describe('settingsStore - load', () => {
@@ -394,5 +398,125 @@ describe('settingsStore - setDefaultProjectLanguage', () => {
     mockInvoke.mockRejectedValue(new Error('disk full'));
 
     await expect(useSettingsStore.getState().setDefaultProjectLanguage('es')).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - load con bookFontFamily y bookFontSize', () => {
+  it('popula bookFontFamily inter desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, bookFontFamily: 'inter' });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().bookFontFamily).toBe('inter');
+  });
+
+  it('usa serif como default si bookFontFamily es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().bookFontFamily).toBe('serif');
+  });
+
+  it('usa 18 como default si bookFontSize es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().bookFontSize).toBe(18);
+  });
+
+  it('aplica --font-size-book al cargar tamaño 22', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, bookFontSize: 22 });
+
+    await useSettingsStore.getState().load();
+
+    expect(document.documentElement.style.getPropertyValue('--font-size-book')).toBe('22px');
+  });
+
+  it('aplica --font-book al cargar inter', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, bookFontFamily: 'inter' });
+
+    await useSettingsStore.getState().load();
+
+    expect(document.documentElement.style.getPropertyValue('--font-book')).toContain('Inter');
+  });
+});
+
+describe('settingsStore - setBookFontFamily', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setBookFontFamily('mono');
+
+    expect(useSettingsStore.getState().bookFontFamily).toBe('mono');
+
+    await promise;
+  });
+
+  it('aplica --font-book al establecer mono', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setBookFontFamily('mono');
+
+    expect(document.documentElement.style.getPropertyValue('--font-book')).toContain('monospace');
+  });
+
+  it('persiste bookFontFamily al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, bookFontFamily: 'serif' };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setBookFontFamily('sans');
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, bookFontFamily: 'sans' },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setBookFontFamily('inter')).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - setBookFontSize', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setBookFontSize(20);
+
+    expect(useSettingsStore.getState().bookFontSize).toBe(20);
+
+    await promise;
+  });
+
+  it('aplica --font-size-book al establecer 22', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setBookFontSize(22);
+
+    expect(document.documentElement.style.getPropertyValue('--font-size-book')).toBe('22px');
+  });
+
+  it('persiste bookFontSize al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, bookFontSize: 18 };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setBookFontSize(20);
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, bookFontSize: 20 },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setBookFontSize(16)).resolves.toBeUndefined();
   });
 });

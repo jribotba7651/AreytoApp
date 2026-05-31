@@ -39,6 +39,10 @@ pub struct GlobalSettings {
     pub editor_font_size: u32,
     #[serde(default = "default_project_language")]
     pub default_project_language: String,
+    #[serde(default = "default_book_font_family")]
+    pub book_font_family: String,
+    #[serde(default = "default_book_font_size")]
+    pub book_font_size: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -76,6 +80,14 @@ fn default_editor_font_size() -> u32 {
 
 fn default_project_language() -> String {
     "en".to_string()
+}
+
+fn default_book_font_family() -> String {
+    "serif".to_string()
+}
+
+fn default_book_font_size() -> u32 {
+    18
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -315,6 +327,44 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.default_project_language, "es");
+    }
+
+    #[test]
+    fn default_book_font_family_es_serif_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.book_font_family, "serif", "book_font_family debe ser 'serif' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn default_book_font_size_es_18_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.book_font_size, 18, "book_font_size debe ser 18 cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_book_font_family_inter() {
+        let original = GlobalSettings {
+            version: 1,
+            book_font_family: "inter".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.book_font_family, "inter");
+    }
+
+    #[test]
+    fn roundtrip_book_font_size_22() {
+        let original = GlobalSettings {
+            version: 1,
+            book_font_size: 22,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.book_font_size, 22);
     }
 
     #[test]

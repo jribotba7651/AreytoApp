@@ -6,6 +6,7 @@ export const THEME_STORAGE_KEY = 'areyto-theme-mode';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 export type EditorFontFamily = 'serif' | 'sans' | 'mono' | 'inter';
+export type BookFontFamily = 'serif' | 'sans' | 'mono' | 'inter';
 
 const EDITOR_FONT_STACKS: Record<EditorFontFamily, string> = {
   serif: '"Iowan Old Style", Charter, Georgia, serif',
@@ -30,6 +31,11 @@ export function applyEditorFont(family: EditorFontFamily, size: number): void {
   document.documentElement.style.setProperty('--font-size-editor', `${size}px`);
 }
 
+export function applyBookFont(family: BookFontFamily, size: number): void {
+  document.documentElement.style.setProperty('--font-book', EDITOR_FONT_STACKS[family]);
+  document.documentElement.style.setProperty('--font-size-book', `${size}px`);
+}
+
 interface SettingsState {
   autoCommit: boolean;
   autosaveIntervalMs: number;
@@ -37,6 +43,8 @@ interface SettingsState {
   editorFontFamily: EditorFontFamily;
   editorFontSize: number;
   defaultProjectLanguage: string;
+  bookFontFamily: BookFontFamily;
+  bookFontSize: number;
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
@@ -45,6 +53,8 @@ interface SettingsState {
   setEditorFontFamily: (family: EditorFontFamily) => Promise<void>;
   setEditorFontSize: (size: number) => Promise<void>;
   setDefaultProjectLanguage: (lang: string) => Promise<void>;
+  setBookFontFamily: (family: BookFontFamily) => Promise<void>;
+  setBookFontSize: (size: number) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -54,6 +64,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   editorFontFamily: 'serif',
   editorFontSize: 16,
   defaultProjectLanguage: 'en',
+  bookFontFamily: 'serif',
+  bookFontSize: 18,
   loaded: false,
 
   load: async () => {
@@ -62,6 +74,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       const themeMode = (settings.themeMode ?? 'light') as ThemeMode;
       const editorFontFamily = (settings.editorFontFamily ?? 'serif') as EditorFontFamily;
       const editorFontSize = settings.editorFontSize ?? 16;
+      const bookFontFamily = (settings.bookFontFamily ?? 'serif') as BookFontFamily;
+      const bookFontSize = settings.bookFontSize ?? 18;
       set({
         autoCommit: settings.autoCommit ?? true,
         autosaveIntervalMs: settings.autosaveIntervalMs ?? AUTOSAVE_DELAY_MS,
@@ -69,10 +83,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         editorFontFamily,
         editorFontSize,
         defaultProjectLanguage: settings.defaultProjectLanguage ?? 'en',
+        bookFontFamily,
+        bookFontSize,
         loaded: true,
       });
       applyTheme(themeMode);
       applyEditorFont(editorFontFamily, editorFontSize);
+      applyBookFont(bookFontFamily, bookFontSize);
     } catch {
       set({ loaded: true });
     }
@@ -140,6 +157,30 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, defaultProjectLanguage: lang });
     } catch (err) {
       console.warn('[areyto] Failed to persist defaultProjectLanguage:', err);
+    }
+  },
+
+  setBookFontFamily: async (family: BookFontFamily) => {
+    set({ bookFontFamily: family });
+    const size = useSettingsStore.getState().bookFontSize;
+    applyBookFont(family, size);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, bookFontFamily: family });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist bookFontFamily:', err);
+    }
+  },
+
+  setBookFontSize: async (size: number) => {
+    set({ bookFontSize: size });
+    const family = useSettingsStore.getState().bookFontFamily;
+    applyBookFont(family, size);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, bookFontSize: size });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist bookFontSize:', err);
     }
   },
 }));
