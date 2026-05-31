@@ -83,6 +83,9 @@
   /* F38 – Editor font (user preference, overridden via inline style by applyEditorFont()) */
   --font-editor: "Iowan Old Style", Charter, Georgia, serif;
   --font-size-editor: 16px;
+  /* F40 – Book font (user preference, overridden via inline style by applyBookFont()) */
+  --font-book: "Iowan Old Style", Charter, Georgia, serif;
+  --font-size-book: 18px;
 }
 
 /* F37 – Dark theme (zinc palette, recovered from pre-F34) */

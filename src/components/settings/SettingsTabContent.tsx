@@ -1,4 +1,4 @@
-import { useSettingsStore, type ThemeMode, type EditorFontFamily } from '@/stores/settingsStore';
+import { useSettingsStore, type ThemeMode, type EditorFontFamily, type BookFontFamily } from '@/stores/settingsStore';
 
 const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
   { value: 'light', label: 'Claro' },
@@ -18,6 +18,20 @@ const EDITOR_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
   { value: 16, label: '16 px' },
   { value: 18, label: '18 px' },
   { value: 20, label: '20 px' },
+];
+
+const BOOK_FONT_FAMILY_OPTIONS: { value: BookFontFamily; label: string }[] = [
+  { value: 'serif', label: 'Serif (Iowan / Georgia)' },
+  { value: 'inter', label: 'Inter' },
+  { value: 'sans', label: 'Sans-serif del sistema' },
+  { value: 'mono', label: 'Monoespaciada' },
+];
+
+const BOOK_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
+  { value: 16, label: '16 px' },
+  { value: 18, label: '18 px' },
+  { value: 20, label: '20 px' },
+  { value: 22, label: '22 px' },
 ];
 
 const LANGUAGE_OPTIONS: { value: string; label: string }[] = [
@@ -57,6 +71,10 @@ function SettingsTabContent() {
   const setEditorFontSize = useSettingsStore((s) => s.setEditorFontSize);
   const defaultProjectLanguage = useSettingsStore((s) => s.defaultProjectLanguage);
   const setDefaultProjectLanguage = useSettingsStore((s) => s.setDefaultProjectLanguage);
+  const bookFontFamily = useSettingsStore((s) => s.bookFontFamily);
+  const setBookFontFamily = useSettingsStore((s) => s.setBookFontFamily);
+  const bookFontSize = useSettingsStore((s) => s.bookFontSize);
+  const setBookFontSize = useSettingsStore((s) => s.setBookFontSize);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -231,6 +249,58 @@ function SettingsTabContent() {
                 className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 {LANGUAGE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Libro
+          </h2>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
+            <div className="flex items-start justify-between gap-6 mb-4">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Fuente del lector
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  Familia tipográfica del tab Libro.
+                </span>
+              </div>
+              <select
+                value={bookFontFamily}
+                onChange={(e) => void setBookFontFamily(e.target.value as BookFontFamily)}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {BOOK_FONT_FAMILY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Tamaño de fuente
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  Tamaño del texto en el tab Libro.
+                </span>
+              </div>
+              <select
+                value={bookFontSize}
+                onChange={(e) => void setBookFontSize(Number(e.target.value))}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {BOOK_FONT_SIZE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>

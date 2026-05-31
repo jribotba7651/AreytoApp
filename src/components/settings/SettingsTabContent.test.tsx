@@ -19,6 +19,8 @@ function makeState(overrides: Record<string, unknown> = {}) {
     editorFontFamily: 'serif',
     editorFontSize: 16,
     defaultProjectLanguage: 'en',
+    bookFontFamily: 'serif',
+    bookFontSize: 18,
     loaded: true,
     setAutoCommit: vi.fn(),
     setAutosaveIntervalMs: vi.fn().mockResolvedValue(undefined),
@@ -26,6 +28,8 @@ function makeState(overrides: Record<string, unknown> = {}) {
     setEditorFontFamily: vi.fn().mockResolvedValue(undefined),
     setEditorFontSize: vi.fn().mockResolvedValue(undefined),
     setDefaultProjectLanguage: vi.fn().mockResolvedValue(undefined),
+    setBookFontFamily: vi.fn().mockResolvedValue(undefined),
+    setBookFontSize: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
