@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F39 Idioma por defecto de proyectos nuevos
+- Última feature completada: F40 Fuente del tab Libro
 - Fecha de última actualización: 2026-05-31
 
 ## Features completadas
@@ -974,6 +974,12 @@ Ninguno.
 
 ### 2026-05-31 - F38: Setting de fuente del editor (familia + tamaño)
 - Commit: 8fcef11
+
+### 2026-05-31 - F40: Fuente del tab Libro
+- Commit: 22c163b
+- Qué se hizo: Campos `bookFontFamily` (default `"serif"`) y `bookFontSize` (default `18`) en `GlobalSettings` Rust + TS. `applyBookFont(family, size)` en `settingsStore` inyecta `--font-book` y `--font-size-book` como inline style en `<html>`, paralelo a `applyEditorFont` de F38. `BookMarkdown.tsx` y `BookFrontmatterTitle.tsx` sustituyen `font-serif` hardcodeado por `var(--font-book)` vía inline style en el contenedor, y los tamaños absolutos por ratios em escalados desde `--font-size-book` (h1=1.78em, h2=1.39em, h3=1.11em, body/p/li=1em). Sección "Libro" en `SettingsTabContent` con dropdown de familia (4 opciones) y tamaño (16/18/20/22px). `bookFontFamily`/`bookFontSize` incluidos en `useSettingsPersistence` para evitar regresión del bug F39. Smoke confirmado: cambio de familia/tamaño del Libro independiente del editor, persiste tras reinicio.
+- Archivos modificados: `src-tauri/src/settings.rs`, `src/lib/settings.ts`, `src/stores/settingsStore.ts`, `src/stores/settingsStore.test.ts`, `src/styles/globals.css`, `src/components/book/BookMarkdown.tsx`, `src/components/book/BookFrontmatterTitle.tsx`, `src/components/settings/SettingsTabContent.tsx`, `src/components/settings/SettingsTabContent.test.tsx`, `src/hooks/useSettingsPersistence.ts`, `src/hooks/useSettingsPersistence.test.ts`
+- Tests: 317 TS + 37 Rust
 
 ### 2026-05-31 - F39: Idioma por defecto de proyectos nuevos
 - Commits: `14da0e7` feat(F39) + `9161957` fix(F39 bug useSettingsPersistence)
