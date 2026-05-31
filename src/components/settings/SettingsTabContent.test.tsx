@@ -16,10 +16,14 @@ function makeState(overrides: Record<string, unknown> = {}) {
     autoCommit: true,
     autosaveIntervalMs: 2000,
     themeMode: 'light',
+    editorFontFamily: 'serif',
+    editorFontSize: 16,
     loaded: true,
     setAutoCommit: vi.fn(),
     setAutosaveIntervalMs: vi.fn().mockResolvedValue(undefined),
     setThemeMode: vi.fn().mockResolvedValue(undefined),
+    setEditorFontFamily: vi.fn().mockResolvedValue(undefined),
+    setEditorFontSize: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

@@ -23,8 +23,17 @@ const mockInvoke = vi.mocked(invoke);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  useSettingsStore.setState({ autoCommit: true, autosaveIntervalMs: AUTOSAVE_DELAY_MS, themeMode: 'light', loaded: false });
+  useSettingsStore.setState({
+    autoCommit: true,
+    autosaveIntervalMs: AUTOSAVE_DELAY_MS,
+    themeMode: 'light',
+    editorFontFamily: 'serif',
+    editorFontSize: 16,
+    loaded: false,
+  });
   document.documentElement.removeAttribute('data-theme');
+  document.documentElement.style.removeProperty('--font-editor');
+  document.documentElement.style.removeProperty('--font-size-editor');
 });
 
 describe('settingsStore - load', () => {
@@ -167,6 +176,126 @@ describe('settingsStore - load con themeMode', () => {
     await useSettingsStore.getState().load();
 
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
+});
+
+describe('settingsStore - load con editorFontFamily y editorFontSize', () => {
+  it('popula editorFontFamily inter desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, editorFontFamily: 'inter' });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().editorFontFamily).toBe('inter');
+  });
+
+  it('usa serif como default si editorFontFamily es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().editorFontFamily).toBe('serif');
+  });
+
+  it('usa 16 como default si editorFontSize es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().editorFontSize).toBe(16);
+  });
+
+  it('aplica --font-size-editor al cargar tamaño 20', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, editorFontSize: 20 });
+
+    await useSettingsStore.getState().load();
+
+    expect(document.documentElement.style.getPropertyValue('--font-size-editor')).toBe('20px');
+  });
+});
+
+describe('settingsStore - setEditorFontFamily', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setEditorFontFamily('mono');
+
+    expect(useSettingsStore.getState().editorFontFamily).toBe('mono');
+
+    await promise;
+  });
+
+  it('aplica --font-editor al establecer mono', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setEditorFontFamily('mono');
+
+    expect(document.documentElement.style.getPropertyValue('--font-editor')).toContain('monospace');
+  });
+
+  it('aplica --font-editor al establecer inter', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setEditorFontFamily('inter');
+
+    expect(document.documentElement.style.getPropertyValue('--font-editor')).toContain('Inter');
+  });
+
+  it('persiste editorFontFamily al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, editorFontFamily: 'serif' };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setEditorFontFamily('sans');
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, editorFontFamily: 'sans' },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setEditorFontFamily('inter')).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - setEditorFontSize', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setEditorFontSize(20);
+
+    expect(useSettingsStore.getState().editorFontSize).toBe(20);
+
+    await promise;
+  });
+
+  it('aplica --font-size-editor al establecer 18', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setEditorFontSize(18);
+
+    expect(document.documentElement.style.getPropertyValue('--font-size-editor')).toBe('18px');
+  });
+
+  it('persiste editorFontSize al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, editorFontSize: 16 };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setEditorFontSize(20);
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, editorFontSize: 20 },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setEditorFontSize(14)).resolves.toBeUndefined();
   });
 });
 

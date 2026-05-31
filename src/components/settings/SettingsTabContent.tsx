@@ -1,9 +1,23 @@
-import { useSettingsStore, type ThemeMode } from '@/stores/settingsStore';
+import { useSettingsStore, type ThemeMode, type EditorFontFamily } from '@/stores/settingsStore';
 
 const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
   { value: 'light', label: 'Claro' },
   { value: 'dark', label: 'Oscuro' },
   { value: 'auto', label: 'Auto (sistema)' },
+];
+
+const EDITOR_FONT_FAMILY_OPTIONS: { value: EditorFontFamily; label: string }[] = [
+  { value: 'serif', label: 'Serif (Iowan / Georgia)' },
+  { value: 'inter', label: 'Inter' },
+  { value: 'sans', label: 'Sans-serif del sistema' },
+  { value: 'mono', label: 'Monoespaciada' },
+];
+
+const EDITOR_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
+  { value: 14, label: '14 px' },
+  { value: 16, label: '16 px' },
+  { value: 18, label: '18 px' },
+  { value: 20, label: '20 px' },
 ];
 
 const AUTOSAVE_PRESETS: { ms: number; label: string }[] = [
@@ -22,6 +36,10 @@ function SettingsTabContent() {
   const setAutosaveIntervalMs = useSettingsStore((s) => s.setAutosaveIntervalMs);
   const themeMode = useSettingsStore((s) => s.themeMode);
   const setThemeMode = useSettingsStore((s) => s.setThemeMode);
+  const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
+  const setEditorFontFamily = useSettingsStore((s) => s.setEditorFontFamily);
+  const editorFontSize = useSettingsStore((s) => s.editorFontSize);
+  const setEditorFontSize = useSettingsStore((s) => s.setEditorFontSize);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -91,6 +109,52 @@ function SettingsTabContent() {
                 {AUTOSAVE_PRESETS.map((p) => (
                   <option key={p.ms} value={p.ms}>
                     {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5 mt-3">
+            <div className="flex items-start justify-between gap-6 mb-4">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Fuente del editor
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  Familia tipográfica del área de escritura.
+                </span>
+              </div>
+              <select
+                value={editorFontFamily}
+                onChange={(e) => void setEditorFontFamily(e.target.value as EditorFontFamily)}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {EDITOR_FONT_FAMILY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Tamaño de fuente
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  Tamaño del texto en el área de escritura.
+                </span>
+              </div>
+              <select
+                value={editorFontSize}
+                onChange={(e) => void setEditorFontSize(Number(e.target.value))}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {EDITOR_FONT_SIZE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
               </select>
