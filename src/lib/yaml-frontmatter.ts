@@ -92,12 +92,12 @@ export function serializeMetadata(data: MetadataData): string {
   return yaml.dump(obj, { lineWidth: -1 }).trimEnd();
 }
 
-export function defaultMetadata(): MetadataData {
-  return { idioma: 'en', descripcion: '', editorial: '', isbn: '', genero: '', fechaPublicacion: '' };
+export function defaultMetadata(lang = 'en'): MetadataData {
+  return { idioma: lang, descripcion: '', editorial: '', isbn: '', genero: '', fechaPublicacion: '' };
 }
 
-export function defaultContent(kind: FrontmatterKind): string {
+export function defaultContent(kind: FrontmatterKind, lang?: string): string {
   if (kind === 'titulo') return serializeTitulo(defaultTitulo());
-  if (kind === 'metadata') return serializeMetadata(defaultMetadata());
+  if (kind === 'metadata') return serializeMetadata(defaultMetadata(lang));
   return serializeCopyright(defaultCopyright());
 }

@@ -36,6 +36,7 @@ interface SettingsState {
   themeMode: ThemeMode;
   editorFontFamily: EditorFontFamily;
   editorFontSize: number;
+  defaultProjectLanguage: string;
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
@@ -43,6 +44,7 @@ interface SettingsState {
   setThemeMode: (mode: ThemeMode) => Promise<void>;
   setEditorFontFamily: (family: EditorFontFamily) => Promise<void>;
   setEditorFontSize: (size: number) => Promise<void>;
+  setDefaultProjectLanguage: (lang: string) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -51,6 +53,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   themeMode: 'light',
   editorFontFamily: 'serif',
   editorFontSize: 16,
+  defaultProjectLanguage: 'en',
   loaded: false,
 
   load: async () => {
@@ -65,6 +68,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         themeMode,
         editorFontFamily,
         editorFontSize,
+        defaultProjectLanguage: settings.defaultProjectLanguage ?? 'en',
         loaded: true,
       });
       applyTheme(themeMode);
@@ -126,6 +130,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, editorFontSize: size });
     } catch (err) {
       console.warn('[areyto] Failed to persist editorFontSize:', err);
+    }
+  },
+
+  setDefaultProjectLanguage: async (lang: string) => {
+    set({ defaultProjectLanguage: lang });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, defaultProjectLanguage: lang });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist defaultProjectLanguage:', err);
     }
   },
 }));

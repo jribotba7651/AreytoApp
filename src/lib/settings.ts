@@ -17,6 +17,7 @@ export interface GlobalSettings {
   themeMode?: 'light' | 'dark' | 'auto';
   editorFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
   editorFontSize?: number;
+  defaultProjectLanguage?: string;
 }
 
 export interface ProjectState {

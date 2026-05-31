@@ -18,12 +18,14 @@ function makeState(overrides: Record<string, unknown> = {}) {
     themeMode: 'light',
     editorFontFamily: 'serif',
     editorFontSize: 16,
+    defaultProjectLanguage: 'en',
     loaded: true,
     setAutoCommit: vi.fn(),
     setAutosaveIntervalMs: vi.fn().mockResolvedValue(undefined),
     setThemeMode: vi.fn().mockResolvedValue(undefined),
     setEditorFontFamily: vi.fn().mockResolvedValue(undefined),
     setEditorFontSize: vi.fn().mockResolvedValue(undefined),
+    setDefaultProjectLanguage: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

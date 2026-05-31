@@ -20,6 +20,21 @@ const EDITOR_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
   { value: 20, label: '20 px' },
 ];
 
+const LANGUAGE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'es', label: 'Español (es)' },
+  { value: 'en', label: 'Inglés (en)' },
+  { value: 'pt', label: 'Portugués (pt)' },
+  { value: 'fr', label: 'Francés (fr)' },
+  { value: 'de', label: 'Alemán (de)' },
+  { value: 'it', label: 'Italiano (it)' },
+  { value: 'ca', label: 'Catalán (ca)' },
+  { value: 'gl', label: 'Gallego (gl)' },
+  { value: 'eu', label: 'Euskera (eu)' },
+  { value: 'zh', label: 'Chino (zh)' },
+  { value: 'ja', label: 'Japonés (ja)' },
+  { value: 'ar', label: 'Árabe (ar)' },
+];
+
 const AUTOSAVE_PRESETS: { ms: number; label: string }[] = [
   { ms: 2000, label: '2 s' },
   { ms: 5000, label: '5 s' },
@@ -40,6 +55,8 @@ function SettingsTabContent() {
   const setEditorFontFamily = useSettingsStore((s) => s.setEditorFontFamily);
   const editorFontSize = useSettingsStore((s) => s.editorFontSize);
   const setEditorFontSize = useSettingsStore((s) => s.setEditorFontSize);
+  const defaultProjectLanguage = useSettingsStore((s) => s.defaultProjectLanguage);
+  const setDefaultProjectLanguage = useSettingsStore((s) => s.setDefaultProjectLanguage);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -183,6 +200,37 @@ function SettingsTabContent() {
                 className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 {THEME_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Proyectos
+          </h2>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Idioma por defecto
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  Idioma que se asigna a nuevos proyectos en el campo idioma del archivo metadata.yaml.
+                </span>
+              </div>
+              <select
+                key={defaultProjectLanguage}
+                value={defaultProjectLanguage}
+                onChange={(e) => void setDefaultProjectLanguage(e.target.value)}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {LANGUAGE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
