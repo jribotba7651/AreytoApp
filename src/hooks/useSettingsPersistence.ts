@@ -23,6 +23,10 @@ export function useSettingsPersistence() {
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
   const autoCommit = useSettingsStore((s) => s.autoCommit);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
+  const themeMode = useSettingsStore((s) => s.themeMode);
+  const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
+  const editorFontSize = useSettingsStore((s) => s.editorFontSize);
+  const defaultProjectLanguage = useSettingsStore((s) => s.defaultProjectLanguage);
 
   const persistGlobal = useRef(
     debounce((settings: GlobalSettings) => {
@@ -53,9 +57,13 @@ export function useSettingsPersistence() {
       editorViewMode,
       autoCommit,
       autosaveIntervalMs,
+      themeMode,
+      editorFontFamily,
+      editorFontSize,
+      defaultProjectLanguage,
       version: 1,
     });
-  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs]);
+  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs, themeMode, editorFontFamily, editorFontSize, defaultProjectLanguage]);
 
   useEffect(() => {
     if (!currentProjectPath || !activeChapterPath) return;
