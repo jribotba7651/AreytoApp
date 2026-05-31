@@ -15,9 +15,11 @@ function makeState(overrides: Record<string, unknown> = {}) {
   return {
     autoCommit: true,
     autosaveIntervalMs: 2000,
+    themeMode: 'light',
     loaded: true,
     setAutoCommit: vi.fn(),
     setAutosaveIntervalMs: vi.fn().mockResolvedValue(undefined),
+    setThemeMode: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
@@ -32,20 +34,20 @@ describe('SettingsTabContent - sección Editor', () => {
   it('renderiza el dropdown de intervalo de autosave', () => {
     render(<SettingsTabContent />);
     expect(screen.getByText('Intervalo de guardado automático')).toBeDefined();
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    const select = screen.getAllByRole('combobox')[0]! as HTMLSelectElement;
     expect(select).toBeDefined();
   });
 
   it('el dropdown lista exactamente los presets 2s/5s/15s/30s', () => {
     render(<SettingsTabContent />);
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    const select = screen.getAllByRole('combobox')[0]! as HTMLSelectElement;
     const options = Array.from(select.options).map((o) => Number(o.value));
     expect(options).toEqual([2000, 5000, 15000, 30000]);
   });
 
   it('el dropdown no expone 500ms', () => {
     render(<SettingsTabContent />);
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    const select = screen.getAllByRole('combobox')[0]! as HTMLSelectElement;
     const options = Array.from(select.options).map((o) => Number(o.value));
     expect(options).not.toContain(500);
   });
@@ -56,7 +58,7 @@ describe('SettingsTabContent - sección Editor', () => {
       selector(makeState({ autosaveIntervalMs: 500 }))
     );
     render(<SettingsTabContent />);
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    const select = screen.getAllByRole('combobox')[0]! as HTMLSelectElement;
     expect(select.value).toBe('2000');
   });
 
@@ -66,7 +68,7 @@ describe('SettingsTabContent - sección Editor', () => {
       selector(makeState({ autosaveIntervalMs: 5000 }))
     );
     render(<SettingsTabContent />);
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    const select = screen.getAllByRole('combobox')[0]! as HTMLSelectElement;
     expect(select.value).toBe('5000');
   });
 
@@ -77,7 +79,7 @@ describe('SettingsTabContent - sección Editor', () => {
       selector(makeState({ setAutosaveIntervalMs }))
     );
     render(<SettingsTabContent />);
-    const select = screen.getByRole('combobox');
+    const select = screen.getAllByRole('combobox')[0]!;
     fireEvent.change(select, { target: { value: '15000' } });
     expect(setAutosaveIntervalMs).toHaveBeenCalledWith(15000);
   });

@@ -82,6 +82,50 @@
   --font-ui: Inter, system-ui, sans-serif;
 }
 
+/* F37 – Dark theme (zinc palette, recovered from pre-F34) */
+html[data-theme="dark"] {
+  /* Tailwind --color-* vars (used by utility classes like bg-bg-primary) */
+  --color-bg-primary: #18181b;
+  --color-bg-secondary: #1f1f23;
+  --color-bg-tertiary: #27272a;
+  --color-bg-editor: #1b1b1f;
+  --color-bg-terminal: #0a0a0c;
+  --color-border-subtle: #26262a;
+  --color-border-default: #34343a;
+  --color-border-strong: #45454d;
+  --color-text-primary: #e8e8ec;
+  --color-text-secondary: #a8a8b0;
+  --color-text-tertiary: #6c6c75;
+  --color-text-editor: #d4d4dc;
+  --color-accent: #7c8aa8;
+  --color-accent-hover: #93a1c0;
+  --color-accent-muted: #4a5468;
+  --color-success: #6b9a7e;
+  --color-warning: #c4a572;
+  --color-error: #b07070;
+  --color-info: #7a93b8;
+  /* Direct --bg-* vars (used by editor-theme.ts and explicit var() calls) */
+  --bg-primary: #18181b;
+  --bg-secondary: #1f1f23;
+  --bg-tertiary: #27272a;
+  --bg-editor: #1b1b1f;
+  --bg-terminal: #0a0a0c;
+  --border-subtle: #26262a;
+  --border-default: #34343a;
+  --border-strong: #45454d;
+  --text-primary: #e8e8ec;
+  --text-secondary: #a8a8b0;
+  --text-tertiary: #6c6c75;
+  --text-editor: #d4d4dc;
+  --accent: #7c8aa8;
+  --accent-hover: #93a1c0;
+  --accent-muted: #4a5468;
+  --success: #6b9a7e;
+  --warning: #c4a572;
+  --error: #b07070;
+  --info: #7a93b8;
+}
+
 /* F35 – Panel resize handles */
 .resize-handle-h {
   position: relative;

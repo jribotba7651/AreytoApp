@@ -7,7 +7,7 @@ import SettingsTabContent from '@/components/settings/SettingsTabContent';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
 import { readGlobalSettings, pathExists } from '@/lib/settings';
@@ -22,9 +22,19 @@ function App() {
   useKeyboardShortcuts();
   useSettingsPersistence();
 
+  const themeMode = useSettingsStore((s) => s.themeMode);
+
   useEffect(() => {
     useSettingsStore.getState().load();
   }, []);
+
+  useEffect(() => {
+    if (themeMode !== 'auto') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => applyTheme('auto');
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [themeMode]);
 
   useEffect(() => {
     async function restoreSession() {
@@ -70,7 +80,7 @@ function App() {
   if (isRestoring) {
     return (
       <div className="h-screen flex items-center justify-center bg-bg-primary">
-        <span className="text-sm text-text-tertiary">Cargando…</span>
+        <span className="text-sm text-text-primary">Cargando…</span>
       </div>
     );
   }
