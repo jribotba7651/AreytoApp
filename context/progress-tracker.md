@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F29 - Editor de metadata del libro (book details)
-- Fecha de última actualización: 2026-05-25
+- Última feature completada: F39 Idioma por defecto de proyectos nuevos
+- Fecha de última actualización: 2026-05-31
 
 ## Features completadas
 
@@ -965,9 +965,25 @@ Ninguno.
 ### 2026-05-30 - F36: Tipografía UI a Inter (fuente local empaquetada)
 - Commit: 61333cb
 
-### [pendiente] - F37: Selector de tema claro/oscuro/auto
+### 2026-05-31 - F37: Selector de tema claro/oscuro/auto
 - Qué se hizo: selector de 3 modos (claro/oscuro/auto) persistido y restaurado. globals.css reorganizado con bloque html[data-theme="dark"] (paleta zinc recuperada de pre-F34). campo themeMode en GlobalSettings (Rust + TS). settingsStore con themeMode + setThemeMode + applyTheme(). Script anti-FOUC en <head> de index.html. Listener prefers-color-scheme para modo auto en App.tsx. Sección "Apariencia" en SettingsTabContent.
 - Archivos: src/styles/globals.css, index.html, src/lib/settings.ts, src-tauri/src/settings.rs, src/stores/settingsStore.ts, src/stores/settingsStore.test.ts, src/App.tsx, src/components/settings/SettingsTabContent.tsx, src/components/settings/SettingsTabContent.test.tsx, context/architecture.md
 - Tests: 281 TS, 27 Rust
 - Decisiones: D-185 data-theme en <html> como selector; CSS vars con dos nombres (--color-* Tailwind + --bg-* directo) sobreescritas en cascada, cero cambios en componentes. D-186 excepción consciente a D-010, aprobada por el arquitecto: localStorage (clave areyto-theme-mode) permitido exclusivamente como caché anti-FOUC leído por el script inline del <head> antes del primer render; settings.json sigue siendo la única fuente de verdad; prohibido para cualquier otro uso. D-187 serde default "light" para theme_mode preserva comportamiento en settings.json existentes. D-188 applyTheme() exportada desde settingsStore, aplica data-theme + escribe localStorage; llamada desde load() y setThemeMode(). D-189 listener prefers-color-scheme en App.tsx useEffect, activo solo cuando themeMode==='auto', limpieza en unmount/cambio.
 - Commit: aecdfb1
+
+### 2026-05-31 - F38: Setting de fuente del editor (familia + tamaño)
+- Commit: 8fcef11
+
+### 2026-05-31 - F39: Idioma por defecto de proyectos nuevos
+- Commits: `14da0e7` feat(F39) + `9161957` fix(F39 bug useSettingsPersistence)
+- Qué se hizo: Campo `defaultProjectLanguage: string` (default `"en"`) en `GlobalSettings` Rust + TS. Estado y setter `setDefaultProjectLanguage` en `settingsStore` (patrón F32: update optimista + persist). `defaultMetadata(lang?)` y `defaultContent(kind, lang?)` aceptan idioma opcional. `ensureFrontmatterFiles(rootPath, lang?)` pasa el idioma al crear `metadata.yaml` de proyectos nuevos. `open-project-flow.ts` lee `defaultProjectLanguage` del store al abrir proyecto. Sección "Proyectos" en `SettingsTabContent` con dropdown de 12 idiomas curados. Smoke confirmado: idioma: es en `metadata.yaml` de proyecto creado con setting 'es'.
+- Archivos creados: `src/hooks/useSettingsPersistence.test.ts`
+- Archivos modificados: `src-tauri/src/settings.rs`, `src/lib/settings.ts`, `src/stores/settingsStore.ts`, `src/stores/settingsStore.test.ts`, `src/lib/yaml-frontmatter.ts`, `src/lib/frontmatter-fs.ts`, `src/lib/frontmatter-fs.test.ts`, `src/lib/open-project-flow.ts`, `src/components/settings/SettingsTabContent.tsx`, `src/components/settings/SettingsTabContent.test.tsx`, `src/hooks/useSettingsPersistence.ts`
+- Tests: 304 TS + 33 Rust
+
+**Bug destapado en smoke:** `useSettingsPersistence.ts` reconstruía `GlobalSettings` con solo 6 campos hardcodeados, sobreescribiendo `defaultProjectLanguage`, `themeMode`, `editorFontFamily`, `editorFontSize` con los defaults de Rust en cada cambio de proyecto o panel. Afectaba F34/F37/F38/F39. Fix: incluir los 4 campos faltantes leídos del store en el objeto y en las dependencias del `useEffect`.
+
+**Bug secundario WebKit:** el `<select>` de 12 opciones no repintaba el label al cambiar el valor (WebKit usa popup scrollable para >4 opciones, que no reacciona a updates de React sin remount). Fix: `key={defaultProjectLanguage}` fuerza remount cuando el valor cambia.
+
+**Deuda técnica — no refactorizar ahora:** `useSettingsPersistence` sigue usando un objeto hardcodeado con todos los campos de `GlobalSettings`. El patrón correcto es read-modify-write: leer el disco con `readGlobalSettings()`, sobreescribir solo los campos que este hook gestiona (`lastProjectPath`, `panels`, `editorViewMode`), y conservar el resto intacto. Con el patrón actual, cualquier setting nuevo que se añada a `GlobalSettings` y se olvide aquí reintroduce el bug. Refactor pendiente cuando se añada el próximo setting de layout.
