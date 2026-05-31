@@ -15,6 +15,8 @@ export interface GlobalSettings {
   autoCommit?: boolean;
   autosaveIntervalMs?: number;
   themeMode?: 'light' | 'dark' | 'auto';
+  editorFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
+  editorFontSize?: number;
 }
 
 export interface ProjectState {

@@ -80,6 +80,9 @@
   --error: #DC2626;
   --info: #2563EB;
   --font-ui: Inter, system-ui, sans-serif;
+  /* F38 – Editor font (user preference, overridden via inline style by applyEditorFont()) */
+  --font-editor: "Iowan Old Style", Charter, Georgia, serif;
+  --font-size-editor: 16px;
 }
 
 /* F37 – Dark theme (zinc palette, recovered from pre-F34) */
