@@ -4,6 +4,18 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
+
 import { invoke } from '@tauri-apps/api/core';
 import { useSettingsStore, AUTOSAVE_DELAY_MS } from './settingsStore';
 
@@ -11,7 +23,8 @@ const mockInvoke = vi.mocked(invoke);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  useSettingsStore.setState({ autoCommit: true, autosaveIntervalMs: AUTOSAVE_DELAY_MS, loaded: false });
+  useSettingsStore.setState({ autoCommit: true, autosaveIntervalMs: AUTOSAVE_DELAY_MS, themeMode: 'light', loaded: false });
+  document.documentElement.removeAttribute('data-theme');
 });
 
 describe('settingsStore - load', () => {
@@ -120,5 +133,87 @@ describe('settingsStore - setAutosaveIntervalMs', () => {
     mockInvoke.mockRejectedValue(new Error('disk full'));
 
     await expect(useSettingsStore.getState().setAutosaveIntervalMs(5000)).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - load con themeMode', () => {
+  it('popula themeMode dark desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, themeMode: 'dark' });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().themeMode).toBe('dark');
+  });
+
+  it('usa light como default si themeMode es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().themeMode).toBe('light');
+  });
+
+  it('aplica data-theme=dark al cargar modo oscuro', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, themeMode: 'dark' });
+
+    await useSettingsStore.getState().load();
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('aplica data-theme=light al cargar modo claro', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, themeMode: 'light' });
+
+    await useSettingsStore.getState().load();
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
+});
+
+describe('settingsStore - setThemeMode', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1, themeMode: 'light' });
+
+    const promise = useSettingsStore.getState().setThemeMode('dark');
+
+    expect(useSettingsStore.getState().themeMode).toBe('dark');
+
+    await promise;
+  });
+
+  it('aplica data-theme=dark al establecer modo oscuro', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setThemeMode('dark');
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('aplica data-theme=light al establecer modo claro', async () => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setThemeMode('light');
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
+
+  it('persiste themeMode al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, themeMode: 'light' };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setThemeMode('dark');
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, themeMode: 'dark' },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setThemeMode('dark')).resolves.toBeUndefined();
   });
 });

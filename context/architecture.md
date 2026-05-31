@@ -63,6 +63,8 @@ mi-libro/
 
 6. Settings persisten en archivo JSON local: no en localStorage. La app debe poder migrar entre máquinas copiando el folder de config.
 
+   **Excepción acotada (D-186, aprobada por el arquitecto):** localStorage está permitido únicamente para el caché anti-FOUC de `themeMode` (clave `areyto-theme-mode`), leído por el script inline del `<head>` antes del primer render de React. settings.json sigue siendo la única fuente de verdad para todos los settings. Prohibido para cualquier otro uso.
+
 7. Nunca commitear sin cambios reales: el versioning verifica diff antes de commit para no inflar el log.
 
 ## Dónde vive cada cosa (mapa rápido)

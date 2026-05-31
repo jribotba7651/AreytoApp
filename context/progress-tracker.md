@@ -958,3 +958,16 @@ Ninguno.
 - Tests: 272 TS (sin cambio), Rust sin cambio
 - Decisiones: D-181 nombres de token existentes mantenidos, valores actualizados (sin renombrar para no romper componentes). D-182 text-tertiary = stone-500 (#78716C) en vez de spec stone-400 (#A8A29E) para WCAG AA en panel VERSIONES (~4.1:1 vs 2.2:1). D-183 accent-muted = slate-400 (#94A3B8): visible como fondo de botón primario (5.4:1) y selección del editor al 50% de opacidad. D-184 backdrops de modales como bg-black/60 en lugar de rgba inline, elimina últimos colores crudos en componentes.
 - Commit: 5507d58
+
+### 2026-05-30 - F35: Divisores de panel visibles y agarrables
+- Commit: d4be013
+
+### 2026-05-30 - F36: Tipografía UI a Inter (fuente local empaquetada)
+- Commit: 61333cb
+
+### [pendiente] - F37: Selector de tema claro/oscuro/auto
+- Qué se hizo: selector de 3 modos (claro/oscuro/auto) persistido y restaurado. globals.css reorganizado con bloque html[data-theme="dark"] (paleta zinc recuperada de pre-F34). campo themeMode en GlobalSettings (Rust + TS). settingsStore con themeMode + setThemeMode + applyTheme(). Script anti-FOUC en <head> de index.html. Listener prefers-color-scheme para modo auto en App.tsx. Sección "Apariencia" en SettingsTabContent.
+- Archivos: src/styles/globals.css, index.html, src/lib/settings.ts, src-tauri/src/settings.rs, src/stores/settingsStore.ts, src/stores/settingsStore.test.ts, src/App.tsx, src/components/settings/SettingsTabContent.tsx, src/components/settings/SettingsTabContent.test.tsx, context/architecture.md
+- Tests: 281 TS, 27 Rust
+- Decisiones: D-185 data-theme en <html> como selector; CSS vars con dos nombres (--color-* Tailwind + --bg-* directo) sobreescritas en cascada, cero cambios en componentes. D-186 excepción consciente a D-010, aprobada por el arquitecto: localStorage (clave areyto-theme-mode) permitido exclusivamente como caché anti-FOUC leído por el script inline del <head> antes del primer render; settings.json sigue siendo la única fuente de verdad; prohibido para cualquier otro uso. D-187 serde default "light" para theme_mode preserva comportamiento en settings.json existentes. D-188 applyTheme() exportada desde settingsStore, aplica data-theme + escribe localStorage; llamada desde load() y setThemeMode(). D-189 listener prefers-color-scheme en App.tsx useEffect, activo solo cuando themeMode==='auto', limpieza en unmount/cambio.
+- Commit: [pendiente — esperando review visual]

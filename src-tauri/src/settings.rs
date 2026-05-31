@@ -31,6 +31,8 @@ pub struct GlobalSettings {
     pub auto_commit: bool,
     #[serde(default = "default_autosave_interval_ms")]
     pub autosave_interval_ms: u32,
+    #[serde(default = "default_theme_mode")]
+    pub theme_mode: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -52,6 +54,10 @@ fn default_auto_commit() -> bool {
 
 fn default_autosave_interval_ms() -> u32 {
     500
+}
+
+fn default_theme_mode() -> String {
+    "light".to_string()
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -203,6 +209,37 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.autosave_interval_ms, 5000, "autosave_interval_ms 5000 debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn default_theme_mode_es_light_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.theme_mode, "light", "theme_mode debe ser 'light' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_theme_mode_dark() {
+        let original = GlobalSettings {
+            version: 1,
+            theme_mode: "dark".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.theme_mode, "dark", "theme_mode 'dark' debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn roundtrip_theme_mode_auto() {
+        let original = GlobalSettings {
+            version: 1,
+            theme_mode: "auto".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.theme_mode, "auto", "theme_mode 'auto' debe preservarse en roundtrip");
     }
 
     #[test]

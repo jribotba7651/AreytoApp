@@ -1,4 +1,10 @@
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useSettingsStore, type ThemeMode } from '@/stores/settingsStore';
+
+const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
+  { value: 'light', label: 'Claro' },
+  { value: 'dark', label: 'Oscuro' },
+  { value: 'auto', label: 'Auto (sistema)' },
+];
 
 const AUTOSAVE_PRESETS: { ms: number; label: string }[] = [
   { ms: 2000, label: '2 s' },
@@ -14,6 +20,8 @@ function SettingsTabContent() {
   const setAutoCommit = useSettingsStore((s) => s.setAutoCommit);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
   const setAutosaveIntervalMs = useSettingsStore((s) => s.setAutosaveIntervalMs);
+  const themeMode = useSettingsStore((s) => s.themeMode);
+  const setThemeMode = useSettingsStore((s) => s.setThemeMode);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -83,6 +91,36 @@ function SettingsTabContent() {
                 {AUTOSAVE_PRESETS.map((p) => (
                   <option key={p.ms} value={p.ms}>
                     {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            Apariencia
+          </h2>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  Tema de la interfaz
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  Claro u oscuro fijos, o auto para seguir la configuración del sistema.
+                </span>
+              </div>
+              <select
+                value={themeMode}
+                onChange={(e) => void setThemeMode(e.target.value as ThemeMode)}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {THEME_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
               </select>

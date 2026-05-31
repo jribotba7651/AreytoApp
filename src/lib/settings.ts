@@ -14,6 +14,7 @@ export interface GlobalSettings {
   version: number;
   autoCommit?: boolean;
   autosaveIntervalMs?: number;
+  themeMode?: 'light' | 'dark' | 'auto';
 }
 
 export interface ProjectState {
