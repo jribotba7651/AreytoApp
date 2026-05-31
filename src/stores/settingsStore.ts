@@ -45,6 +45,7 @@ interface SettingsState {
   defaultProjectLanguage: string;
   bookFontFamily: BookFontFamily;
   bookFontSize: number;
+  exportFolder: string;
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
@@ -55,6 +56,7 @@ interface SettingsState {
   setDefaultProjectLanguage: (lang: string) => Promise<void>;
   setBookFontFamily: (family: BookFontFamily) => Promise<void>;
   setBookFontSize: (size: number) => Promise<void>;
+  setExportFolder: (folder: string) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -66,6 +68,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   defaultProjectLanguage: 'en',
   bookFontFamily: 'serif',
   bookFontSize: 18,
+  exportFolder: '',
   loaded: false,
 
   load: async () => {
@@ -85,6 +88,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         defaultProjectLanguage: settings.defaultProjectLanguage ?? 'en',
         bookFontFamily,
         bookFontSize,
+        exportFolder: settings.exportFolder ?? '',
         loaded: true,
       });
       applyTheme(themeMode);
@@ -181,6 +185,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, bookFontSize: size });
     } catch (err) {
       console.warn('[areyto] Failed to persist bookFontSize:', err);
+    }
+  },
+
+  setExportFolder: async (folder: string) => {
+    set({ exportFolder: folder });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, exportFolder: folder });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist exportFolder:', err);
     }
   },
 }));

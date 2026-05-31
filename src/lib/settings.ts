@@ -20,6 +20,7 @@ export interface GlobalSettings {
   defaultProjectLanguage?: string;
   bookFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
   bookFontSize?: number;
+  exportFolder?: string;
 }
 
 export interface ProjectState {

@@ -3,6 +3,7 @@ import { Download, FileText } from 'lucide-react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { loadBook } from '@/lib/book-loader';
 import { exportBookMarkdown, exportBookDocx } from '@/lib/export-service';
 import { slugify } from '@/lib/export-composer';
@@ -23,6 +24,8 @@ import type { ExportScope } from '@/lib/export-service';
 function BookTabContent() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const activeTab = useLayoutStore((s) => s.activeTab);
+  const exportFolder = useSettingsStore((s) => s.exportFolder);
+  const setExportFolder = useSettingsStore((s) => s.setExportFolder);
   const [bookData, setBookData] = useState<BookData | null>(null);
   const [loading, setLoading] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -48,7 +51,8 @@ function BookTabContent() {
 
     try {
       const today = new Date().toISOString().slice(0, 10);
-      const defaultPath = `${currentProject.rootPath}/${currentProject.nombre}-${today}.md`;
+      const baseDir = exportFolder || currentProject.rootPath;
+      const defaultPath = `${baseDir}/${currentProject.nombre}-${today}.md`;
 
       const outputPath = await save({
         defaultPath,
@@ -61,6 +65,9 @@ function BookTabContent() {
       }
 
       await exportBookMarkdown(currentProject.rootPath, { scope }, outputPath);
+
+      const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
+      if (chosenDir) void setExportFolder(chosenDir);
 
       setShowExportDialog(false);
       setExportLoading(false);
@@ -84,7 +91,8 @@ function BookTabContent() {
 
     try {
       const today = new Date().toISOString().slice(0, 10);
-      const defaultPath = `${currentProject.rootPath}/${currentProject.nombre}-${today}.docx`;
+      const baseDir = exportFolder || currentProject.rootPath;
+      const defaultPath = `${baseDir}/${currentProject.nombre}-${today}.docx`;
 
       const outputPath = await save({
         defaultPath,
@@ -97,6 +105,9 @@ function BookTabContent() {
       }
 
       await exportBookDocx(currentProject.rootPath, { scope }, outputPath);
+
+      const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
+      if (chosenDir) void setExportFolder(chosenDir);
 
       setShowDocxDialog(false);
       setDocxLoading(false);
