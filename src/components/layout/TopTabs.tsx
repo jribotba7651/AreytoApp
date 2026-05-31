@@ -1,8 +1,10 @@
-import { X } from 'lucide-react';
+import { useState } from 'react';
+import { X, Info } from 'lucide-react';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import type { Tab } from '@/types/layout';
 import type { SaveStatus } from '@/stores/projectStore';
+import AboutDialog from '@/components/about/AboutDialog';
 
 interface TabDef {
   id: Tab;
@@ -30,6 +32,7 @@ function TopTabs() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const closeProject = useProjectStore((s) => s.closeProject);
   const saveStatus = useProjectStore((s) => s.saveStatus);
+  const [showAbout, setShowAbout] = useState(false);
 
   const statusLabel = STATUS_LABEL[saveStatus];
 
@@ -79,7 +82,18 @@ function TopTabs() {
             </button>
           </>
         )}
+
+        <button
+          onClick={() => setShowAbout(true)}
+          aria-label="Acerca de"
+          title="Acerca de"
+          className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+        >
+          <Info size={14} />
+        </button>
       </div>
+
+      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
     </div>
   );
 }
