@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F41 Modal Acerca de Areyto
+- Última feature completada: F42 Carpeta default de export
 - Fecha de última actualización: 2026-05-31
 
 ## Features completadas
@@ -974,6 +974,12 @@ Ninguno.
 
 ### 2026-05-31 - F38: Setting de fuente del editor (familia + tamaño)
 - Commit: 8fcef11
+
+### 2026-05-31 - F42: Carpeta default de export configurable
+- Commit: 82bcdfc
+- Qué se hizo: Campo `exportFolder: String` en `GlobalSettings` (Rust serde default `String::new()` vacío; TS `exportFolder?: string`). `settingsStore`: estado `exportFolder` (default `''`), setter `setExportFolder` con read-modify-write, `load()` mapea con `?? ''`. `BookTabContent`: `baseDir = exportFolder || currentProject.rootPath` al construir `defaultPath` para `.md` y `.docx`; tras export exitoso, extrae dirname del `outputPath` elegido por el usuario y llama `setExportFolder` (comportamiento híbrido: fija desde Ajustes + recuerda la última carpeta usada). Sección "Export" en `SettingsTabContent` con display de ruta actual o "Carpeta del proyecto (por defecto)", botón "Examinar…" (`open({ directory: true, multiple: false })`), y botón "Restablecer" (visible solo si hay carpeta configurada, vuelve a `''`). `exportFolder` incluido en `useSettingsPersistence` (objeto hardcodeado + array de deps) para evitar regresión del bug F39. Smoke confirmado: vacío abre en carpeta del proyecto, configurado abre en la carpeta elegida, recuerda la última usada, persiste tras reinicio.
+- Archivos modificados: `src-tauri/src/settings.rs`, `src/lib/settings.ts`, `src/stores/settingsStore.ts`, `src/stores/settingsStore.test.ts`, `src/hooks/useSettingsPersistence.ts`, `src/hooks/useSettingsPersistence.test.ts`, `src/components/layout/BookTabContent.tsx`, `src/components/settings/SettingsTabContent.tsx`, `src/components/settings/SettingsTabContent.test.tsx`
+- Tests: 339 TS + 39 Rust
 
 ### 2026-05-31 - F41: Modal Acerca de Areyto
 - Commit: 4df1bd6
