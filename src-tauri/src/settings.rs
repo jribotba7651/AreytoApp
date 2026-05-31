@@ -37,6 +37,8 @@ pub struct GlobalSettings {
     pub editor_font_family: String,
     #[serde(default = "default_editor_font_size")]
     pub editor_font_size: u32,
+    #[serde(default = "default_project_language")]
+    pub default_project_language: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -70,6 +72,10 @@ fn default_editor_font_family() -> String {
 
 fn default_editor_font_size() -> u32 {
     16
+}
+
+fn default_project_language() -> String {
+    "en".to_string()
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -290,6 +296,25 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.editor_font_size, 20);
+    }
+
+    #[test]
+    fn default_project_language_es_en_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.default_project_language, "en", "default_project_language debe ser 'en' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_default_project_language_es() {
+        let original = GlobalSettings {
+            version: 1,
+            default_project_language: "es".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.default_project_language, "es");
     }
 
     #[test]

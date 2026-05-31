@@ -78,7 +78,7 @@ export async function writeDedicatoria(rootPath: string, data: DedicatoriaData):
   await writeFile(frontmatterPath(rootPath, 'dedicatoria'), data.contenido);
 }
 
-export async function ensureFrontmatterFiles(rootPath: string): Promise<void> {
+export async function ensureFrontmatterFiles(rootPath: string, lang?: string): Promise<void> {
   const dir = `${rootPath}/frontmatter`;
   await ensureDir(dir);
 
@@ -99,6 +99,6 @@ export async function ensureFrontmatterFiles(rootPath: string): Promise<void> {
   const metadataPath = frontmatterPath(rootPath, 'metadata');
   const metadataExists = await invoke<boolean>('path_exists', { path: metadataPath });
   if (!metadataExists) {
-    await writeFile(metadataPath, defaultContent('metadata'));
+    await writeFile(metadataPath, defaultContent('metadata', lang));
   }
 }

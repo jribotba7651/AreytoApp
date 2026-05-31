@@ -184,6 +184,23 @@ describe('ensureFrontmatterFiles', () => {
     expect(contents).not.toMatch(/^---/);
   });
 
+  it('metadata.yaml se crea con el idioma pasado como argumento', async () => {
+    mockInvoke
+      .mockResolvedValueOnce(undefined) // ensure_dir
+      .mockResolvedValueOnce(true)      // path_exists titulo → exists
+      .mockResolvedValueOnce(true)      // path_exists copyright → exists
+      .mockResolvedValueOnce(true)      // path_exists dedicatoria → exists
+      .mockResolvedValueOnce(false)     // path_exists metadata → no existe
+      .mockResolvedValueOnce(undefined); // write_text_file metadata
+
+    await ensureFrontmatterFiles('/proyecto', 'es');
+
+    const writeCalls = mockInvoke.mock.calls.filter((c) => c[0] === 'write_text_file');
+    expect(writeCalls).toHaveLength(1);
+    const contents = (writeCalls[0]![1] as { contents: string }).contents;
+    expect(contents).toContain('idioma: es');
+  });
+
   it('no sobreescribe archivos existentes', async () => {
     mockInvoke
       .mockResolvedValueOnce(undefined) // ensure_dir

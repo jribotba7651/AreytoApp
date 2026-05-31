@@ -29,6 +29,7 @@ beforeEach(() => {
     themeMode: 'light',
     editorFontFamily: 'serif',
     editorFontSize: 16,
+    defaultProjectLanguage: 'en',
     loaded: false,
   });
   document.documentElement.removeAttribute('data-theme');
@@ -344,5 +345,54 @@ describe('settingsStore - setThemeMode', () => {
     mockInvoke.mockRejectedValue(new Error('disk full'));
 
     await expect(useSettingsStore.getState().setThemeMode('dark')).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - load con defaultProjectLanguage', () => {
+  it('popula defaultProjectLanguage desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, defaultProjectLanguage: 'es' });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().defaultProjectLanguage).toBe('es');
+  });
+
+  it('usa "en" como default si defaultProjectLanguage es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().defaultProjectLanguage).toBe('en');
+  });
+});
+
+describe('settingsStore - setDefaultProjectLanguage', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setDefaultProjectLanguage('es');
+
+    expect(useSettingsStore.getState().defaultProjectLanguage).toBe('es');
+
+    await promise;
+  });
+
+  it('persiste el valor al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, defaultProjectLanguage: 'en' };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setDefaultProjectLanguage('fr');
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, defaultProjectLanguage: 'fr' },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setDefaultProjectLanguage('es')).resolves.toBeUndefined();
   });
 });

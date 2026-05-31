@@ -7,6 +7,7 @@ import { readProjectState } from './settings';
 import { ensureFrontmatterFiles } from './frontmatter-fs';
 import { ensureBackmatterFiles } from './backmatter-fs';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 export type OpenProjectResult =
   | { ok: true }
@@ -24,7 +25,8 @@ export async function setupProjectInStores(project: Project): Promise<void> {
   const gitInit = await ensureGitInit(project.rootPath);
   if (!gitInit.ok) console.warn('Git init warning:', gitInit.error);
 
-  await ensureFrontmatterFiles(project.rootPath).catch((e) =>
+  const lang = useSettingsStore.getState().defaultProjectLanguage;
+  await ensureFrontmatterFiles(project.rootPath, lang).catch((e) =>
     console.warn('Frontmatter init warning:', e)
   );
 
