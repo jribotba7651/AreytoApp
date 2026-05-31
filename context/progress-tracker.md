@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F40 Fuente del tab Libro
+- Última feature completada: F41 Modal Acerca de Areyto
 - Fecha de última actualización: 2026-05-31
 
 ## Features completadas
@@ -974,6 +974,13 @@ Ninguno.
 
 ### 2026-05-31 - F38: Setting de fuente del editor (familia + tamaño)
 - Commit: 8fcef11
+
+### 2026-05-31 - F41: Modal Acerca de Areyto
+- Commit: 4df1bd6
+- Qué se hizo: Modal "Acerca de Areyto" abierto desde un botón-icono `Info` (14px, lucide-react) en el extremo derecho de `TopTabs`. Estado local `const [showAbout, setShowAbout] = useState(false)` en `TopTabs` — NO toca `layoutStore`. `AboutDialog` nuevo sigue el patrón de modal del proyecto: backdrop `fixed inset-0 z-50 bg-black/60`, panel `bg-bg-tertiary border border-border-default rounded-lg`, cierra con X / Escape / click en backdrop. Contenido: nombre "Areyto", línea descriptiva, "Jíbaro en la Luna LLC", versión `0.1.0` obtenida con `getVersion()` de `@tauri-apps/api/app` (sin comando Rust nuevo, sin permiso extra en capabilities). Smoke confirmado.
+- Archivos creados: `src/components/about/AboutDialog.tsx`, `src/components/about/AboutDialog.test.tsx`, `src/components/layout/TopTabs.test.tsx`
+- Archivos modificados: `src/components/layout/TopTabs.tsx`
+- Tests: 333 TS + 37 Rust. Feature solo-frontend.
 
 ### 2026-05-31 - F40: Fuente del tab Libro
 - Commit: 22c163b
