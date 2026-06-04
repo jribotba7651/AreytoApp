@@ -9,17 +9,23 @@ vi.mock('@tauri-apps/api/app', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => ({
-      'tabs.capitulo': 'Capítulo Activo',
-      'tabs.libro': 'Libro',
-      'tabs.terminados': 'Terminados',
-      'tabs.ajustes': 'Ajustes',
-      'topbar.saving': 'Guardando…',
-      'topbar.saved': 'Guardado',
-      'topbar.saveError': 'Error al guardar',
-      'topbar.closeProject': 'Cerrar proyecto',
-      'topbar.about': 'Acerca de',
-    } as Record<string, string>)[key] ?? key,
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (key === 'about.version') return `Versión ${opts?.version ?? ''}`;
+      return ({
+        'tabs.capitulo': 'Capítulo Activo',
+        'tabs.libro': 'Libro',
+        'tabs.terminados': 'Terminados',
+        'tabs.ajustes': 'Ajustes',
+        'topbar.saving': 'Guardando…',
+        'topbar.saved': 'Guardado',
+        'topbar.saveError': 'Error al guardar',
+        'topbar.closeProject': 'Cerrar proyecto',
+        'topbar.about': 'Acerca de',
+        'about.tagline': 'Un IDE para escritores serios.',
+        'about.company': 'Jíbaro en la Luna LLC',
+        'about.close': 'Cerrar',
+      } as Record<string, string>)[key] ?? key;
+    },
   }),
 }));
 

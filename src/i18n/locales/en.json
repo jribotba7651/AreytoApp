@@ -124,5 +124,107 @@
     "agradecimientos": {
       "sectionTitle": "Acknowledgements"
     }
+  },
+  "welcome": {
+    "tagline": "Chapter-by-chapter writing editor",
+    "dialogTitle": "Select the project folder",
+    "openProject": "Open project",
+    "opening": "Opening…",
+    "restoreMessageSuffix": ". Select a new one below.",
+    "errorOpen": "Could not open the project. Try again.",
+    "errorLoad": "Could not load the active chapter."
+  },
+  "modal": {
+    "createProject": {
+      "title": "Create project",
+      "description": "This folder has no project. You can create one here.",
+      "placeholder": "Project name",
+      "errorAlreadyExists": "A project already exists in this folder.",
+      "errorWriteFailed": "Could not create the project: {{reason}}",
+      "errorGeneric": "Error creating the project. Try again.",
+      "cancel": "Cancel",
+      "create": "Create",
+      "creating": "Creating…"
+    },
+    "closeChapter": {
+      "title": "Close chapter",
+      "checking": "Checking…",
+      "conflictPart1": "This chapter was already closed before. The tag ",
+      "conflictPart2": " exists in the history. You will create a new tag ",
+      "conflictPart3": " that will mark this new close as finished. Previous tags remain as historical markers.",
+      "normalPart1": "You are about to mark ",
+      "normalPart2": " as finished. The file will be moved to Finished and marked with a git tag.",
+      "cancel": "Cancel",
+      "closeChapter": "Close chapter",
+      "createTag": "Create {{tagName}}",
+      "closing": "Closing…",
+      "errorTagFailed": "Could not create the git tag",
+      "errorWriteFailed": "Could not move the file",
+      "errorPathNotFound": "File not found",
+      "errorReadFailed": "Could not read the file",
+      "errorGeneric": "An unexpected error occurred"
+    },
+    "reopenChapter": {
+      "title": "Reopen chapter",
+      "bodyPart1": "You are about to reopen ",
+      "bodyPart2": ". The file will return to ",
+      "bodyPart3": " and will be automatically activated in the editor. The git tag ",
+      "bodyPart4": " remains as a historical marker.",
+      "cancel": "Cancel",
+      "reopen": "Reopen chapter",
+      "reopening": "Reopening…",
+      "errorWriteFailed": "Could not move the file",
+      "errorPathNotFound": "File not found",
+      "errorReadFailed": "Could not read the file",
+      "errorGeneric": "An unexpected error occurred"
+    },
+    "restoreVersion": {
+      "title": "Restore version",
+      "description": "The current content will be saved before restoring. The current version will remain in the history.",
+      "cancel": "Cancel",
+      "restore": "Restore",
+      "restoring": "Restoring…"
+    },
+    "exportMarkdown": {
+      "title": "Export book",
+      "description": "Choose which chapters to include in the exported markdown file.",
+      "cancel": "Cancel",
+      "export": "Export",
+      "exporting": "Exporting…"
+    },
+    "exportDocx": {
+      "title": "Export to Word",
+      "description": "Choose which chapters to include in the .docx file exported via pandoc.",
+      "cancel": "Cancel",
+      "export": "Export",
+      "exporting": "Exporting…"
+    },
+    "exportScope": {
+      "both": "Both (finished + in progress)",
+      "finished": "Only finished",
+      "inProgress": "Only in progress"
+    }
+  },
+  "sidebar": {
+    "frontmatter": "Frontmatter",
+    "chapters": "Chapters",
+    "backmatter": "Backmatter",
+    "noProject": "No project",
+    "noChapters": "No chapters",
+    "newChapter": "New chapter",
+    "closeChapter": "Close active chapter",
+    "items": {
+      "titulo": "Title and author",
+      "copyright": "Copyright",
+      "dedicatoria": "Dedication",
+      "metadata": "Details",
+      "agradecimientos": "Acknowledgements"
+    }
+  },
+  "about": {
+    "tagline": "An IDE for serious writers.",
+    "company": "Jíbaro en la Luna LLC",
+    "version": "Version {{version}}",
+    "close": "Close"
   }
 }

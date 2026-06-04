@@ -5,6 +5,19 @@ vi.mock('@tauri-apps/api/app', () => ({
   getVersion: vi.fn().mockResolvedValue('0.1.0'),
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) => {
+      if (key === 'about.version') return `Versión ${opts?.version ?? ''}`;
+      return ({
+        'about.tagline': 'Un IDE para escritores serios.',
+        'about.company': 'Jíbaro en la Luna LLC',
+        'about.close': 'Cerrar',
+      } as Record<string, string>)[key] ?? key;
+    },
+  }),
+}));
+
 import { getVersion } from '@tauri-apps/api/app';
 import AboutDialog from './AboutDialog';
 

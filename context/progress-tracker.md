@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F45 i18n Fase 3: editores de Frontmatter/Backmatter
+- Última feature completada: F46 i18n Fase 4: Welcome + modales + sidebar + AboutDialog
 - Fecha de última actualización: 2026-06-04
 
 ## Features completadas
@@ -935,6 +935,22 @@ Ninguno.
 - La primera compilación de Rust (cargo) tarda varios minutos en descargar y compilar las dependencias. Las siguientes son rápidas.
 - pnpm-workspace.yaml tiene allowBuilds: esbuild — no borrar, es necesario para que Vite funcione.
 - Tailwind v4: usar @theme {} para definir tokens, no tailwind.config.js. Clases de Tailwind mapean a --color-* por convención de v4.
+
+### 2026-06-04 - F46: i18n Fase 4 — Welcome + modales + sidebar + AboutDialog
+- Commit: (pendiente smoke del arquitecto)
+- Qué se hizo: migración de todos los strings visibles de WelcomeScreen, 7 modales (CreateProjectModal, CloseChapterModal, ReopenChapterModal, RestoreConfirmModal, ExportBookDialog, ExportBookDocxDialog, AboutDialog) y los componentes de sidebar (SidebarPanel, FrontmatterSection, BackmatterSection, ChapterList, NewChapterButton, CloseChapterButton).
+- Namespaces nuevos en en.json/es.json: `welcome.*` (tagline, dialogTitle, openProject, opening, restoreMessageSuffix, errorOpen, errorLoad), `modal.*` (createProject, closeChapter, reopenChapter, restoreVersion, exportMarkdown, exportDocx, exportScope con subclaves por modal), `sidebar.*` (frontmatter, chapters, backmatter, noProject, noChapters, newChapter, closeChapter, items.titulo/copyright/dedicatoria/metadata/agradecimientos), `about.*` (tagline, company, version, close).
+- Componentes migrados: WelcomeScreen, CreateProjectModal, CloseChapterModal, ReopenChapterModal, RestoreConfirmModal, ExportBookDialog, ExportBookDocxDialog, AboutDialog, SidebarPanel, FrontmatterSection, BackmatterSection, ChapterList, NewChapterButton, CloseChapterButton.
+- Tests actualizados: AboutDialog.test.tsx, ExportBookDialog.test.tsx, ExportBookDocxDialog.test.tsx, TopTabs.test.tsx (mock react-i18next extendido con claves about.*).
+- Nota: AboutDialog tenía strings hardcodeados de F41 (se hizo antes de i18n). Migrados en esta fase.
+- Nota: `about.version` usa interpolación i18next: `t('about.version', { version })` — excepción aprobada por arquitecto (valor único al final, sin elementos JSX).
+- Nota: `modal.createProject.errorWriteFailed` también usa interpolación i18next: `t('modal.createProject.errorWriteFailed', { reason })` — mismo caso que about.version (valor único en error de texto plano).
+- Frases con elementos JSX (strong/code) en CloseChapterModal y ReopenChapterModal: troceadas en Part1/Part2/Part3/Part4 per decisión del arquitecto. NO se usa interpolación i18next para esas.
+- Botón Cancelar: clave propia por modal (modal.<nombre>.cancel), no reutiliza common.cancel.
+- Sidebar items (Título y autor, Agradecimientos, etc.): claves propias bajo sidebar.items.*, no reutilizan frontmatter.*/backmatter.* (contexto distinto: navegación vs encabezado de editor).
+- DEUDA MENOR: frases troceadas Part1/Part2 funcionan bien para en/es pero pueden romperse con idiomas de orden sintáctico distinto (alemán, japonés, árabe). Revisar si se añade un tercer idioma.
+- Tests: 347 TS + 41 Rust (sin cambio de conteo).
+- Pendientes F47: lib/, App.tsx, limpieza opcional topbar.saving/saved → common.saving/saved.
 
 ### 2026-06-04 - F45: i18n Fase 3 — Editores de Frontmatter y Backmatter
 - Qué se hizo: migración de los 5 editores de frontmatter/backmatter (~25 strings). Namespace common.* nuevo para los strings repetidos (saving/saved/loading). Refactor de sub-componentes IdiomaField y DescripcionField en FrontmatterMetadataEditor para aceptar label/placeholder como props (consistente con el patrón Field existente).

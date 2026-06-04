@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { open } from '@tauri-apps/plugin-dialog';
 import { openProject } from '@/lib/project-fs';
 import { setupProjectInStores } from '@/lib/open-project-flow';
@@ -12,6 +13,7 @@ interface WelcomeScreenProps {
 }
 
 function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
+  const { t } = useTranslation();
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
   const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
@@ -27,7 +29,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
       selected = await open({
         directory: true,
         multiple: false,
-        title: 'Selecciona la carpeta del proyecto',
+        title: t('welcome.dialogTitle'),
       });
     } catch {
       setLoading(false);
@@ -46,7 +48,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
       try {
         await setupProjectInStores(result.value);
       } catch {
-        setError('No se pudo cargar el capítulo activo.');
+        setError(t('welcome.errorLoad'));
       }
       setLoading(false);
       return;
@@ -58,9 +60,9 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
       return;
     }
 
-    setError('No se pudo abrir el proyecto. Intenta de nuevo.');
+    setError(t('welcome.errorOpen'));
     setLoading(false);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     setTriggerOpenProject(handleOpen);
@@ -78,12 +80,12 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
         Areyto
       </h1>
       <p className="text-sm text-text-secondary">
-        Editor de escritura por capítulos
+        {t('welcome.tagline')}
       </p>
 
       {restoreMessage && (
         <p className="text-sm text-text-secondary mt-1 max-w-sm text-center">
-          {restoreMessage}. Selecciona uno nuevo abajo.
+          {restoreMessage}{t('welcome.restoreMessageSuffix')}
         </p>
       )}
 
@@ -93,7 +95,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
           disabled={loading}
           className="px-5 py-2 text-sm bg-accent-muted text-text-primary rounded hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-150"
         >
-          {loading ? 'Abriendo…' : 'Abrir proyecto'}
+          {loading ? t('welcome.opening') : t('welcome.openProject')}
         </button>
         <div className="absolute top-1/2 left-full -translate-y-1/2 pl-2">
           <ShortcutHint text="⌘⇧O" />

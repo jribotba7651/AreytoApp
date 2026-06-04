@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { readChapter, updateProjectMeta } from '@/lib/project-fs';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
 
 function ChapterList() {
+  const { t } = useTranslation();
   const chapters = useProjectStore((s) => s.chapters);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -29,7 +31,7 @@ function ChapterList() {
   if (chapters.length === 0) {
     return (
       <div className="px-3 py-2">
-        <p className="text-xs text-text-tertiary">Sin capítulos</p>
+        <p className="text-xs text-text-tertiary">{t('sidebar.noChapters')}</p>
       </div>
     );
   }

@@ -109,6 +109,20 @@ describe('performCloseChapter', () => {
     const result = await performCloseChapter(PROJECT, CHAPTER);
 
     expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.kind).toBe('TagFailed');
     expect(mockCloseChapter).not.toHaveBeenCalled();
+  });
+
+  it('retorna error estructurado si closeChapter falla', async () => {
+    mockTagChapter.mockResolvedValue({ ok: true, value: 'cap-01-final' });
+    mockCloseChapter.mockResolvedValue({
+      ok: false,
+      error: { kind: 'WriteFailed', path: CHAPTER.path, reason: 'permission denied' },
+    });
+
+    const result = await performCloseChapter(PROJECT, CHAPTER);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.kind).toBe('WriteFailed');
   });
 });

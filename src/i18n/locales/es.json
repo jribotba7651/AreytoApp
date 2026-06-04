@@ -124,5 +124,107 @@
     "agradecimientos": {
       "sectionTitle": "Agradecimientos"
     }
+  },
+  "welcome": {
+    "tagline": "Editor de escritura por capítulos",
+    "dialogTitle": "Selecciona la carpeta del proyecto",
+    "openProject": "Abrir proyecto",
+    "opening": "Abriendo…",
+    "restoreMessageSuffix": ". Selecciona uno nuevo abajo.",
+    "errorOpen": "No se pudo abrir el proyecto. Intenta de nuevo.",
+    "errorLoad": "No se pudo cargar el capítulo activo."
+  },
+  "modal": {
+    "createProject": {
+      "title": "Crear proyecto",
+      "description": "Esta carpeta no tiene un proyecto. Puedes crear uno aquí.",
+      "placeholder": "Nombre del proyecto",
+      "errorAlreadyExists": "Ya existe un proyecto en esta carpeta.",
+      "errorWriteFailed": "No se pudo crear el proyecto: {{reason}}",
+      "errorGeneric": "Error al crear el proyecto. Intenta de nuevo.",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "creating": "Creando…"
+    },
+    "closeChapter": {
+      "title": "Cerrar capítulo",
+      "checking": "Verificando…",
+      "conflictPart1": "Este capítulo ya fue cerrado antes. El tag ",
+      "conflictPart2": " existe en el historial. Vas a crear un nuevo tag ",
+      "conflictPart3": " que marcará este nuevo momento como terminado. Los tags anteriores quedan como marcas históricas.",
+      "normalPart1": "Vas a marcar ",
+      "normalPart2": " como terminado. El archivo se moverá a Terminados y quedará marcado con un tag de git.",
+      "cancel": "Cancelar",
+      "closeChapter": "Cerrar capítulo",
+      "createTag": "Crear {{tagName}}",
+      "closing": "Cerrando…",
+      "errorTagFailed": "No se pudo crear el tag git",
+      "errorWriteFailed": "No se pudo mover el archivo",
+      "errorPathNotFound": "Archivo no encontrado",
+      "errorReadFailed": "No se pudo leer el archivo",
+      "errorGeneric": "Ocurrió un error inesperado"
+    },
+    "reopenChapter": {
+      "title": "Reabrir capítulo",
+      "bodyPart1": "Vas a reabrir ",
+      "bodyPart2": ". El archivo volverá a ",
+      "bodyPart3": " y se activará automáticamente en el editor. El tag git ",
+      "bodyPart4": " se mantiene como marca histórica.",
+      "cancel": "Cancelar",
+      "reopen": "Reabrir capítulo",
+      "reopening": "Reabriendo…",
+      "errorWriteFailed": "No se pudo mover el archivo",
+      "errorPathNotFound": "Archivo no encontrado",
+      "errorReadFailed": "No se pudo leer el archivo",
+      "errorGeneric": "Ocurrió un error inesperado"
+    },
+    "restoreVersion": {
+      "title": "Restaurar versión",
+      "description": "El contenido actual se guardará antes de restaurar. La versión actual quedará en el historial.",
+      "cancel": "Cancelar",
+      "restore": "Restaurar",
+      "restoring": "Restaurando…"
+    },
+    "exportMarkdown": {
+      "title": "Exportar libro",
+      "description": "Elige qué capítulos incluir en el archivo markdown exportado.",
+      "cancel": "Cancelar",
+      "export": "Exportar",
+      "exporting": "Exportando…"
+    },
+    "exportDocx": {
+      "title": "Exportar a Word",
+      "description": "Elige qué capítulos incluir en el archivo .docx exportado vía pandoc.",
+      "cancel": "Cancelar",
+      "export": "Exportar",
+      "exporting": "Exportando…"
+    },
+    "exportScope": {
+      "both": "Ambos (terminados + en progreso)",
+      "finished": "Solo terminados",
+      "inProgress": "Solo en progreso"
+    }
+  },
+  "sidebar": {
+    "frontmatter": "Frontmatter",
+    "chapters": "Capítulos",
+    "backmatter": "Backmatter",
+    "noProject": "Sin proyecto",
+    "noChapters": "Sin capítulos",
+    "newChapter": "Nuevo capítulo",
+    "closeChapter": "Cerrar capítulo activo",
+    "items": {
+      "titulo": "Título y autor",
+      "copyright": "Copyright",
+      "dedicatoria": "Dedicatoria",
+      "metadata": "Detalles",
+      "agradecimientos": "Agradecimientos"
+    }
+  },
+  "about": {
+    "tagline": "Un IDE para escritores serios.",
+    "company": "Jíbaro en la Luna LLC",
+    "version": "Versión {{version}}",
+    "close": "Cerrar"
   }
 }

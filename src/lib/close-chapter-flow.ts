@@ -5,7 +5,7 @@ import { useProjectStore } from '@/stores/projectStore';
 
 export type CloseResult =
   | { ok: true; tagName: string; newPath: string }
-  | { ok: false; error: string };
+  | { ok: false; error: { kind: string } };
 
 export interface ConflictInfo {
   baseTagExists: boolean;
@@ -46,13 +46,13 @@ export async function performCloseChapter(
     explicitTagName: options?.explicitTagName,
   });
   if (!tagResult.ok) {
-    return { ok: false, error: `No se pudo crear el tag git: ${tagResult.error.kind}` };
+    return { ok: false, error: { kind: tagResult.error.kind } };
   }
 
   // 3. Move file to capitulos-terminados/
   const moveResult = await closeChapter(project, chapter);
   if (!moveResult.ok) {
-    return { ok: false, error: `No se pudo mover el archivo: ${moveResult.error.kind}` };
+    return { ok: false, error: { kind: moveResult.error.kind } };
   }
 
   // 4. Commit the file move (non-fatal if it fails)
