@@ -19,13 +19,6 @@ const TABS: TabDef[] = [
   { id: 'ajustes', shortcutHint: '⌘4' },
 ];
 
-const STATUS_LABEL: Record<SaveStatus, string> = {
-  idle: '',
-  saving: 'Guardando…',
-  saved: 'Guardado',
-  error: 'Error al guardar',
-};
-
 function TopTabs() {
   const { t } = useTranslation();
   const activeTab = useLayoutStore((s) => s.activeTab);
@@ -35,7 +28,13 @@ function TopTabs() {
   const saveStatus = useProjectStore((s) => s.saveStatus);
   const [showAbout, setShowAbout] = useState(false);
 
-  const statusLabel = STATUS_LABEL[saveStatus];
+  const statusLabels: Record<SaveStatus, string> = {
+    idle: '',
+    saving: t('topbar.saving'),
+    saved: t('topbar.saved'),
+    error: t('topbar.saveError'),
+  };
+  const statusLabel = statusLabels[saveStatus];
 
   return (
     <div className="flex items-center bg-bg-secondary border-b border-border-subtle shrink-0">
@@ -75,8 +74,8 @@ function TopTabs() {
             </span>
             <button
               onClick={closeProject}
-              aria-label="Cerrar proyecto"
-              title="Cerrar proyecto (⌘⇧W)"
+              aria-label={t('topbar.closeProject')}
+              title={`${t('topbar.closeProject')} (⌘⇧W)`}
               className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
             >
               <X size={14} />
@@ -86,8 +85,8 @@ function TopTabs() {
 
         <button
           onClick={() => setShowAbout(true)}
-          aria-label="Acerca de"
-          title="Acerca de"
+          aria-label={t('topbar.about')}
+          title={t('topbar.about')}
           className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
         >
           <Info size={14} />

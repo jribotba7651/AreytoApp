@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F43 i18n Fase 1: infraestructura + piloto TopTabs
+- Última feature completada: F44 i18n Fase 2: SettingsTabContent + resto TopTabs
 - Fecha de última actualización: 2026-06-04
 
 ## Features completadas
@@ -935,6 +935,14 @@ Ninguno.
 - La primera compilación de Rust (cargo) tarda varios minutos en descargar y compilar las dependencias. Las siguientes son rápidas.
 - pnpm-workspace.yaml tiene allowBuilds: esbuild — no borrar, es necesario para que Vite funcione.
 - Tailwind v4: usar @theme {} para definir tokens, no tailwind.config.js. Clases de Tailwind mapean a --color-* por convención de v4.
+
+### 2026-06-04 - F44: i18n Fase 2 — SettingsTabContent + resto de TopTabs
+- Qué se hizo: migración completa de todos los strings visibles de SettingsTabContent (~47 strings) y los 7 strings que quedaron de TopTabs en F43 (STATUS_LABEL × 3 + aria-label/title × 4).
+- Namespaces añadidos a en.json/es.json: `settings.*` (title, moreComingSoon + 6 secciones: versioning, editor, appearance, projects, book, export), `topbar.*` (saving, saved, saveError, closeProject, about), `theme.*` (light, dark, auto), `font.*` (serif, inter, sans, mono compartido entre editor y lector).
+- Decisiones: THEME_OPTIONS y FONT_FAMILY_OPTIONS simplificados a arrays de valores puros (label eliminado, ahora `t('theme.'+value)` / `t('font.'+value)` en JSX). AUTOSAVE_PRESETS, FONT_SIZE_OPTIONS, LANGUAGE_OPTIONS, UI_LOCALE_OPTIONS mantienen labels hardcoded (unidades universales / nombres nativos de idiomas). `settings.export.sectionTitle` = "Export" en ambos locales (ya estaba en inglés en la UI original). STATUS_LABEL movido de módulo-scope a variable local inside el componente para poder usar `t()`. Shortcut ⌘⇧W concatenado fuera del string traducible per D-194.
+- Archivos modificados: src/i18n/locales/en.json, src/i18n/locales/es.json, src/components/settings/SettingsTabContent.tsx, src/components/layout/TopTabs.tsx, src/components/settings/SettingsTabContent.test.tsx, src/components/layout/TopTabs.test.tsx
+- Tests: 347 TS + 41 Rust (sin cambio de conteo; tests actualizados para mocks expandidos)
+- Pendientes F45-F47: migrar Frontmatter editors, Welcome/modales, sidebar, lib/, App.tsx
 
 ### 2026-06-04 - F43: i18n Fase 1 — Infraestructura + piloto TopTabs
 - Qué se hizo: infraestructura react-i18next montada. Dos locales (en/es) con recursos JSON inline. uiLocale persistido en GlobalSettings (campo distinto de defaultProjectLanguage que es metadata del libro). TopTabs migrado como componente piloto. Selector "Idioma de la interfaz" nuevo en sección "Interfaz" de SettingsTabContent. Cambio de idioma al instante vía i18n.changeLanguage en setter y en load(). uiLocale incluido en useSettingsPersistence (bug F39 prevenido).

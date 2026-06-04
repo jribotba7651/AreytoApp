@@ -6,10 +6,87 @@
     "ajustes": "Settings"
   },
   "settings": {
+    "title": "Settings",
+    "moreComingSoon": "More settings coming soon.",
     "uiLocale": {
       "sectionTitle": "Interface",
       "label": "Interface Language",
       "description": "Changes the display language of Areyto. Does not affect the book language or its metadata."
+    },
+    "versioning": {
+      "sectionTitle": "Versioning",
+      "autoCommit": {
+        "label": "Automatic commit on each save",
+        "description": "When active, Areyto automatically creates a Git commit each time a chapter is saved. Turn this off if you prefer to control commits manually."
+      }
+    },
+    "editor": {
+      "sectionTitle": "Editor",
+      "autosave": {
+        "label": "Autosave interval",
+        "description": "Wait time after the last change before saving automatically."
+      },
+      "fontFamily": {
+        "label": "Editor font",
+        "description": "Typeface for the writing area."
+      },
+      "fontSize": {
+        "label": "Font size",
+        "description": "Text size in the writing area."
+      }
+    },
+    "appearance": {
+      "sectionTitle": "Appearance",
+      "theme": {
+        "label": "Interface theme",
+        "description": "Fixed light or dark, or auto to follow the system setting."
+      }
+    },
+    "projects": {
+      "sectionTitle": "Projects",
+      "defaultLanguage": {
+        "label": "Default language",
+        "description": "Language assigned to new projects in the language field of metadata.yaml."
+      }
+    },
+    "book": {
+      "sectionTitle": "Book",
+      "fontFamily": {
+        "label": "Reader font",
+        "description": "Typeface for the Book tab."
+      },
+      "fontSize": {
+        "label": "Font size",
+        "description": "Text size in the Book tab."
+      }
+    },
+    "export": {
+      "sectionTitle": "Export",
+      "folder": {
+        "label": "Destination folder",
+        "description": "Folder where the Save As dialog opens when exporting. Updated automatically with the last folder used.",
+        "default": "Project folder (default)"
+      },
+      "browse": "Browse…",
+      "reset": "Reset"
     }
+  },
+  "topbar": {
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Error saving",
+    "closeProject": "Close project",
+    "about": "About"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Auto (system)"
+  },
+  "font": {
+    "serif": "Serif (Iowan / Georgia)",
+    "inter": "Inter",
+    "sans": "System sans-serif",
+    "mono": "Monospace"
   }
 }
