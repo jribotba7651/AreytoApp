@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { readAgradecimientos, writeAgradecimientos } from '@/lib/backmatter-fs';
 import { commitChanges } from '@/lib/versioning';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 
 function BackmatterAgradecimientosEditor() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const [initialContent, setInitialContent] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -42,7 +44,7 @@ function BackmatterAgradecimientosEditor() {
   if (initialContent === null) {
     return (
       <div className="h-full bg-bg-editor flex items-center justify-center">
-        <p className="text-xs text-text-tertiary">Cargando…</p>
+        <p className="text-xs text-text-tertiary">{t('common.loading')}</p>
       </div>
     );
   }
@@ -51,13 +53,13 @@ function BackmatterAgradecimientosEditor() {
     <div className="h-full flex flex-col bg-bg-editor">
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle shrink-0">
         <span className="text-xs text-text-tertiary font-sans uppercase tracking-wider">
-          Agradecimientos
+          {t('backmatter.agradecimientos.sectionTitle')}
         </span>
         {saveStatus === 'saving' && (
-          <span className="text-xs text-text-tertiary">Guardando…</span>
+          <span className="text-xs text-text-tertiary">{t('common.saving')}</span>
         )}
         {saveStatus === 'saved' && (
-          <span className="text-xs text-accent">Guardado</span>
+          <span className="text-xs text-accent">{t('common.saved')}</span>
         )}
       </div>
       <div className="flex-1 min-h-0">

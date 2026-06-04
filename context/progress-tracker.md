@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F44 i18n Fase 2: SettingsTabContent + resto TopTabs
+- Última feature completada: F45 i18n Fase 3: editores de Frontmatter/Backmatter
 - Fecha de última actualización: 2026-06-04
 
 ## Features completadas
@@ -935,6 +935,16 @@ Ninguno.
 - La primera compilación de Rust (cargo) tarda varios minutos en descargar y compilar las dependencias. Las siguientes son rápidas.
 - pnpm-workspace.yaml tiene allowBuilds: esbuild — no borrar, es necesario para que Vite funcione.
 - Tailwind v4: usar @theme {} para definir tokens, no tailwind.config.js. Clases de Tailwind mapean a --color-* por convención de v4.
+
+### 2026-06-04 - F45: i18n Fase 3 — Editores de Frontmatter y Backmatter
+- Qué se hizo: migración de los 5 editores de frontmatter/backmatter (~25 strings). Namespace common.* nuevo para los strings repetidos (saving/saved/loading). Refactor de sub-componentes IdiomaField y DescripcionField en FrontmatterMetadataEditor para aceptar label/placeholder como props (consistente con el patrón Field existente).
+- Namespaces añadidos: common.* (saving, saved, loading), frontmatter.* (titulo, copyright, metadata, dedicatoria con sus labels/placeholders), backmatter.* (agradecimientos).
+- Strings NO traducidos (intencional): placeholder "en" en IdiomaField (código ISO), label "ISBN" (sigla estándar), placeholder "978-0-000-00000-0" (formato técnico), placeholder "2025" (año de ejemplo), placeholder dinámico `new Date().getFullYear()` en CopyrightEditor.
+- Coexistencia: topbar.saving/topbar.saved de F44 intactos. Los 5 componentes usan common.saving/common.saved. Limpieza de topbar.* → common.* queda para F47 si se decide.
+- Componentes migrados: FrontmatterTituloEditor, FrontmatterCopyrightEditor, FrontmatterMetadataEditor, FrontmatterDedicatoriaEditor, BackmatterAgradecimientosEditor.
+- Archivos modificados: src/i18n/locales/en.json, src/i18n/locales/es.json, los 5 componentes, FrontmatterMetadataEditor.test.tsx (mock react-i18next añadido).
+- Tests: 347 TS + 41 Rust (sin cambio de conteo; test actualizado para mock expandido).
+- Pendientes F46-F47: migrar Welcome/modales/sidebar (F46), lib/, App.tsx y limpieza opcional topbar→common (F47).
 
 ### 2026-06-04 - F44: i18n Fase 2 — SettingsTabContent + resto de TopTabs
 - Qué se hizo: migración completa de todos los strings visibles de SettingsTabContent (~47 strings) y los 7 strings que quedaron de TopTabs en F43 (STATUS_LABEL × 3 + aria-label/title × 4).

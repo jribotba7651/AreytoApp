@@ -5,6 +5,11 @@
     "terminados": "Finished",
     "ajustes": "Settings"
   },
+  "common": {
+    "saving": "Saving…",
+    "saved": "Saved",
+    "loading": "Loading…"
+  },
   "settings": {
     "title": "Settings",
     "moreComingSoon": "More settings coming soon.",
@@ -88,5 +93,36 @@
     "inter": "Inter",
     "sans": "System sans-serif",
     "mono": "Monospace"
+  },
+  "frontmatter": {
+    "titulo": {
+      "sectionTitle": "Title and author",
+      "titulo":    { "label": "Title",              "placeholder": "The book title" },
+      "subtitulo": { "label": "Subtitle (optional)", "placeholder": "A descriptive subtitle" },
+      "autor":     { "label": "Author",              "placeholder": "Author name" }
+    },
+    "copyright": {
+      "sectionTitle": "Copyright",
+      "ano":      { "label": "Year" },
+      "titular":  { "label": "Holder",             "placeholder": "Copyright holder name" },
+      "licencia": { "label": "License",            "placeholder": "All rights reserved" },
+      "notas":    { "label": "Notes (optional)",   "placeholder": "Additional notes" }
+    },
+    "metadata": {
+      "sectionTitle": "Book details",
+      "idioma":           { "label": "Language" },
+      "descripcion":      { "label": "Description",   "placeholder": "Book synopsis" },
+      "editorial":        { "label": "Publisher",     "placeholder": "Publisher name" },
+      "genero":           { "label": "Genre",         "placeholder": "Novel, essay, poetry…" },
+      "fechaPublicacion": { "label": "Publication date" }
+    },
+    "dedicatoria": {
+      "sectionTitle": "Dedication"
+    }
+  },
+  "backmatter": {
+    "agradecimientos": {
+      "sectionTitle": "Acknowledgements"
+    }
   }
 }

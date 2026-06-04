@@ -10,6 +10,24 @@ vi.mock('@/stores/projectStore', () => ({
   useProjectStore: vi.fn(),
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => ({
+      'frontmatter.metadata.sectionTitle': 'Detalles del libro',
+      'frontmatter.metadata.idioma.label': 'Idioma',
+      'frontmatter.metadata.descripcion.label': 'Descripción',
+      'frontmatter.metadata.descripcion.placeholder': 'Sinopsis del libro',
+      'frontmatter.metadata.editorial.label': 'Editorial',
+      'frontmatter.metadata.editorial.placeholder': 'Nombre de la editorial',
+      'frontmatter.metadata.genero.label': 'Género',
+      'frontmatter.metadata.genero.placeholder': 'Novela, ensayo, poesía…',
+      'frontmatter.metadata.fechaPublicacion.label': 'Fecha de publicación',
+      'common.saving': 'Guardando…',
+      'common.saved': 'Guardado',
+    } as Record<string, string>)[key] ?? key,
+  }),
+}));
+
 import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';
 import { useProjectStore } from '@/stores/projectStore';
 import FrontmatterMetadataEditor from './FrontmatterMetadataEditor';
