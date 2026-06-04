@@ -7,7 +7,7 @@ import { useLayoutStore } from '@/stores/layoutStore';
 
 export type ReopenResult =
   | { ok: true; newPath: string }
-  | { ok: false; error: string };
+  | { ok: false; error: { kind: string } };
 
 export async function performReopenChapter(
   project: Project,
@@ -16,7 +16,7 @@ export async function performReopenChapter(
   // 1. Move file from capitulos-terminados/ to capitulos/
   const moveResult = await reopenChapter(closedChapter);
   if (!moveResult.ok) {
-    return { ok: false, error: `No se pudo mover el archivo: ${moveResult.error.kind}` };
+    return { ok: false, error: { kind: moveResult.error.kind } };
   }
 
   const { newPath } = moveResult.value;

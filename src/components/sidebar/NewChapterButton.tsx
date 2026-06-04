@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
 import { createChapter, updateProjectMeta, readChapter } from '@/lib/project-fs';
 import ShortcutHint from '@/components/shared/ShortcutHint';
 
 function NewChapterButton() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const addChapter = useProjectStore((s) => s.addChapter);
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
@@ -38,7 +40,7 @@ function NewChapterButton() {
       className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-150"
     >
       <Plus size={14} />
-      <span>Nuevo capítulo</span>
+      <span>{t('sidebar.newChapter')}</span>
       <ShortcutHint text="⌘N" className="ml-auto" />
     </button>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { getVersion } from '@tauri-apps/api/app';
 
@@ -7,6 +8,7 @@ interface AboutDialogProps {
 }
 
 function AboutDialog({ onClose }: AboutDialogProps) {
+  const { t } = useTranslation();
   const [version, setVersion] = useState('');
 
   useEffect(() => {
@@ -32,7 +34,7 @@ function AboutDialog({ onClose }: AboutDialogProps) {
           <h2 className="text-base font-semibold text-text-primary">Areyto</h2>
           <button
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('about.close')}
             className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
           >
             <X size={14} />
@@ -40,12 +42,12 @@ function AboutDialog({ onClose }: AboutDialogProps) {
         </div>
 
         <p className="text-sm text-text-secondary mb-4">
-          Un IDE para escritores serios.
+          {t('about.tagline')}
         </p>
 
         <div className="text-xs text-text-tertiary space-y-1">
-          <p>Jíbaro en la Luna LLC</p>
-          {version && <p>Versión {version}</p>}
+          <p>{t('about.company')}</p>
+          {version && <p>{t('about.version', { version })}</p>}
         </div>
       </div>
     </div>

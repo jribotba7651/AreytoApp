@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import ChapterList from '@/components/sidebar/ChapterList';
 import NewChapterButton from '@/components/sidebar/NewChapterButton';
@@ -7,12 +8,13 @@ import FrontmatterSection from '@/components/sidebar/FrontmatterSection';
 import BackmatterSection from '@/components/sidebar/BackmatterSection';
 
 function SidebarPanel() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
 
   if (!currentProject) {
     return (
       <div className="h-full bg-bg-secondary border-r border-border-subtle flex items-center justify-center">
-        <p className="text-xs text-text-tertiary">Sin proyecto</p>
+        <p className="text-xs text-text-tertiary">{t('sidebar.noProject')}</p>
       </div>
     );
   }
@@ -23,7 +25,7 @@ function SidebarPanel() {
 
       <div className="px-3 pt-4 pb-2 shrink-0 flex items-center justify-between border-t border-border-subtle">
         <p className="text-xs text-text-tertiary uppercase tracking-wider font-sans">
-          Capítulos
+          {t('sidebar.chapters')}
         </p>
         <RefreshChaptersButton />
       </div>
