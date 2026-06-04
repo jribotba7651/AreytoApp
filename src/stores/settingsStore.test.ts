@@ -4,6 +4,12 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
+vi.mock('@/i18n/i18n', () => ({
+  default: {
+    changeLanguage: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
@@ -17,9 +23,11 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 import { invoke } from '@tauri-apps/api/core';
+import i18n from '@/i18n/i18n';
 import { useSettingsStore, AUTOSAVE_DELAY_MS } from './settingsStore';
 
 const mockInvoke = vi.mocked(invoke);
+const mockChangeLanguage = vi.mocked(i18n.changeLanguage);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -33,6 +41,7 @@ beforeEach(() => {
     bookFontFamily: 'serif',
     bookFontSize: 18,
     exportFolder: '',
+    uiLocale: 'en',
     loaded: false,
   });
   document.documentElement.removeAttribute('data-theme');
@@ -577,5 +586,70 @@ describe('settingsStore - setExportFolder', () => {
     mockInvoke.mockRejectedValue(new Error('disk full'));
 
     await expect(useSettingsStore.getState().setExportFolder('/ruta')).resolves.toBeUndefined();
+  });
+});
+
+describe('settingsStore - load con uiLocale', () => {
+  it('popula uiLocale es desde los settings del disco', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, uiLocale: 'es' });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().uiLocale).toBe('es');
+  });
+
+  it('usa "en" como default si uiLocale es undefined en el archivo', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().load();
+
+    expect(useSettingsStore.getState().uiLocale).toBe('en');
+  });
+
+  it('llama i18n.changeLanguage con el uiLocale cargado', async () => {
+    mockInvoke.mockResolvedValueOnce({ panels: {}, version: 1, uiLocale: 'es' });
+
+    await useSettingsStore.getState().load();
+
+    expect(mockChangeLanguage).toHaveBeenCalledWith('es');
+  });
+});
+
+describe('settingsStore - setUiLocale', () => {
+  it('actualiza el store de forma optimista antes de escribir al disco', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    const promise = useSettingsStore.getState().setUiLocale('es');
+
+    expect(useSettingsStore.getState().uiLocale).toBe('es');
+
+    await promise;
+  });
+
+  it('llama i18n.changeLanguage con el nuevo locale', async () => {
+    mockInvoke.mockResolvedValue({ panels: {}, version: 1 });
+
+    await useSettingsStore.getState().setUiLocale('es');
+
+    expect(mockChangeLanguage).toHaveBeenCalledWith('es');
+  });
+
+  it('persiste uiLocale al disco con merge del estado actual', async () => {
+    const currentOnDisk = { panels: {}, version: 1, uiLocale: 'en' };
+    mockInvoke
+      .mockResolvedValueOnce(currentOnDisk)
+      .mockResolvedValueOnce(undefined);
+
+    await useSettingsStore.getState().setUiLocale('es');
+
+    expect(mockInvoke).toHaveBeenCalledWith('write_global_settings', {
+      settings: { ...currentOnDisk, uiLocale: 'es' },
+    });
+  });
+
+  it('no lanza si el invoke falla', async () => {
+    mockInvoke.mockRejectedValue(new Error('disk full'));
+
+    await expect(useSettingsStore.getState().setUiLocale('es')).resolves.toBeUndefined();
   });
 });

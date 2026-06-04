@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { readGlobalSettings, writeGlobalSettings } from '@/lib/settings';
+import i18n from '@/i18n/i18n';
 
 export const AUTOSAVE_DELAY_MS = 500;
 export const THEME_STORAGE_KEY = 'areyto-theme-mode';
@@ -46,6 +47,7 @@ interface SettingsState {
   bookFontFamily: BookFontFamily;
   bookFontSize: number;
   exportFolder: string;
+  uiLocale: string;
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
@@ -57,6 +59,7 @@ interface SettingsState {
   setBookFontFamily: (family: BookFontFamily) => Promise<void>;
   setBookFontSize: (size: number) => Promise<void>;
   setExportFolder: (folder: string) => Promise<void>;
+  setUiLocale: (locale: string) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -69,6 +72,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   bookFontFamily: 'serif',
   bookFontSize: 18,
   exportFolder: '',
+  uiLocale: 'en',
   loaded: false,
 
   load: async () => {
@@ -79,6 +83,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       const editorFontSize = settings.editorFontSize ?? 16;
       const bookFontFamily = (settings.bookFontFamily ?? 'serif') as BookFontFamily;
       const bookFontSize = settings.bookFontSize ?? 18;
+      const uiLocale = settings.uiLocale ?? 'en';
       set({
         autoCommit: settings.autoCommit ?? true,
         autosaveIntervalMs: settings.autosaveIntervalMs ?? AUTOSAVE_DELAY_MS,
@@ -89,11 +94,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         bookFontFamily,
         bookFontSize,
         exportFolder: settings.exportFolder ?? '',
+        uiLocale,
         loaded: true,
       });
       applyTheme(themeMode);
       applyEditorFont(editorFontFamily, editorFontSize);
       applyBookFont(bookFontFamily, bookFontSize);
+      void i18n.changeLanguage(uiLocale);
     } catch {
       set({ loaded: true });
     }
@@ -195,6 +202,17 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, exportFolder: folder });
     } catch (err) {
       console.warn('[areyto] Failed to persist exportFolder:', err);
+    }
+  },
+
+  setUiLocale: async (locale: string) => {
+    set({ uiLocale: locale });
+    void i18n.changeLanguage(locale);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, uiLocale: locale });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist uiLocale:', err);
     }
   },
 }));

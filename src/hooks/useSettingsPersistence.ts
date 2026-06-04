@@ -30,6 +30,7 @@ export function useSettingsPersistence() {
   const bookFontFamily = useSettingsStore((s) => s.bookFontFamily);
   const bookFontSize = useSettingsStore((s) => s.bookFontSize);
   const exportFolder = useSettingsStore((s) => s.exportFolder);
+  const uiLocale = useSettingsStore((s) => s.uiLocale);
 
   const persistGlobal = useRef(
     debounce((settings: GlobalSettings) => {
@@ -67,9 +68,10 @@ export function useSettingsPersistence() {
       bookFontFamily,
       bookFontSize,
       exportFolder,
+      uiLocale,
       version: 1,
     });
-  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs, themeMode, editorFontFamily, editorFontSize, defaultProjectLanguage, bookFontFamily, bookFontSize, exportFolder]);
+  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs, themeMode, editorFontFamily, editorFontSize, defaultProjectLanguage, bookFontFamily, bookFontSize, exportFolder, uiLocale]);
 
   useEffect(() => {
     if (!currentProjectPath || !activeChapterPath) return;

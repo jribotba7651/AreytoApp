@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import type { Tab } from '@/types/layout';
@@ -8,15 +9,14 @@ import AboutDialog from '@/components/about/AboutDialog';
 
 interface TabDef {
   id: Tab;
-  label: string;
   shortcutHint: string;
 }
 
 const TABS: TabDef[] = [
-  { id: 'capitulo', label: 'Capítulo Activo', shortcutHint: '⌘1' },
-  { id: 'libro', label: 'Libro', shortcutHint: '⌘2' },
-  { id: 'terminados', label: 'Terminados', shortcutHint: '⌘3' },
-  { id: 'ajustes', label: 'Ajustes', shortcutHint: '⌘4' },
+  { id: 'capitulo', shortcutHint: '⌘1' },
+  { id: 'libro', shortcutHint: '⌘2' },
+  { id: 'terminados', shortcutHint: '⌘3' },
+  { id: 'ajustes', shortcutHint: '⌘4' },
 ];
 
 const STATUS_LABEL: Record<SaveStatus, string> = {
@@ -27,6 +27,7 @@ const STATUS_LABEL: Record<SaveStatus, string> = {
 };
 
 function TopTabs() {
+  const { t } = useTranslation();
   const activeTab = useLayoutStore((s) => s.activeTab);
   const setActiveTab = useLayoutStore((s) => s.setActiveTab);
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -44,7 +45,7 @@ function TopTabs() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            title={`${tab.label} (${tab.shortcutHint})`}
+            title={`${t('tabs.' + tab.id)} (${tab.shortcutHint})`}
             className={[
               'px-4 py-2 text-sm transition-colors duration-150 border-b-2 -mb-px',
               isActive
@@ -52,7 +53,7 @@ function TopTabs() {
                 : 'text-text-secondary border-transparent hover:text-text-primary',
             ].join(' ')}
           >
-            {tab.label}
+            {t('tabs.' + tab.id)}
           </button>
         );
       })}

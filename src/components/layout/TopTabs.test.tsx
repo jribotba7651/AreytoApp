@@ -7,6 +7,17 @@ vi.mock('@tauri-apps/api/app', () => ({
   getVersion: vi.fn().mockResolvedValue('0.1.0'),
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => ({
+      'tabs.capitulo': 'Capítulo Activo',
+      'tabs.libro': 'Libro',
+      'tabs.terminados': 'Terminados',
+      'tabs.ajustes': 'Ajustes',
+    } as Record<string, string>)[key] ?? key,
+  }),
+}));
+
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import TopTabs from './TopTabs';

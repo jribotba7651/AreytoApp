@@ -45,6 +45,8 @@ pub struct GlobalSettings {
     pub book_font_size: u32,
     #[serde(default = "default_export_folder")]
     pub export_folder: String,
+    #[serde(default = "default_ui_locale")]
+    pub ui_locale: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -94,6 +96,10 @@ fn default_book_font_size() -> u32 {
 
 fn default_export_folder() -> String {
     String::new()
+}
+
+fn default_ui_locale() -> String {
+    "en".to_string()
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -390,6 +396,25 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.export_folder, "/Users/juan/Documents");
+    }
+
+    #[test]
+    fn default_ui_locale_es_en_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.ui_locale, "en", "ui_locale debe ser 'en' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_ui_locale_es() {
+        let original = GlobalSettings {
+            version: 1,
+            ui_locale: "es".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.ui_locale, "es");
     }
 
     #[test]
