@@ -1,4 +1,5 @@
 import { open } from '@tauri-apps/plugin-dialog';
+import { useTranslation } from 'react-i18next';
 import { useSettingsStore, type ThemeMode, type EditorFontFamily, type BookFontFamily } from '@/stores/settingsStore';
 
 const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
@@ -35,6 +36,11 @@ const BOOK_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
   { value: 22, label: '22 px' },
 ];
 
+const UI_LOCALE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+];
+
 const LANGUAGE_OPTIONS: { value: string; label: string }[] = [
   { value: 'es', label: 'Español (es)' },
   { value: 'en', label: 'Inglés (en)' },
@@ -60,6 +66,7 @@ const AUTOSAVE_PRESETS: { ms: number; label: string }[] = [
 const PRESET_VALUES = AUTOSAVE_PRESETS.map((p) => p.ms);
 
 function SettingsTabContent() {
+  const { t } = useTranslation();
   const autoCommit = useSettingsStore((s) => s.autoCommit);
   const setAutoCommit = useSettingsStore((s) => s.setAutoCommit);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
@@ -78,6 +85,8 @@ function SettingsTabContent() {
   const setBookFontSize = useSettingsStore((s) => s.setBookFontSize);
   const exportFolder = useSettingsStore((s) => s.exportFolder);
   const setExportFolder = useSettingsStore((s) => s.setExportFolder);
+  const uiLocale = useSettingsStore((s) => s.uiLocale);
+  const setUiLocale = useSettingsStore((s) => s.setUiLocale);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -221,6 +230,37 @@ function SettingsTabContent() {
                 className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 {THEME_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            {t('settings.uiLocale.sectionTitle')}
+          </h2>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  {t('settings.uiLocale.label')}
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  {t('settings.uiLocale.description')}
+                </span>
+              </div>
+              <select
+                key={uiLocale}
+                value={uiLocale}
+                onChange={(e) => void setUiLocale(e.target.value)}
+                className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                {UI_LOCALE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>

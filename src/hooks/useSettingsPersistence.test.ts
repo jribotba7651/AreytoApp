@@ -47,6 +47,7 @@ function makeSettingsState(overrides: Record<string, unknown> = {}) {
     bookFontFamily: 'serif' as const,
     bookFontSize: 18,
     exportFolder: '',
+    uiLocale: 'en',
     ...overrides,
   };
 }
@@ -106,6 +107,21 @@ describe('useSettingsPersistence - persistGlobal incluye todos los campos de Glo
     expect(mockWriteGlobalSettings.mock.calls[0]![0]).toMatchObject({
       editorFontFamily: 'mono',
       editorFontSize: 20,
+    });
+  });
+
+  it('el objeto escrito incluye uiLocale del store', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockUseSettingsStore.mockImplementation((selector: any) =>
+      selector(makeSettingsState({ uiLocale: 'es' }))
+    );
+
+    renderHook(() => useSettingsPersistence());
+    await vi.advanceTimersByTimeAsync(400);
+
+    expect(mockWriteGlobalSettings).toHaveBeenCalledOnce();
+    expect(mockWriteGlobalSettings.mock.calls[0]![0]).toMatchObject({
+      uiLocale: 'es',
     });
   });
 

@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F42 Carpeta default de export
-- Fecha de última actualización: 2026-05-31
+- Última feature completada: F43 i18n Fase 1: infraestructura + piloto TopTabs
+- Fecha de última actualización: 2026-06-04
 
 ## Features completadas
 
@@ -935,6 +935,35 @@ Ninguno.
 - La primera compilación de Rust (cargo) tarda varios minutos en descargar y compilar las dependencias. Las siguientes son rápidas.
 - pnpm-workspace.yaml tiene allowBuilds: esbuild — no borrar, es necesario para que Vite funcione.
 - Tailwind v4: usar @theme {} para definir tokens, no tailwind.config.js. Clases de Tailwind mapean a --color-* por convención de v4.
+
+### 2026-06-04 - F43: i18n Fase 1 — Infraestructura + piloto TopTabs
+- Qué se hizo: infraestructura react-i18next montada. Dos locales (en/es) con recursos JSON inline. uiLocale persistido en GlobalSettings (campo distinto de defaultProjectLanguage que es metadata del libro). TopTabs migrado como componente piloto. Selector "Idioma de la interfaz" nuevo en sección "Interfaz" de SettingsTabContent. Cambio de idioma al instante vía i18n.changeLanguage en setter y en load(). uiLocale incluido en useSettingsPersistence (bug F39 prevenido).
+- Dependencias nuevas (aprobadas por arquitecto): react-i18next 17.0.8, i18next 26.3.0 (React 19 compatible)
+- Archivos creados:
+  - src/i18n/i18n.ts (init i18next con initReactI18next, recursos inline, lng default 'en')
+  - src/i18n/locales/en.json (keys: tabs.capitulo/libro/terminados/ajustes + settings.uiLocale.*)
+  - src/i18n/locales/es.json (mismas keys en español)
+- Archivos modificados:
+  - src/main.tsx (import i18n, I18nextProvider wrapping App)
+  - src-tauri/src/settings.rs (campo ui_locale: String, serde default "en", 2 tests nuevos)
+  - src/lib/settings.ts (uiLocale?: string en GlobalSettings)
+  - src/stores/settingsStore.ts (uiLocale state + setUiLocale + changeLanguage en load())
+  - src/stores/settingsStore.test.ts (mock i18n, uiLocale en beforeEach, 7 tests nuevos)
+  - src/hooks/useSettingsPersistence.ts (uiLocale en objeto + deps)
+  - src/hooks/useSettingsPersistence.test.ts (uiLocale en makeSettingsState + 1 test nuevo)
+  - src/components/layout/TopTabs.tsx (useTranslation, t('tabs.'+id) sustituye labels hardcoded)
+  - src/components/layout/TopTabs.test.tsx (mock react-i18next con traducciones ES)
+  - src/components/settings/SettingsTabContent.tsx (useTranslation, UI_LOCALE_OPTIONS, sección Interfaz nueva)
+  - src/components/settings/SettingsTabContent.test.tsx (mock react-i18next, uiLocale+setUiLocale en makeState)
+  - context/architecture.md (i18n deps aprobadas documentadas, React 19 corregido de "18")
+- Decisiones:
+  - D-190: react-i18next v17 + i18next v26 como deps aprobadas; versiones compatibles con React 19
+  - D-191: uiLocale: String en GlobalSettings, serde default "en". Nombre distinto de defaultProjectLanguage (ese es para metadata.yaml del libro, no la UI)
+  - D-192: I18nextProvider en main.tsx envuelve App. i18n.ts importado antes del render como side effect de init
+  - D-193: i18n.changeLanguage llamado en load() y setUiLocale() — mismo patrón de side-effect que applyTheme()
+  - D-194: TopTabs como único piloto en F43. STATUS_LABEL y todos los demás strings quedan para F44-F47
+- Tests: 347 TS + 41 Rust (era 339 TS + 39 Rust antes)
+- Pendientes F44-F47: migrar el resto de strings al sistema i18n
 
 ### 2026-05-30 - F32: Intervalo de autosave configurable
 - Qué se hizo: campo autosave_interval_ms en GlobalSettings (Rust+TS), serde default 500, clamp [500,300000]. settingsStore.setAutosaveIntervalMs persiste inmediato. useAutosave lee del store y re-arma el timer en vivo al cambiar; null -> fallback AUTOSAVE_DELAY_MS=500. Tab Ajustes seccion Editor con dropdown de presets fijos 2/5/15/30s, default visible 2s. Legacy 500 en disco muestra 2s sin warning.

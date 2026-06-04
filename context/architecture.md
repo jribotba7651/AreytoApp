@@ -2,7 +2,7 @@
 
 ## Stack
 - Framework: Tauri (no Electron, más liviano y arranque rápido)
-- UI: React 18 + TypeScript strict
+- UI: React 19 + TypeScript strict
 - Styling: Tailwind CSS
 - Estado global: Zustand (sin Redux, sin boilerplate)
 - Editor: CodeMirror 6 (más liviano que Monaco, mejor para prosa)
@@ -12,6 +12,7 @@
 - Webview: Tauri WebviewWindow o iframe
 - Markdown rendering (tab Libro): react-markdown con tema custom
 - Resizable panels: react-resizable-panels
+- i18n (aprobado F43): react-i18next v17 + i18next v26. Idiomas: en (default), es. Recursos inline JSON en src/i18n/locales/. I18nextProvider en main.tsx. uiLocale persiste en GlobalSettings (distinto de defaultProjectLanguage que es metadata del libro).
 
 ## Boundaries (separación de capas)
 

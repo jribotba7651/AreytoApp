@@ -1,0 +1,15 @@
+{
+  "tabs": {
+    "capitulo": "Active Chapter",
+    "libro": "Book",
+    "terminados": "Finished",
+    "ajustes": "Settings"
+  },
+  "settings": {
+    "uiLocale": {
+      "sectionTitle": "Interface",
+      "label": "Interface Language",
+      "description": "Changes the display language of Areyto. Does not affect the book language or its metadata."
+    }
+  }
+}

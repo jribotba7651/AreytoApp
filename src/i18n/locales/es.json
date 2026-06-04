@@ -1,0 +1,15 @@
+{
+  "tabs": {
+    "capitulo": "Capítulo Activo",
+    "libro": "Libro",
+    "terminados": "Terminados",
+    "ajustes": "Ajustes"
+  },
+  "settings": {
+    "uiLocale": {
+      "sectionTitle": "Interfaz",
+      "label": "Idioma de la interfaz",
+      "description": "Cambia el idioma de visualización de Areyto. No afecta el idioma del libro ni su metadata."
+    }
+  }
+}

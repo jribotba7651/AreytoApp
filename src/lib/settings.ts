@@ -21,6 +21,7 @@ export interface GlobalSettings {
   bookFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
   bookFontSize?: number;
   exportFolder?: string;
+  uiLocale?: string;
 }
 
 export interface ProjectState {

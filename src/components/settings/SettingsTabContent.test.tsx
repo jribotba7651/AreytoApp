@@ -10,6 +10,16 @@ vi.mock('@tauri-apps/plugin-dialog', () => ({
   open: vi.fn().mockResolvedValue(null),
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => ({
+      'settings.uiLocale.sectionTitle': 'Interfaz',
+      'settings.uiLocale.label': 'Idioma de la interfaz',
+      'settings.uiLocale.description': 'Cambia el idioma de la interfaz de Areyto.',
+    } as Record<string, string>)[key] ?? key,
+  }),
+}));
+
 import { useSettingsStore } from '@/stores/settingsStore';
 import SettingsTabContent from './SettingsTabContent';
 
@@ -36,6 +46,8 @@ function makeState(overrides: Record<string, unknown> = {}) {
     setBookFontFamily: vi.fn().mockResolvedValue(undefined),
     setBookFontSize: vi.fn().mockResolvedValue(undefined),
     setExportFolder: vi.fn().mockResolvedValue(undefined),
+    uiLocale: 'en',
+    setUiLocale: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
