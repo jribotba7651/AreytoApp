@@ -5,6 +5,11 @@
     "terminados": "Terminados",
     "ajustes": "Ajustes"
   },
+  "common": {
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "loading": "Cargando…"
+  },
   "settings": {
     "title": "Ajustes",
     "moreComingSoon": "Más ajustes próximamente.",
@@ -88,5 +93,36 @@
     "inter": "Inter",
     "sans": "Sans-serif del sistema",
     "mono": "Monoespaciada"
+  },
+  "frontmatter": {
+    "titulo": {
+      "sectionTitle": "Título y autor",
+      "titulo":    { "label": "Título",              "placeholder": "El título del libro" },
+      "subtitulo": { "label": "Subtítulo (opcional)", "placeholder": "Un subtítulo descriptivo" },
+      "autor":     { "label": "Autor",               "placeholder": "Nombre del autor" }
+    },
+    "copyright": {
+      "sectionTitle": "Copyright",
+      "ano":      { "label": "Año" },
+      "titular":  { "label": "Titular",          "placeholder": "Nombre del titular del copyright" },
+      "licencia": { "label": "Licencia",         "placeholder": "Todos los derechos reservados" },
+      "notas":    { "label": "Notas (opcional)", "placeholder": "Notas adicionales" }
+    },
+    "metadata": {
+      "sectionTitle": "Detalles del libro",
+      "idioma":           { "label": "Idioma" },
+      "descripcion":      { "label": "Descripción",        "placeholder": "Sinopsis del libro" },
+      "editorial":        { "label": "Editorial",          "placeholder": "Nombre de la editorial" },
+      "genero":           { "label": "Género",             "placeholder": "Novela, ensayo, poesía…" },
+      "fechaPublicacion": { "label": "Fecha de publicación" }
+    },
+    "dedicatoria": {
+      "sectionTitle": "Dedicatoria"
+    }
+  },
+  "backmatter": {
+    "agradecimientos": {
+      "sectionTitle": "Agradecimientos"
+    }
   }
 }

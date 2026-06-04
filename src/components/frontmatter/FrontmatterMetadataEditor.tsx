@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';
 import { defaultMetadata } from '@/lib/yaml-frontmatter';
@@ -32,15 +33,17 @@ function Field({
 }
 
 function IdiomaField({
+  label,
   value,
   onChange,
 }: {
+  label: string;
   value: string;
   onChange: (v: string) => void;
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-xs text-text-tertiary font-sans uppercase tracking-wider">Idioma</span>
+      <span className="text-xs text-text-tertiary font-sans uppercase tracking-wider">{label}</span>
       <input
         type="text"
         list="areyto-idioma-list"
@@ -59,19 +62,23 @@ function IdiomaField({
 }
 
 function DescripcionField({
+  label,
+  placeholder,
   value,
   onChange,
 }: {
+  label: string;
+  placeholder: string;
   value: string;
   onChange: (v: string) => void;
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-xs text-text-tertiary font-sans uppercase tracking-wider">Descripción</span>
+      <span className="text-xs text-text-tertiary font-sans uppercase tracking-wider">{label}</span>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Sinopsis del libro"
+        placeholder={placeholder}
         rows={4}
         className="bg-bg-tertiary border border-border-subtle rounded px-2 py-1.5 text-sm font-serif text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-accent resize-y"
       />
@@ -80,6 +87,7 @@ function DescripcionField({
 }
 
 function FrontmatterMetadataEditor() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const [data, setData] = useState<MetadataData>(defaultMetadata());
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -119,23 +127,32 @@ function FrontmatterMetadataEditor() {
       <div className="max-w-xl mx-auto flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-sans font-medium text-text-secondary uppercase tracking-wider">
-            Detalles del libro
+            {t('frontmatter.metadata.sectionTitle')}
           </h2>
           {saveStatus === 'saving' && (
-            <span className="text-xs text-text-tertiary">Guardando…</span>
+            <span className="text-xs text-text-tertiary">{t('common.saving')}</span>
           )}
           {saveStatus === 'saved' && (
-            <span className="text-xs text-accent">Guardado</span>
+            <span className="text-xs text-accent">{t('common.saved')}</span>
           )}
         </div>
 
-        <IdiomaField value={data.idioma} onChange={(v) => handleChange('idioma', v)} />
-        <DescripcionField value={data.descripcion} onChange={(v) => handleChange('descripcion', v)} />
+        <IdiomaField
+          label={t('frontmatter.metadata.idioma.label')}
+          value={data.idioma}
+          onChange={(v) => handleChange('idioma', v)}
+        />
+        <DescripcionField
+          label={t('frontmatter.metadata.descripcion.label')}
+          placeholder={t('frontmatter.metadata.descripcion.placeholder')}
+          value={data.descripcion}
+          onChange={(v) => handleChange('descripcion', v)}
+        />
         <Field
-          label="Editorial"
+          label={t('frontmatter.metadata.editorial.label')}
           value={data.editorial}
           onChange={(v) => handleChange('editorial', v)}
-          placeholder="Nombre de la editorial"
+          placeholder={t('frontmatter.metadata.editorial.placeholder')}
         />
         <Field
           label="ISBN"
@@ -144,13 +161,13 @@ function FrontmatterMetadataEditor() {
           placeholder="978-0-000-00000-0"
         />
         <Field
-          label="Género"
+          label={t('frontmatter.metadata.genero.label')}
           value={data.genero}
           onChange={(v) => handleChange('genero', v)}
-          placeholder="Novela, ensayo, poesía…"
+          placeholder={t('frontmatter.metadata.genero.placeholder')}
         />
         <Field
-          label="Fecha de publicación"
+          label={t('frontmatter.metadata.fechaPublicacion.label')}
           value={data.fechaPublicacion}
           onChange={(v) => handleChange('fechaPublicacion', v)}
           placeholder="2025"
