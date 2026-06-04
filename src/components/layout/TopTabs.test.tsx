@@ -14,6 +14,11 @@ vi.mock('react-i18next', () => ({
       'tabs.libro': 'Libro',
       'tabs.terminados': 'Terminados',
       'tabs.ajustes': 'Ajustes',
+      'topbar.saving': 'Guardando…',
+      'topbar.saved': 'Guardado',
+      'topbar.saveError': 'Error al guardar',
+      'topbar.closeProject': 'Cerrar proyecto',
+      'topbar.about': 'Acerca de',
     } as Record<string, string>)[key] ?? key,
   }),
 }));

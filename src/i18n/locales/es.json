@@ -6,10 +6,87 @@
     "ajustes": "Ajustes"
   },
   "settings": {
+    "title": "Ajustes",
+    "moreComingSoon": "Más ajustes próximamente.",
     "uiLocale": {
       "sectionTitle": "Interfaz",
       "label": "Idioma de la interfaz",
       "description": "Cambia el idioma de visualización de Areyto. No afecta el idioma del libro ni su metadata."
+    },
+    "versioning": {
+      "sectionTitle": "Versionado",
+      "autoCommit": {
+        "label": "Commit automático en cada guardado",
+        "description": "Cuando está activo, Areyto crea un commit de Git automáticamente cada vez que se guarda un capítulo. Apaga esto si prefieres controlar los commits manualmente."
+      }
+    },
+    "editor": {
+      "sectionTitle": "Editor",
+      "autosave": {
+        "label": "Intervalo de guardado automático",
+        "description": "Tiempo de espera tras el último cambio antes de guardar automáticamente."
+      },
+      "fontFamily": {
+        "label": "Fuente del editor",
+        "description": "Familia tipográfica del área de escritura."
+      },
+      "fontSize": {
+        "label": "Tamaño de fuente",
+        "description": "Tamaño del texto en el área de escritura."
+      }
+    },
+    "appearance": {
+      "sectionTitle": "Apariencia",
+      "theme": {
+        "label": "Tema de la interfaz",
+        "description": "Claro u oscuro fijos, o auto para seguir la configuración del sistema."
+      }
+    },
+    "projects": {
+      "sectionTitle": "Proyectos",
+      "defaultLanguage": {
+        "label": "Idioma por defecto",
+        "description": "Idioma que se asigna a nuevos proyectos en el campo idioma del archivo metadata.yaml."
+      }
+    },
+    "book": {
+      "sectionTitle": "Libro",
+      "fontFamily": {
+        "label": "Fuente del lector",
+        "description": "Familia tipográfica del tab Libro."
+      },
+      "fontSize": {
+        "label": "Tamaño de fuente",
+        "description": "Tamaño del texto en el tab Libro."
+      }
+    },
+    "export": {
+      "sectionTitle": "Export",
+      "folder": {
+        "label": "Carpeta de destino",
+        "description": "Carpeta donde se abre el Save As al exportar. Se actualiza automáticamente con la última carpeta usada.",
+        "default": "Carpeta del proyecto (por defecto)"
+      },
+      "browse": "Examinar…",
+      "reset": "Restablecer"
     }
+  },
+  "topbar": {
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "saveError": "Error al guardar",
+    "closeProject": "Cerrar proyecto",
+    "about": "Acerca de"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "auto": "Auto (sistema)"
+  },
+  "font": {
+    "serif": "Serif (Iowan / Georgia)",
+    "inter": "Inter",
+    "sans": "Sans-serif del sistema",
+    "mono": "Monoespaciada"
   }
 }

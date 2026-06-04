@@ -2,31 +2,15 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore, type ThemeMode, type EditorFontFamily, type BookFontFamily } from '@/stores/settingsStore';
 
-const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
-  { value: 'light', label: 'Claro' },
-  { value: 'dark', label: 'Oscuro' },
-  { value: 'auto', label: 'Auto (sistema)' },
-];
+const THEME_VALUES: ThemeMode[] = ['light', 'dark', 'auto'];
 
-const EDITOR_FONT_FAMILY_OPTIONS: { value: EditorFontFamily; label: string }[] = [
-  { value: 'serif', label: 'Serif (Iowan / Georgia)' },
-  { value: 'inter', label: 'Inter' },
-  { value: 'sans', label: 'Sans-serif del sistema' },
-  { value: 'mono', label: 'Monoespaciada' },
-];
+const FONT_FAMILY_VALUES: EditorFontFamily[] = ['serif', 'inter', 'sans', 'mono'];
 
 const EDITOR_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
   { value: 14, label: '14 px' },
   { value: 16, label: '16 px' },
   { value: 18, label: '18 px' },
   { value: 20, label: '20 px' },
-];
-
-const BOOK_FONT_FAMILY_OPTIONS: { value: BookFontFamily; label: string }[] = [
-  { value: 'serif', label: 'Serif (Iowan / Georgia)' },
-  { value: 'inter', label: 'Inter' },
-  { value: 'sans', label: 'Sans-serif del sistema' },
-  { value: 'mono', label: 'Monoespaciada' },
 ];
 
 const BOOK_FONT_SIZE_OPTIONS: { value: number; label: string }[] = [
@@ -93,23 +77,21 @@ function SettingsTabContent() {
   return (
     <div className="h-full overflow-y-auto bg-bg-primary">
       <div className="max-w-2xl mx-auto px-8 py-10">
-        <h1 className="text-2xl font-semibold text-text-primary mb-8">Ajustes</h1>
+        <h1 className="text-2xl font-semibold text-text-primary mb-8">{t('settings.title')}</h1>
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-            Versionado
+            {t('settings.versioning.sectionTitle')}
           </h2>
 
           <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
             <label className="flex items-start justify-between gap-6 cursor-pointer">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Commit automático en cada guardado
+                  {t('settings.versioning.autoCommit.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Cuando está activo, Areyto crea un commit de Git automáticamente cada vez
-                  que se guarda un capítulo. Apaga esto si prefieres controlar los commits
-                  manualmente.
+                  {t('settings.versioning.autoCommit.description')}
                 </span>
               </div>
               <button
@@ -135,17 +117,17 @@ function SettingsTabContent() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-            Editor
+            {t('settings.editor.sectionTitle')}
           </h2>
 
           <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Intervalo de guardado automático
+                  {t('settings.editor.autosave.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Tiempo de espera tras el último cambio antes de guardar automáticamente.
+                  {t('settings.editor.autosave.description')}
                 </span>
               </div>
               <select
@@ -166,10 +148,10 @@ function SettingsTabContent() {
             <div className="flex items-start justify-between gap-6 mb-4">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Fuente del editor
+                  {t('settings.editor.fontFamily.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Familia tipográfica del área de escritura.
+                  {t('settings.editor.fontFamily.description')}
                 </span>
               </div>
               <select
@@ -177,9 +159,9 @@ function SettingsTabContent() {
                 onChange={(e) => void setEditorFontFamily(e.target.value as EditorFontFamily)}
                 className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                {EDITOR_FONT_FAMILY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                {FONT_FAMILY_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {t('font.' + value)}
                   </option>
                 ))}
               </select>
@@ -188,10 +170,10 @@ function SettingsTabContent() {
             <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Tamaño de fuente
+                  {t('settings.editor.fontSize.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Tamaño del texto en el área de escritura.
+                  {t('settings.editor.fontSize.description')}
                 </span>
               </div>
               <select
@@ -211,17 +193,17 @@ function SettingsTabContent() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-            Apariencia
+            {t('settings.appearance.sectionTitle')}
           </h2>
 
           <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Tema de la interfaz
+                  {t('settings.appearance.theme.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Claro u oscuro fijos, o auto para seguir la configuración del sistema.
+                  {t('settings.appearance.theme.description')}
                 </span>
               </div>
               <select
@@ -229,9 +211,9 @@ function SettingsTabContent() {
                 onChange={(e) => void setThemeMode(e.target.value as ThemeMode)}
                 className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                {THEME_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                {THEME_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {t('theme.' + value)}
                   </option>
                 ))}
               </select>
@@ -272,17 +254,17 @@ function SettingsTabContent() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-            Proyectos
+            {t('settings.projects.sectionTitle')}
           </h2>
 
           <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Idioma por defecto
+                  {t('settings.projects.defaultLanguage.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Idioma que se asigna a nuevos proyectos en el campo idioma del archivo metadata.yaml.
+                  {t('settings.projects.defaultLanguage.description')}
                 </span>
               </div>
               <select
@@ -303,17 +285,17 @@ function SettingsTabContent() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-            Libro
+            {t('settings.book.sectionTitle')}
           </h2>
 
           <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
             <div className="flex items-start justify-between gap-6 mb-4">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Fuente del lector
+                  {t('settings.book.fontFamily.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Familia tipográfica del tab Libro.
+                  {t('settings.book.fontFamily.description')}
                 </span>
               </div>
               <select
@@ -321,9 +303,9 @@ function SettingsTabContent() {
                 onChange={(e) => void setBookFontFamily(e.target.value as BookFontFamily)}
                 className="shrink-0 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                {BOOK_FONT_FAMILY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                {FONT_FAMILY_VALUES.map((value) => (
+                  <option key={value} value={value}>
+                    {t('font.' + value)}
                   </option>
                 ))}
               </select>
@@ -332,10 +314,10 @@ function SettingsTabContent() {
             <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Tamaño de fuente
+                  {t('settings.book.fontSize.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed">
-                  Tamaño del texto en el tab Libro.
+                  {t('settings.book.fontSize.description')}
                 </span>
               </div>
               <select
@@ -355,20 +337,20 @@ function SettingsTabContent() {
 
         <section className="mb-10">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
-            Export
+            {t('settings.export.sectionTitle')}
           </h2>
 
           <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
                 <span className="block text-sm text-text-primary font-medium mb-1">
-                  Carpeta de destino
+                  {t('settings.export.folder.label')}
                 </span>
                 <span className="block text-xs text-text-tertiary leading-relaxed mb-2">
-                  Carpeta donde se abre el Save As al exportar. Se actualiza automáticamente con la última carpeta usada.
+                  {t('settings.export.folder.description')}
                 </span>
                 <span className="block text-xs text-text-secondary font-mono truncate">
-                  {exportFolder || 'Carpeta del proyecto (por defecto)'}
+                  {exportFolder || t('settings.export.folder.default')}
                 </span>
               </div>
               <div className="flex flex-col gap-2 shrink-0">
@@ -376,14 +358,14 @@ function SettingsTabContent() {
                   onClick={() => void open({ directory: true, multiple: false }).then((dir) => { if (typeof dir === 'string') void setExportFolder(dir); })}
                   className="px-3 py-1 text-sm bg-bg-tertiary border border-border-default text-text-primary rounded hover:bg-bg-primary transition-colors duration-150"
                 >
-                  Examinar…
+                  {t('settings.export.browse')}
                 </button>
                 {exportFolder && (
                   <button
                     onClick={() => void setExportFolder('')}
                     className="px-3 py-1 text-sm text-text-tertiary hover:text-text-primary transition-colors duration-150 text-center"
                   >
-                    Restablecer
+                    {t('settings.export.reset')}
                   </button>
                 )}
               </div>
@@ -391,7 +373,7 @@ function SettingsTabContent() {
           </div>
         </section>
 
-        <p className="text-xs text-text-tertiary">Más ajustes próximamente.</p>
+        <p className="text-xs text-text-tertiary">{t('settings.moreComingSoon')}</p>
       </div>
     </div>
   );
