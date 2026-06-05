@@ -5,10 +5,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F46 i18n Fase 4: Welcome + modales + sidebar + AboutDialog
-- Fecha de última actualización: 2026-06-04
+- Última feature completada: F47 i18n Fase 5 (final scope mínimo): lib/ + App.tsx + consolidación topbar→common
+- Fecha de última actualización: 2026-06-05
 
 ## Features completadas
+
+### 2026-06-05 - F47 - i18n Fase 5 (final, scope mínimo): lib/ + App.tsx + consolidación topbar→common
+- Qué se hizo: migración de los strings de UI restantes en lib/ y App.tsx, y consolidación de claves duplicadas topbar.saving/saved/saveError → common.*.
+- Archivos modificados:
+  - src/i18n/locales/en.json (añadidas common.saveError, common.failedToListChapters, common.defaultCopyrightLicense, app.restoreError; eliminadas topbar.saving, topbar.saved, topbar.saveError)
+  - src/i18n/locales/es.json (mismos cambios en español)
+  - src/components/layout/TopTabs.tsx (t('topbar.saving/saved/saveError') → t('common.saving/saved/saveError'))
+  - src/components/layout/TopTabs.test.tsx (mock actualizado a common.saving/saved/saveError)
+  - src/App.tsx (useTranslation añadido; "Cargando…" → t('common.loading'); mensaje restore → t('app.restoreError', { path }))
+  - src/lib/refresh-chapters.ts (import i18n; 'Failed to list chapters' → i18n.t('common.failedToListChapters'))
+  - src/lib/refresh-chapters.test.ts (vi.mock i18n; aserción actualizada a clave i18n)
+  - src/lib/yaml-frontmatter.ts (import i18n; 'Todos los derechos reservados' → i18n.t('common.defaultCopyrightLicense'))
+  - src/lib/yaml-frontmatter.test.ts (vi.mock i18n; aserción actualizada a clave i18n)
+  - src/components/frontmatter/FrontmatterMetadataEditor.test.tsx (vi.mock i18n añadido — dependencia transitiva yaml-frontmatter → i18n)
+- Decisiones tomadas:
+  - D-178: lib/ usa import directo de i18n (i18n.t()) en vez de hook. Patrón estándar para módulos non-React que necesitan i18n.
+  - D-179: Tests de lib/ mockean '@/i18n/i18n' con { t: key => key } y asertan sobre la clave i18n, no la traducción. Más robusto ante cambios de copy.
+  - D-180: topbar.saving/saved/saveError consolidados a common.*. topbar queda solo con closeProject y about.
+- Pendientes relacionados:
+  - **F48 (pendiente)**: ~25 strings escapados de componentes no cubiertos en F43-F47: BookTabContent (flujos de export con interpolación de rutas/errores), EditorPanel (Editar/Previsualizar), BookHeader y FinishedTabContent (plurales capítulo/capítulos), BookEmptyState, TerminadosEmptyState, TerminalView, BookChapterError, RefreshChaptersButton. Contiene PLURALES (capítulo/capítulos → i18next count) e interpolaciones. La i18n NO está 100% completa hasta F48.
+- Tests: 348 TS + 41 Rust — todos verdes
+- Bugs encontrados: dependencia transitiva yaml-frontmatter → i18n rompía FrontmatterMetadataEditor.test.tsx; resuelto añadiendo vi.mock('@/i18n/i18n') en ese test.
 
 ### 2026-05-21 - F0: Foundation Scaffold
 - Qué se hizo: clone local del repo, subida de archivos de contexto, scaffold inicial Tauri + React + TS + Tailwind + Zustand + Vitest, configuración de path aliases, estructura de carpetas según architecture.md

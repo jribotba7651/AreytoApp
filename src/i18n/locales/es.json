@@ -8,7 +8,13 @@
   "common": {
     "saving": "Guardando…",
     "saved": "Guardado",
-    "loading": "Cargando…"
+    "saveError": "Error al guardar",
+    "loading": "Cargando…",
+    "failedToListChapters": "No se pudo listar los capítulos",
+    "defaultCopyrightLicense": "Todos los derechos reservados"
+  },
+  "app": {
+    "restoreError": "No se pudo abrir el último proyecto: {{path}}"
   },
   "settings": {
     "title": "Ajustes",
@@ -77,9 +83,6 @@
     }
   },
   "topbar": {
-    "saving": "Guardando…",
-    "saved": "Guardado",
-    "saveError": "Error al guardar",
     "closeProject": "Cerrar proyecto",
     "about": "Acerca de"
   },

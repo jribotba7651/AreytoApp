@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import TopTabs from '@/components/layout/TopTabs';
 import ChapterTabContent from '@/components/layout/ChapterTabContent';
 import BookTabContent from '@/components/layout/BookTabContent';
@@ -14,6 +15,7 @@ import { readGlobalSettings, pathExists } from '@/lib/settings';
 import { openProjectByPath } from '@/lib/open-project-flow';
 
 function App() {
+  const { t } = useTranslation();
   const activeTab = useLayoutStore((s) => s.activeTab);
   const currentProject = useProjectStore((s) => s.currentProject);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
@@ -61,7 +63,7 @@ function App() {
           const exists = await pathExists(settings.lastProjectPath);
           if (!exists) {
             setRestoreMessage(
-              `No se pudo abrir el último proyecto: ${settings.lastProjectPath}`
+              t('app.restoreError', { path: settings.lastProjectPath })
             );
           } else {
             await openProjectByPath(settings.lastProjectPath);
@@ -80,7 +82,7 @@ function App() {
   if (isRestoring) {
     return (
       <div className="h-screen flex items-center justify-center bg-bg-primary">
-        <span className="text-sm text-text-primary">Cargando…</span>
+        <span className="text-sm text-text-primary">{t('common.loading')}</span>
       </div>
     );
   }

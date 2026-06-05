@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Project, Chapter } from '@/types/project';
 
+vi.mock('@/i18n/i18n', () => ({ default: { t: (key: string) => key } }));
+
 vi.mock('./project-fs', () => ({
   listChapters: vi.fn(),
 }));
@@ -80,7 +82,7 @@ describe('refreshChapters', () => {
     const result = await refreshChapters(PROJECT);
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe('Failed to list chapters');
+    expect(result.error).toBe('common.failedToListChapters');
     expect(setChapters).not.toHaveBeenCalled();
   });
 });
