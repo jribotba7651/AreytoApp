@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
+vi.mock('@/i18n/i18n', () => ({ default: { t: (key: string) => key } }));
+
 vi.mock('@/lib/frontmatter-fs', () => ({
   readMetadata: vi.fn(),
   writeMetadata: vi.fn(),

@@ -8,7 +8,13 @@
   "common": {
     "saving": "Saving…",
     "saved": "Saved",
-    "loading": "Loading…"
+    "saveError": "Error saving",
+    "loading": "Loading…",
+    "failedToListChapters": "Failed to list chapters",
+    "defaultCopyrightLicense": "All rights reserved"
+  },
+  "app": {
+    "restoreError": "Could not open the last project: {{path}}"
   },
   "settings": {
     "title": "Settings",
@@ -77,9 +83,6 @@
     }
   },
   "topbar": {
-    "saving": "Saving…",
-    "saved": "Saved",
-    "saveError": "Error saving",
     "closeProject": "Close project",
     "about": "About"
   },

@@ -1,11 +1,12 @@
 import type { Project } from '@/types/project';
 import { listChapters } from './project-fs';
 import { useProjectStore } from '@/stores/projectStore';
+import i18n from '@/i18n/i18n';
 
 export async function refreshChapters(project: Project): Promise<{ ok: boolean; error?: string }> {
   const result = await listChapters(project);
   if (!result.ok) {
-    return { ok: false, error: 'Failed to list chapters' };
+    return { ok: false, error: i18n.t('common.failedToListChapters') };
   }
 
   const inProgress = result.value.filter((c) => c.status === 'in-progress');

@@ -30,9 +30,9 @@ function TopTabs() {
 
   const statusLabels: Record<SaveStatus, string> = {
     idle: '',
-    saving: t('topbar.saving'),
-    saved: t('topbar.saved'),
-    error: t('topbar.saveError'),
+    saving: t('common.saving'),
+    saved: t('common.saved'),
+    error: t('common.saveError'),
   };
   const statusLabel = statusLabels[saveStatus];
 

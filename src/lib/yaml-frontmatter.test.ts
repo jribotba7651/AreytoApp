@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('@/i18n/i18n', () => ({ default: { t: (key: string) => key } }));
 import {
   parseTitulo,
   parseCopyright,
@@ -135,7 +137,7 @@ describe('defaults', () => {
 
   it('defaultCopyright tiene licencia predefinida', () => {
     const d = defaultCopyright();
-    expect(d.licencia).toBe('Todos los derechos reservados');
+    expect(d.licencia).toBe('common.defaultCopyrightLicense');
     expect(d.ano).toBeNull();
   });
 });
