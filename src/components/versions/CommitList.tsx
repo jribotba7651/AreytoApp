@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { restoreFile } from '@/lib/versioning';
 import CommitListItem from './CommitListItem';
@@ -6,6 +7,7 @@ import RestoreConfirmModal from './RestoreConfirmModal';
 import type { Commit } from '@/types/git';
 
 function CommitList() {
+  const { t } = useTranslation();
   const commits = useProjectStore((s) => s.commits);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -46,7 +48,7 @@ function CommitList() {
   if (!activeChapterPath) {
     return (
       <div className="flex-1 flex items-center justify-center px-3">
-        <p className="text-xs text-text-tertiary text-center">Sin capítulo activo</p>
+        <p className="text-xs text-text-tertiary text-center">{t('versions.noActiveChapter')}</p>
       </div>
     );
   }
@@ -54,7 +56,7 @@ function CommitList() {
   if (commits.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center px-3">
-        <p className="text-xs text-text-tertiary text-center">Sin historial todavía</p>
+        <p className="text-xs text-text-tertiary text-center">{t('versions.noHistory')}</p>
       </div>
     );
   }

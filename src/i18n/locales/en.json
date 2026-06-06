@@ -11,7 +11,11 @@
     "saveError": "Error saving",
     "loading": "Loading…",
     "failedToListChapters": "Failed to list chapters",
-    "defaultCopyrightLicense": "All rights reserved"
+    "defaultCopyrightLicense": "All rights reserved",
+    "noProjectOpen": "No open project",
+    "chapterCount_one": "{{count}} chapter",
+    "chapterCount_other": "{{count}} chapters",
+    "defaultChapterTitle": "Chapter {{num}}"
   },
   "app": {
     "restoreError": "Could not open the last project: {{path}}"
@@ -57,7 +61,21 @@
       "sectionTitle": "Projects",
       "defaultLanguage": {
         "label": "Default language",
-        "description": "Language assigned to new projects in the language field of metadata.yaml."
+        "description": "Language assigned to new projects in the language field of metadata.yaml.",
+        "options": {
+          "es": "Spanish (es)",
+          "en": "English (en)",
+          "pt": "Portuguese (pt)",
+          "fr": "French (fr)",
+          "de": "German (de)",
+          "it": "Italian (it)",
+          "ca": "Catalan (ca)",
+          "gl": "Galician (gl)",
+          "eu": "Basque (eu)",
+          "zh": "Chinese (zh)",
+          "ja": "Japanese (ja)",
+          "ar": "Arabic (ar)"
+        }
       }
     },
     "book": {
@@ -208,6 +226,40 @@
       "inProgress": "Only in progress"
     }
   },
+  "book": {
+    "loading": "Loading book…",
+    "emptyTitle": "The book is empty",
+    "emptyBody": "Create your first chapter from the Active Chapter view",
+    "indice": "Table of Contents",
+    "chapterLoadError": "Could not load {{filename}}",
+    "export": {
+      "successBody": "Book exported to:\n{{path}}",
+      "successTitle": "Export complete",
+      "errorBody": "Export error: {{error}}",
+      "errorTitle": "Export error",
+      "toWordTitle": "Export book to Word (.docx)",
+      "toWordLabel": "Export to Word",
+      "toMarkdownTitle": "Export book to markdown",
+      "toMarkdownLabel": "Export"
+    }
+  },
+  "editor": {
+    "edit": "Edit",
+    "preview": "Preview",
+    "noActiveChapter": "No active chapter"
+  },
+  "versions": {
+    "title": "Versions",
+    "noActiveChapter": "No active chapter",
+    "noHistory": "No history yet",
+    "expandPanel": "Expand versions panel",
+    "collapsePanel": "Collapse versions panel"
+  },
+  "finished": {
+    "title": "Finished chapters",
+    "emptyTitle": "No finished chapters",
+    "emptyBody": "When you close a chapter from the sidebar it will appear here"
+  },
   "sidebar": {
     "frontmatter": "Frontmatter",
     "chapters": "Chapters",
@@ -216,6 +268,8 @@
     "noChapters": "No chapters",
     "newChapter": "New chapter",
     "closeChapter": "Close active chapter",
+    "refreshList": "Reload list",
+    "refreshListAria": "Reload chapter list",
     "items": {
       "titulo": "Title and author",
       "copyright": "Copyright",

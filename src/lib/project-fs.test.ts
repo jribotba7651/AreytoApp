@@ -17,6 +17,8 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
+vi.mock('@/i18n/i18n', () => ({ default: { t: (key: string) => key } }));
+
 import { invoke } from '@tauri-apps/api/core';
 const mockInvoke = vi.mocked(invoke);
 
@@ -190,12 +192,12 @@ describe('createChapter', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.filename).toBe('cap-01.md');
-      expect(result.value.title).toBe('Capítulo 1');
+      expect(result.value.title).toBe('common.defaultChapterTitle');
     }
 
     const writeCall = mockInvoke.mock.calls.find(([cmd]) => cmd === 'write_text_file');
     expect(writeCall).toBeDefined();
-    expect((writeCall?.[1] as { contents: string }).contents).toBe('# Capítulo 1\n\n');
+    expect((writeCall?.[1] as { contents: string }).contents).toBe('# common.defaultChapterTitle\n\n');
   });
 
   it('usa "Capítulo N" como título por default derivado del filename', async () => {
@@ -210,7 +212,7 @@ describe('createChapter', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.filename).toBe('cap-02.md');
-      expect(result.value.title).toBe('Capítulo 2');
+      expect(result.value.title).toBe('common.defaultChapterTitle');
     }
   });
 

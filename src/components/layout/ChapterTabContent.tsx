@@ -1,6 +1,7 @@
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { Layout } from 'react-resizable-panels';
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import SidebarPanel from '@/components/panels/SidebarPanel';
 import EditorPanel from '@/components/panels/EditorPanel';
 import TerminalPanel from '@/components/panels/TerminalPanel';
@@ -37,6 +38,7 @@ function MiddlePanels() {
 }
 
 function ChapterTabContent() {
+  const { t } = useTranslation();
   const { sizes, isVersionsCollapsed, setSizes, toggleVersionsPanel } = useLayoutStore();
 
   if (isVersionsCollapsed) {
@@ -61,7 +63,7 @@ function ChapterTabContent() {
         </Group>
         <button
           onClick={toggleVersionsPanel}
-          aria-label="Expandir panel de versiones"
+          aria-label={t('versions.expandPanel')}
           className="absolute right-2 top-2 flex items-center justify-center w-6 h-6 rounded bg-bg-secondary border border-border-default text-text-tertiary hover:text-text-primary transition-colors duration-150"
         >
           <ChevronLeft size={14} />
