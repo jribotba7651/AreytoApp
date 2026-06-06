@@ -149,6 +149,7 @@
   "welcome": {
     "tagline": "Editor de escritura por capítulos",
     "dialogTitle": "Selecciona la carpeta del proyecto",
+    "newProjectDialogTitle": "Selecciona la carpeta para el nuevo proyecto",
     "openProject": "Abrir proyecto",
     "opening": "Abriendo…",
     "restoreMessageSuffix": ". Selecciona uno nuevo abajo.",
@@ -159,7 +160,11 @@
     "createProject": {
       "title": "Crear proyecto",
       "description": "Esta carpeta no tiene un proyecto. Puedes crear uno aquí.",
+      "descriptionNew": "Elige un nombre y carpeta donde crear el nuevo proyecto.",
       "placeholder": "Nombre del proyecto",
+      "locationLabel": "Guardar en:",
+      "chooseLocation": "Elegir ubicación",
+      "noLocationSelected": "Sin carpeta seleccionada",
       "errorAlreadyExists": "Ya existe un proyecto en esta carpeta.",
       "errorWriteFailed": "No se pudo crear el proyecto: {{reason}}",
       "errorGeneric": "Error al crear el proyecto. Intenta de nuevo.",

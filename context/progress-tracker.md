@@ -5,10 +5,28 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F48 i18n Fase 6 (cierra i18n al 100%): componentes escapados + 2 gaps
+- Última feature completada: F49 Menú File nativo con Open / New / Close Project
 - Fecha de última actualización: 2026-06-05
 
 ## Features completadas
+
+### 2026-06-05 - F49 - Menú File nativo con Open / New / Close Project
+- Qué se hizo: menú de aplicación Tauri 2.x nativo con submenú "File" (Open Project…, New Project…, Close Project). Los ítems del menú emiten eventos Tauri al frontend vía el patrón emit/listen ya existente (igual que terminal.rs/useTerminal.ts). El frontend reutiliza la lógica existente sin duplicar.
+- Archivos modificados:
+  - src-tauri/src/lib.rs (menú Areyto + File con 3 ítems y aceleradores; on_menu_event emite menu:open-project / menu:new-project / menu:close-project; imports tauri::menu::* + Emitter)
+  - src/stores/projectStore.ts (añadidos pendingMenuAction: 'open' | null y setPendingMenuAction — permiten coordinar la acción cuando el menú se dispara con un proyecto ya abierto)
+  - src/hooks/useMenuEvents.ts (nuevo hook; listen de 3 eventos; si hay proyecto abierto → setPendingMenuAction + closeProject; si no → triggerOpenProject)
+  - src/components/welcome/WelcomeScreen.tsx (useEffect de montaje: lee pendingMenuAction → dispara handleOpen automáticamente al renderizar WelcomeScreen tras closeProject)
+  - src/App.tsx (useMenuEvents() añadido junto a useKeyboardShortcuts y useSettingsPersistence)
+- Decisiones tomadas:
+  - D-186: Labels del menú nativo en inglés fijo ("File", "Open Project…", etc.). Los menús nativos de Tauri no pasan fácilmente por react-i18next (el menú se construye en Rust en tiempo de arranque). i18n del menú nativo = tarea futura aparte.
+  - D-187: "Open Project" y "New Project" usan el mismo handler (triggerOpenProject / handleOpen de WelcomeScreen). La distinción open/create la decide la carpeta elegida: si tiene proyecto.json lo abre; si no, muestra CreateProjectModal. Semántica suficiente para F49.
+  - D-188: Coordinación menú-con-proyecto-abierto vía pendingMenuAction en el store: closeProject() → WelcomeScreen monta → useEffect lee pendingMenuAction → llama handleOpen. Evita duplicar el dialog logic fuera de WelcomeScreen.
+  - D-189: ⌘⇧W sigue funcionando como shortcut de teclado además del menú nativo. closeProject() es idempotente — doble disparo no rompe nada.
+- Pendientes relacionados:
+  - F50 (siguiente): validación de estructura al abrir proyecto (proyecto.json + 4 carpetas). openProject hoy solo verifica proyecto.json.
+- Tests: 348 TS + 41 Rust — todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-06-05 - F48 - i18n Fase 6 (cierra i18n al 100%): componentes escapados + 2 gaps
 - Qué se hizo: migración de los ~25 strings restantes de UI en componentes no cubiertos por F43-F47. i18n queda al 100%. Incluye plurales (i18next count), interpolaciones, shortcuts, y 2 gaps descubiertos en el audit.

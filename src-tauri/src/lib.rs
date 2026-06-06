@@ -4,6 +4,11 @@ mod project_fs;
 mod settings;
 mod terminal;
 
+use tauri::{
+    menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
+    Emitter,
+};
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -16,6 +21,36 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .manage(std::sync::Mutex::new(None::<terminal::PtySession>))
+        .menu(|app| {
+            let app_menu = Submenu::with_items(
+                app,
+                "Areyto",
+                true,
+                &[
+                    &PredefinedMenuItem::about(app, None, None)?,
+                    &PredefinedMenuItem::separator(app)?,
+                    &PredefinedMenuItem::quit(app, None)?,
+                ],
+            )?;
+            let file_menu = Submenu::with_items(
+                app,
+                "File",
+                true,
+                &[
+                    &MenuItem::with_id(app, "open-project", "Open Project\u{2026}", true, Some("CmdOrCtrl+O"))?,
+                    &MenuItem::with_id(app, "new-project", "New Project\u{2026}", true, Some("CmdOrCtrl+Shift+N"))?,
+                    &PredefinedMenuItem::separator(app)?,
+                    &MenuItem::with_id(app, "close-project", "Close Project", true, Some("CmdOrCtrl+Shift+W"))?,
+                ],
+            )?;
+            Menu::with_items(app, &[&app_menu, &file_menu])
+        })
+        .on_menu_event(|app, event| match event.id().as_ref() {
+            "open-project" => { app.emit("menu:open-project", ()).ok(); }
+            "new-project"  => { app.emit("menu:new-project", ()).ok(); }
+            "close-project" => { app.emit("menu:close-project", ()).ok(); }
+            _ => {}
+        })
         .invoke_handler(tauri::generate_handler![
             greet,
             project_fs::read_text_file,

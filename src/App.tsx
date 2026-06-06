@@ -10,6 +10,7 @@ import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useMenuEvents } from '@/hooks/useMenuEvents';
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
 import { readGlobalSettings, pathExists } from '@/lib/settings';
 import { openProjectByPath } from '@/lib/open-project-flow';
@@ -22,6 +23,7 @@ function App() {
   const [isRestoring, setIsRestoring] = useState(true);
 
   useKeyboardShortcuts();
+  useMenuEvents();
   useSettingsPersistence();
 
   const themeMode = useSettingsStore((s) => s.themeMode);
