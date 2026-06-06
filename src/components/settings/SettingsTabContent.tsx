@@ -275,7 +275,7 @@ function SettingsTabContent() {
               >
                 {LANGUAGE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t('settings.projects.defaultLanguage.options.' + opt.value)}
                   </option>
                 ))}
               </select>

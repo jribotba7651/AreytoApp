@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Eye, Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import BookMarkdown from '@/components/book/BookMarkdown';
 import ShortcutHint from '@/components/shared/ShortcutHint';
@@ -14,6 +15,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useAutosave } from '@/hooks/useAutosave';
 
 function ChapterView() {
+  const { t } = useTranslation();
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -68,14 +70,14 @@ function ChapterView() {
           <button
             onClick={handleToggle}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
-            title={isPreview ? 'Editar (⌘E)' : 'Vista previa (⌘E)'}
+            title={isPreview ? `${t('editor.edit')} (⌘E)` : `${t('editor.preview')} (⌘E)`}
           >
             {isPreview ? (
               <Pencil size={14} />
             ) : (
               <Eye size={14} />
             )}
-            <span>{isPreview ? 'Editar' : 'Previsualizar'}</span>
+            <span>{isPreview ? t('editor.edit') : t('editor.preview')}</span>
           </button>
           <div className="pl-1.5">
             <ShortcutHint text="⌘E" />
@@ -107,6 +109,7 @@ function ChapterView() {
 }
 
 function EditorPanel() {
+  const { t } = useTranslation();
   const activeView = useProjectStore((s) => s.activeView);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
 
@@ -133,7 +136,7 @@ function EditorPanel() {
   if (!activeChapterPath) {
     return (
       <div className="h-full bg-bg-editor flex items-center justify-center">
-        <p className="font-serif text-base text-text-tertiary">No hay capítulo activo</p>
+        <p className="font-serif text-base text-text-tertiary">{t('editor.noActiveChapter')}</p>
       </div>
     );
   }

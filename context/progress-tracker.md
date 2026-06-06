@@ -5,10 +5,42 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F47 i18n Fase 5 (final scope mínimo): lib/ + App.tsx + consolidación topbar→common
+- Última feature completada: F48 i18n Fase 6 (cierra i18n al 100%): componentes escapados + 2 gaps
 - Fecha de última actualización: 2026-06-05
 
 ## Features completadas
+
+### 2026-06-05 - F48 - i18n Fase 6 (cierra i18n al 100%): componentes escapados + 2 gaps
+- Qué se hizo: migración de los ~25 strings restantes de UI en componentes no cubiertos por F43-F47. i18n queda al 100%. Incluye plurales (i18next count), interpolaciones, shortcuts, y 2 gaps descubiertos en el audit.
+- Archivos modificados:
+  - src/i18n/locales/en.json (añadidas claves: common.noProjectOpen, common.chapterCount_one/other, book.loading, book.emptyTitle/Body, book.indice, book.chapterLoadError, book.export.*, editor.edit/preview/noActiveChapter, versions.title/noActiveChapter/noHistory/expandPanel/collapsePanel, finished.title/emptyTitle/emptyBody, sidebar.refreshList/refreshListAria, settings.projects.defaultLanguage.options.*)
+  - src/i18n/locales/es.json (mismas claves en español)
+  - src/components/layout/BookTabContent.tsx (useTranslation; 10 strings migrados incl. interpolaciones de ruta/error y noProjectOpen)
+  - src/components/panels/EditorPanel.tsx (useTranslation en ChapterView y EditorPanel; shortcuts patrón `${t('editor.edit')} (⌘E)`)
+  - src/components/book/BookHeader.tsx (useTranslation; plural common.chapterCount)
+  - src/components/layout/FinishedTabContent.tsx (useTranslation; noProjectOpen, finished.title, plural chapterCount)
+  - src/components/book/BookEmptyState.tsx (useTranslation; book.emptyTitle/emptyBody)
+  - src/components/terminados/TerminadosEmptyState.tsx (useTranslation; finished.emptyTitle/emptyBody)
+  - src/components/terminal/TerminalView.tsx (useTranslation; common.noProjectOpen)
+  - src/components/book/BookChapterError.tsx (useTranslation; book.chapterLoadError con interpolación filename)
+  - src/components/sidebar/RefreshChaptersButton.tsx (useTranslation; sidebar.refreshList + shortcut, sidebar.refreshListAria)
+  - src/components/versions/CommitList.tsx (useTranslation; versions.noActiveChapter, versions.noHistory)
+  - src/components/book/BookIndice.tsx (useTranslation; book.indice)
+  - src/components/frontmatter/FrontmatterCopyrightEditor.tsx (licencia inicial → t('common.defaultCopyrightLicense'))
+  - src/components/layout/ChapterTabContent.tsx (useTranslation; versions.expandPanel)
+  - src/components/panels/VersionsPanel.tsx (useTranslation; versions.title, versions.collapsePanel)
+  - src/components/versions/RestoreConfirmModal.tsx (GAP 1: formatDate acepta locale param; usa i18n.language en vez de 'es-ES' hardcodeado)
+  - src/components/settings/SettingsTabContent.tsx (GAP 2: LANGUAGE_OPTIONS render usa t('settings.projects.defaultLanguage.options.' + opt.value); UI_LOCALE_OPTIONS sin tocar)
+  - src/components/book/BookIndice.test.tsx (vi.mock react-i18next añadido — BookIndice usa useTranslation ahora)
+- Decisiones tomadas:
+  - D-181: Plurales i18next: claves _one/_other con {{count}} interpolado. Ambos BookHeader y FinishedTabContent comparten common.chapterCount.
+  - D-182: Shortcut pattern (establecido en F44): símbolo concatenado FUERA de t(), e.g. `${t('editor.edit')} (⌘E)`.
+  - D-183: LANGUAGE_OPTIONS conserva el array con {value, label} pero el label ya no se usa en render — solo el value para construir la clave i18n. El array podría simplificarse a solo values en refactor futuro, pero está fuera de scope F48.
+  - D-184: UI_LOCALE_OPTIONS (English/Español en nombre nativo) NO se toca; es intencional que los nombres de idioma de UI se muestren siempre en su nombre nativo.
+  - D-185: formatDate en RestoreConfirmModal ahora recibe locale como parámetro (i18n.language) en vez de hardcodear 'es-ES'. Función pura, fácil de testear.
+- Pendientes relacionados: ninguno — i18n al 100%
+- Tests: 348 TS + 41 Rust — todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-06-05 - F47 - i18n Fase 5 (final, scope mínimo): lib/ + App.tsx + consolidación topbar→common
 - Qué se hizo: migración de los strings de UI restantes en lib/ y App.tsx, y consolidación de claves duplicadas topbar.saving/saved/saveError → common.*.

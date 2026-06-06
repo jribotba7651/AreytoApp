@@ -8,8 +8,8 @@ interface RestoreConfirmModalProps {
   onClose: () => void;
 }
 
-function formatDate(isoTimestamp: string): string {
-  return new Date(isoTimestamp).toLocaleString('es-ES', {
+function formatDate(isoTimestamp: string, locale: string): string {
+  return new Date(isoTimestamp).toLocaleString(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -18,7 +18,7 @@ function formatDate(isoTimestamp: string): string {
 }
 
 function RestoreConfirmModal({ commit, loading, onConfirm, onClose }: RestoreConfirmModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <div
@@ -36,7 +36,7 @@ function RestoreConfirmModal({ commit, loading, onConfirm, onClose }: RestoreCon
         <div className="bg-bg-secondary rounded border border-border-subtle p-3 mb-4">
           <p className="text-sm text-text-primary truncate">{commit.message}</p>
           <p className="text-xs text-text-tertiary font-mono mt-1">
-            {commit.shortHash} · {formatDate(commit.timestamp)}
+            {commit.shortHash} · {formatDate(commit.timestamp, i18n.language)}
           </p>
         </div>
 

@@ -49,7 +49,7 @@ function FrontmatterCopyrightEditor() {
   const [data, setData] = useState<CopyrightData>({
     ano: null,
     titular: '',
-    licencia: 'Todos los derechos reservados',
+    licencia: t('common.defaultCopyrightLicense'),
   });
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

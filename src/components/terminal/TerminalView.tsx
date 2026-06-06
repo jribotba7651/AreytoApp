@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { useTerminal } from '@/hooks/useTerminal';
 
 function TerminalView() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
@@ -16,7 +18,7 @@ function TerminalView() {
   if (!currentProject) {
     return (
       <div className="h-full flex items-center justify-center bg-bg-terminal">
-        <p className="font-mono text-sm text-text-tertiary">Sin proyecto abierto</p>
+        <p className="font-mono text-sm text-text-tertiary">{t('common.noProjectOpen')}</p>
       </div>
     );
   }

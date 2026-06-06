@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Download, FileText } from 'lucide-react';
 import { save, message } from '@tauri-apps/plugin-dialog';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -22,6 +23,7 @@ import type { BookData } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
 
 function BookTabContent() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const activeTab = useLayoutStore((s) => s.activeTab);
   const exportFolder = useSettingsStore((s) => s.exportFolder);
@@ -72,14 +74,14 @@ function BookTabContent() {
       setShowExportDialog(false);
       setExportLoading(false);
 
-      await message(`Libro exportado en:\n${outputPath}`, {
-        title: 'Exportación completada',
+      await message(t('book.export.successBody', { path: outputPath }), {
+        title: t('book.export.successTitle'),
         kind: 'info',
       });
     } catch (err) {
       setExportLoading(false);
-      await message(`Error al exportar: ${String(err)}`, {
-        title: 'Error de exportación',
+      await message(t('book.export.errorBody', { error: String(err) }), {
+        title: t('book.export.errorTitle'),
         kind: 'error',
       });
     }
@@ -112,14 +114,14 @@ function BookTabContent() {
       setShowDocxDialog(false);
       setDocxLoading(false);
 
-      await message(`Libro exportado en:\n${outputPath}`, {
-        title: 'Exportación completada',
+      await message(t('book.export.successBody', { path: outputPath }), {
+        title: t('book.export.successTitle'),
         kind: 'info',
       });
     } catch (err) {
       setDocxLoading(false);
-      await message(`Error al exportar: ${String(err)}`, {
-        title: 'Error de exportación',
+      await message(t('book.export.errorBody', { error: String(err) }), {
+        title: t('book.export.errorTitle'),
         kind: 'error',
       });
     }
@@ -128,7 +130,7 @@ function BookTabContent() {
   if (!currentProject) {
     return (
       <div className="h-full flex items-center justify-center bg-bg-primary">
-        <p className="font-serif text-text-tertiary">Sin proyecto abierto</p>
+        <p className="font-serif text-text-tertiary">{t('common.noProjectOpen')}</p>
       </div>
     );
   }
@@ -137,7 +139,7 @@ function BookTabContent() {
     if (loading) {
       return (
         <div className="h-full flex items-center justify-center">
-          <p className="font-sans text-sm text-text-tertiary">Cargando libro…</p>
+          <p className="font-sans text-sm text-text-tertiary">{t('book.loading')}</p>
         </div>
       );
     }
@@ -204,19 +206,19 @@ function BookTabContent() {
           onClick={() => setShowDocxDialog(true)}
           disabled={docxLoading}
           className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
-          title="Exportar libro a Word (.docx)"
+          title={t('book.export.toWordTitle')}
         >
           <FileText size={14} />
-          <span>Exportar a Word</span>
+          <span>{t('book.export.toWordLabel')}</span>
         </button>
         <button
           onClick={() => setShowExportDialog(true)}
           disabled={exportLoading}
           className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
-          title="Exportar libro a markdown"
+          title={t('book.export.toMarkdownTitle')}
         >
           <Download size={14} />
-          <span>Exportar</span>
+          <span>{t('book.export.toMarkdownLabel')}</span>
         </button>
       </div>
 
