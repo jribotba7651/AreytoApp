@@ -253,6 +253,19 @@ export async function reopenChapter(
   return ok({ newPath });
 }
 
+export async function createProjectInNewFolder(
+  parentPath: string,
+  nombre: string
+): Promise<ProjectResult<Project>> {
+  const safeName = nombre.trim().replace(/[/\\:*?"<>|]/g, '_');
+  const rootPath = `${parentPath}/${safeName}`;
+
+  const dirResult = await ensureDir(rootPath);
+  if (!dirResult.ok) return dirResult;
+
+  return createProject(rootPath, nombre.trim());
+}
+
 export async function closeChapter(
   _project: Project,
   chapter: Chapter

@@ -25,6 +25,8 @@ interface ProjectState {
   flushAutosave: (() => Promise<void>) | null;
   syncAutosaveSaved: ((content: string) => void) | null;
   triggerOpenProject: (() => void) | null;
+  triggerNewProject: (() => void) | null;
+  pendingMenuAction: 'open' | 'new' | null;
   setCurrentProject: (project: Project | null) => void;
   closeProject: () => void;
   setActiveChapter: (path: string, content: string) => void;
@@ -41,6 +43,8 @@ interface ProjectState {
   setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
   setTriggerOpenProject: (fn: (() => void) | null) => void;
+  setTriggerNewProject: (fn: (() => void) | null) => void;
+  setPendingMenuAction: (action: 'open' | 'new' | null) => void;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -56,6 +60,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
   flushAutosave: null,
   syncAutosaveSaved: null,
   triggerOpenProject: null,
+  triggerNewProject: null,
+  pendingMenuAction: null,
 
   setCurrentProject: (project: Project | null) => set({ currentProject: project }),
 
@@ -110,4 +116,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
     set({ syncAutosaveSaved: fn }),
 
   setTriggerOpenProject: (fn: (() => void) | null) => set({ triggerOpenProject: fn }),
+
+  setTriggerNewProject: (fn: (() => void) | null) => set({ triggerNewProject: fn }),
+
+  setPendingMenuAction: (action: 'open' | 'new' | null) => set({ pendingMenuAction: action }),
 }));

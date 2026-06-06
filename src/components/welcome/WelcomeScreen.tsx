@@ -16,7 +16,9 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
   const { t } = useTranslation();
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
   const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
+  const setTriggerNewProject = useProjectStore((s) => s.setTriggerNewProject);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -64,13 +66,41 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
     setLoading(false);
   }, [t]);
 
+  const handleNew = useCallback(() => {
+    setError('');
+    setShowNewProjectModal(true);
+  }, []);
+
   useEffect(() => {
     setTriggerOpenProject(handleOpen);
     return () => setTriggerOpenProject(null);
   }, [handleOpen, setTriggerOpenProject]);
 
+  useEffect(() => {
+    setTriggerNewProject(handleNew);
+    return () => setTriggerNewProject(null);
+  }, [handleNew, setTriggerNewProject]);
+
+  // Fire pending action set by useMenuEvents when a project was open at the time of the event
+  useEffect(() => {
+    const store = useProjectStore.getState();
+    if (store.pendingMenuAction === 'open') {
+      store.setPendingMenuAction(null);
+      handleOpen();
+    } else if (store.pendingMenuAction === 'new') {
+      store.setPendingMenuAction(null);
+      handleNew();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleCreated(project: Project) {
     setPendingPath(null);
+    setCurrentProject(project);
+  }
+
+  function handleNewCreated(project: Project) {
+    setShowNewProjectModal(false);
     setCurrentProject(project);
   }
 
@@ -111,6 +141,13 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
           folderPath={pendingPath}
           onClose={() => { setPendingPath(null); setLoading(false); }}
           onCreated={handleCreated}
+        />
+      )}
+
+      {showNewProjectModal && (
+        <CreateProjectModal
+          onClose={() => setShowNewProjectModal(false)}
+          onCreated={handleNewCreated}
         />
       )}
     </div>

@@ -149,6 +149,7 @@
   "welcome": {
     "tagline": "Chapter-by-chapter writing editor",
     "dialogTitle": "Select the project folder",
+    "newProjectDialogTitle": "Select folder for new project",
     "openProject": "Open project",
     "opening": "Opening…",
     "restoreMessageSuffix": ". Select a new one below.",
@@ -159,7 +160,11 @@
     "createProject": {
       "title": "Create project",
       "description": "This folder has no project. You can create one here.",
+      "descriptionNew": "Choose a name and a parent folder for the new project.",
       "placeholder": "Project name",
+      "locationLabel": "Save in:",
+      "chooseLocation": "Choose location",
+      "noLocationSelected": "No folder selected",
       "errorAlreadyExists": "A project already exists in this folder.",
       "errorWriteFailed": "Could not create the project: {{reason}}",
       "errorGeneric": "Error creating the project. Try again.",

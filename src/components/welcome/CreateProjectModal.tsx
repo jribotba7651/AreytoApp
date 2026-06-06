@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { open } from '@tauri-apps/plugin-dialog';
 import type { Project } from '@/types/project';
-import { createProject } from '@/lib/project-fs';
+import { createProject, createProjectInNewFolder } from '@/lib/project-fs';
 import { loadInitialChapter } from '@/lib/chapter-loader';
 import { ensureGitInit } from '@/lib/versioning';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import { useProjectStore } from '@/stores/projectStore';
 
 interface CreateProjectModalProps {
-  folderPath: string;
+  folderPath?: string;
   onClose: () => void;
   onCreated: (project: Project) => void;
 }
@@ -19,22 +20,44 @@ function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectMod
   const setChapters = useProjectStore((s) => s.setChapters);
   const setCommits = useProjectStore((s) => s.setCommits);
   const [nombre, setNombre] = useState('');
+  const [parentPath, setParentPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const isNewMode = folderPath === undefined;
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const isValid = nombre.trim().length > 0;
+  const isValid = nombre.trim().length > 0 && (!isNewMode || parentPath !== null);
+
+  async function handleChooseLocation() {
+    let selected: string | string[] | null;
+    try {
+      selected = await open({
+        directory: true,
+        multiple: false,
+        title: t('modal.createProject.chooseLocation'),
+      });
+    } catch {
+      return;
+    }
+    if (selected && !Array.isArray(selected)) {
+      setParentPath(selected);
+      setError('');
+    }
+  }
 
   async function handleCreate() {
     if (!isValid || loading) return;
     setLoading(true);
     setError('');
 
-    const result = await createProject(folderPath, nombre.trim());
+    const result = isNewMode
+      ? await createProjectInNewFolder(parentPath!, nombre.trim())
+      : await createProject(folderPath!, nombre.trim());
 
     if (!result.ok) {
       const { error: err } = result;
@@ -82,12 +105,31 @@ function CreateProjectModal({ folderPath, onClose, onCreated }: CreateProjectMod
           {t('modal.createProject.title')}
         </h2>
         <p className="text-sm text-text-secondary mb-4">
-          {t('modal.createProject.description')}
+          {isNewMode
+            ? t('modal.createProject.descriptionNew')
+            : t('modal.createProject.description')}
         </p>
 
-        <p className="font-mono text-xs text-text-tertiary mb-4 break-all leading-relaxed">
-          {folderPath}
-        </p>
+        {isNewMode ? (
+          <div className="mb-4">
+            <p className="text-xs text-text-tertiary mb-1">{t('modal.createProject.locationLabel')}</p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleChooseLocation}
+                className="px-3 py-1.5 text-xs bg-bg-secondary border border-border-default rounded hover:border-border-strong transition-colors duration-150 text-text-secondary hover:text-text-primary"
+              >
+                {t('modal.createProject.chooseLocation')}
+              </button>
+              <span className="font-mono text-xs text-text-tertiary truncate">
+                {parentPath ?? t('modal.createProject.noLocationSelected')}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <p className="font-mono text-xs text-text-tertiary mb-4 break-all leading-relaxed">
+            {folderPath}
+          </p>
+        )}
 
         <input
           ref={inputRef}
