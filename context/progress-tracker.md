@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F29 - Editor de metadata del libro (book details)
-- Fecha de última actualización: 2026-05-25
+- Última feature completada: F37 - File watcher automático
+- Fecha de última actualización: 2026-08-02
 
 ## Features completadas
 
@@ -959,3 +959,30 @@ Ninguno.
 - Tests: 272 TS (sin cambio), Rust sin cambio
 - Decisiones: D-181 nombres de token existentes mantenidos, valores actualizados (sin renombrar para no romper componentes). D-182 text-tertiary = stone-500 (#78716C) en vez de spec stone-400 (#A8A29E) para WCAG AA en panel VERSIONES (~4.1:1 vs 2.2:1). D-183 accent-muted = slate-400 (#94A3B8): visible como fondo de botón primario (5.4:1) y selección del editor al 50% de opacidad. D-184 backdrops de modales como bg-black/60 en lugar de rgba inline, elimina últimos colores crudos en componentes.
 - Commit: 5507d58
+
+### 2026-08-02 - F37: File watcher automático
+- Qué se hizo: detección automática de cambios externos en .md de capitulos/ y capitulos-terminados/. Crate notify (Rust) con watcher.rs (watch_project/unwatch_project + WatcherState managed). Evento Tauri project-files-changed emitido en cada Create/Modify/Remove. Función pura decideReload en lib/watcher-reconcile.ts con 3 decisiones: ignore (eco del autosave), reload (sin ediciones locales), prompt (con ediciones locales). Hook useProjectWatcher con debounce 300ms: refreshChapters siempre + reload/prompt del capítulo activo. Store: lastSavedContent sincronizado en autosave (doSave + syncSaved) y en setActiveChapter; externalChangePending para el banner. Banner ExternalChangeBanner no bloqueante en EditorPanel con botón "Recargar" y X para descartar. Reload usa el mismo mecanismo que el restore de versiones (updateContent + syncAutosaveSaved + incrementEditorVersion).
+- Archivos creados:
+  - src-tauri/src/watcher.rs (WatcherState, watch_project, unwatch_project)
+  - src/lib/watcher-reconcile.ts (decideReload función pura)
+  - src/lib/watcher-reconcile.test.ts (4 tests)
+  - src/hooks/useProjectWatcher.ts (hook con debounce)
+  - src/components/editor/ExternalChangeBanner.tsx (banner no bloqueante)
+- Archivos modificados:
+  - src-tauri/Cargo.toml (notify 7)
+  - src-tauri/src/lib.rs (mod watcher, manage WatcherState, 2 commands)
+  - src/stores/projectStore.ts (lastSavedContent, externalChangePending, setters)
+  - src/hooks/useAutosave.ts (setLastSavedContent en doSave y syncSaved)
+  - src/components/panels/EditorPanel.tsx (ExternalChangeBanner montado)
+  - src/App.tsx (useProjectWatcher montado)
+- Decisiones tomadas:
+  - D-185: watcher vía crate notify + comando Tauri custom + evento Tauri, no polling. Debounce 300ms en el front, no en Rust. Eco suprimido comparando disco contra lastSavedContent.
+  - D-186: reload usa el mismo mecanismo que restore de versiones (updateContent + syncAutosaveSaved + incrementEditorVersion). No se inventó camino nuevo.
+  - D-187: banner no bloqueante, no modal. El usuario decide si recargar o descartar.
+- Pendientes relacionados:
+  - Watch de frontmatter/ y backmatter/ (future task)
+  - UI de merge/diff 3-way (future task, v1 solo prompt)
+  - Reaccionar a operaciones git externas (future task)
+- Tests: 276 TS (4 nuevos), Rust sin tests nuevos (thin wrapper)
+- Bugs encontrados: ninguno
+- Commit: d27503b
