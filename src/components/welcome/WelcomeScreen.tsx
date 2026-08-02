@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
+import { FileText } from 'lucide-react';
 import { openProject } from '@/lib/project-fs';
 import { setupProjectInStores } from '@/lib/open-project-flow';
 import { useProjectStore } from '@/stores/projectStore';
 import CreateProjectModal from './CreateProjectModal';
+import ImportDocxModal from './ImportDocxModal';
 import ShortcutHint from '@/components/shared/ShortcutHint';
 import type { Project } from '@/types/project';
 
@@ -15,6 +17,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
   const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [importDocxPath, setImportDocxPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -67,6 +70,22 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
     return () => setTriggerOpenProject(null);
   }, [handleOpen, setTriggerOpenProject]);
 
+  async function handleImportDocx() {
+    setError('');
+    try {
+      const selected = await open({
+        multiple: false,
+        title: 'Selecciona un archivo .docx',
+        filters: [{ name: 'Word', extensions: ['docx'] }],
+      });
+      if (selected && !Array.isArray(selected)) {
+        setImportDocxPath(selected);
+      }
+    } catch {
+      // User cancelled
+    }
+  }
+
   function handleCreated(project: Project) {
     setPendingPath(null);
     setCurrentProject(project);
@@ -100,6 +119,14 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
         </div>
       </div>
 
+      <button
+        onClick={handleImportDocx}
+        className="flex items-center gap-1.5 px-4 py-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors duration-150"
+      >
+        <FileText size={14} />
+        Importar de Word (.docx)
+      </button>
+
       {error && (
         <p className="text-xs text-error mt-2">{error}</p>
       )}
@@ -109,6 +136,14 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
           folderPath={pendingPath}
           onClose={() => { setPendingPath(null); setLoading(false); }}
           onCreated={handleCreated}
+        />
+      )}
+
+      {importDocxPath && (
+        <ImportDocxModal
+          docxPath={importDocxPath}
+          onClose={() => setImportDocxPath(null)}
+          onImported={() => setImportDocxPath(null)}
         />
       )}
     </div>

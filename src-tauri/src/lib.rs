@@ -1,5 +1,6 @@
 mod export;
 mod git;
+mod import;
 mod project_fs;
 mod settings;
 mod terminal;
@@ -51,6 +52,7 @@ pub fn run() {
             terminal::pty_kill,
             watcher::watch_project,
             watcher::unwatch_project,
+            import::import_docx,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
