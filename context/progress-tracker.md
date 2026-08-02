@@ -983,6 +983,7 @@ Ninguno.
   - Watch de frontmatter/ y backmatter/ (future task)
   - UI de merge/diff 3-way (future task, v1 solo prompt)
   - Reaccionar a operaciones git externas (future task)
-- Tests: 276 TS (4 nuevos), Rust sin tests nuevos (thin wrapper)
+- Tests: 279 TS (7 nuevos), Rust sin tests nuevos (thin wrapper)
 - Bugs encontrados: ninguno
 - Commit: d27503b
+- Fix: match del capítulo activo por últimos dos segmentos del path (isSameChapterFile) en vez de igualdad exacta, para que la recarga en vivo dispare en proyectos de iCloud/Synology donde FSEvents reporta el path canónico. Commit d41ef05.
