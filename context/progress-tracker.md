@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F37 - File watcher automático
+- Última feature completada: F38 - Importar docx
 - Fecha de última actualización: 2026-08-02
 
 ## Features completadas
@@ -987,3 +987,28 @@ Ninguno.
 - Bugs encontrados: ninguno
 - Commit: d27503b
 - Fix: match del capítulo activo por últimos dos segmentos del path (isSameChapterFile) en vez de igualdad exacta, para que la recarga en vivo dispare en proyectos de iCloud/Synology donde FSEvents reporta el path canónico. Commit d41ef05.
+
+### 2026-08-02 - F38: Importar docx
+- Qué se hizo: importar manuscrito .docx, convertir a markdown con pandoc sidecar existente, dividir en capítulos de forma adaptativa, crear proyecto Areyto nuevo y abrirlo. Comando Rust import_docx (pandoc -f docx -t markdown --wrap=none). Función pura splitIntoChapters en lib/split-import.ts: detecta el nivel de encabezado ATX más superficial que se repite >= 2 veces, divide por ese nivel, promueve cada encabezado de capítulo a H1, conserva contenido pre-primer-capítulo como cap-01. Flujo import-docx-flow.ts orquesta pandoc + split + createProject + writeChapter + setupProjectInStores. Botón "Importar de Word (.docx)" en WelcomeScreen + ImportDocxModal (nombre sembrado con filename del docx, selector de carpeta destino).
+- Archivos creados:
+  - src-tauri/src/import.rs (import_docx command)
+  - src/lib/split-import.ts (splitIntoChapters función pura)
+  - src/lib/split-import.test.ts (5 tests)
+  - src/lib/import-docx-flow.ts (flujo orquestador)
+  - src/components/welcome/ImportDocxModal.tsx (modal nombre + carpeta)
+- Archivos modificados:
+  - src-tauri/src/lib.rs (mod import, import_docx registrado)
+  - src/components/welcome/WelcomeScreen.tsx (botón importar + modal)
+- Decisiones tomadas:
+  - D-188: división de capítulos por el nivel de encabezado ATX más superficial que se repite >= 2 veces. Si ningún nivel se repite, un solo capítulo. Encabezado de capítulo promovido a H1. Contenido pre-primer-capítulo conservado como cap-01.
+  - D-189: pandoc --wrap=none para no insertar saltos de línea artificiales en el markdown.
+  - D-190: nombre del proyecto sembrado con el filename del docx (sin extensión). Carpeta destino seleccionada por el usuario.
+  - D-191: sin dependencias nuevas (pandoc sidecar y tauri-plugin-dialog ya existen).
+- Pendientes relacionados:
+  - Imágenes/media del docx (v1 es solo texto)
+  - Import de frontmatter/metadata del docx a editores de frontmatter
+  - Otros formatos (Scrivener, .odt, epub)
+  - Split de .md/.txt suelto
+- Tests: 284 TS (5 nuevos), Rust sin tests nuevos (thin wrapper)
+- Bugs encontrados: ninguno
+- Commit: 9607d4d
