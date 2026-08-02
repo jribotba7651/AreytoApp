@@ -4,7 +4,7 @@ import { listen } from '@tauri-apps/api/event';
 import { useProjectStore } from '@/stores/projectStore';
 import { refreshChapters } from '@/lib/refresh-chapters';
 import { readChapter } from '@/lib/project-fs';
-import { decideReload } from '@/lib/watcher-reconcile';
+import { decideReload, isSameChapterFile } from '@/lib/watcher-reconcile';
 
 const DEBOUNCE_MS = 300;
 
@@ -59,7 +59,7 @@ export function useProjectWatcher() {
       if (!activeChapterPath) return;
 
       const isActiveChanged = Array.from(changedPaths).some(
-        (p) => p === activeChapterPath
+        (p) => isSameChapterFile(p, activeChapterPath)
       );
       if (!isActiveChanged) return;
 
