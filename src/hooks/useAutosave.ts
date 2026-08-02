@@ -49,6 +49,7 @@ export function useAutosave({
 
     if (result.ok) {
       lastSavedRef.current = saveContent;
+      useProjectStore.getState().setLastSavedContent(saveContent);
       onStatusChangeRef.current('saved');
 
       if (saveProjPath) {
@@ -111,6 +112,7 @@ export function useAutosave({
 
   const syncSaved = useCallback((savedContent: string) => {
     lastSavedRef.current = savedContent;
+    useProjectStore.getState().setLastSavedContent(savedContent);
   }, []);
 
   return { flush, syncSaved };

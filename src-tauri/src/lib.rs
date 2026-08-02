@@ -3,6 +3,7 @@ mod git;
 mod project_fs;
 mod settings;
 mod terminal;
+mod watcher;
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -16,6 +17,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .manage(std::sync::Mutex::new(None::<terminal::PtySession>))
+        .manage(watcher::WatcherState(std::sync::Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![
             greet,
             project_fs::read_text_file,
@@ -47,6 +49,8 @@ pub fn run() {
             terminal::pty_write,
             terminal::pty_resize,
             terminal::pty_kill,
+            watcher::watch_project,
+            watcher::unwatch_project,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

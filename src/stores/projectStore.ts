@@ -21,6 +21,8 @@ interface ProjectState {
   chapters: Chapter[];
   commits: Commit[];
   closedChapters: ClosedChapter[];
+  lastSavedContent: string;
+  externalChangePending: { path: string; diskContent: string } | null;
   editorVersion: number;
   flushAutosave: (() => Promise<void>) | null;
   syncAutosaveSaved: ((content: string) => void) | null;
@@ -40,6 +42,8 @@ interface ProjectState {
   incrementEditorVersion: () => void;
   setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
+  setLastSavedContent: (content: string) => void;
+  setExternalChangePending: (pending: { path: string; diskContent: string } | null) => void;
   setTriggerOpenProject: (fn: (() => void) | null) => void;
 }
 
@@ -52,6 +56,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
   chapters: [],
   commits: [],
   closedChapters: [],
+  lastSavedContent: '',
+  externalChangePending: null,
   editorVersion: 0,
   flushAutosave: null,
   syncAutosaveSaved: null,
@@ -69,11 +75,13 @@ export const useProjectStore = create<ProjectState>((set) => ({
       chapters: [],
       commits: [],
       closedChapters: [],
+      lastSavedContent: '',
+      externalChangePending: null,
       editorVersion: 0,
     }),
 
   setActiveChapter: (path: string, content: string) =>
-    set({ activeChapterPath: path, activeChapterContent: content, activeView: 'chapter', saveStatus: 'idle', commits: [] }),
+    set({ activeChapterPath: path, activeChapterContent: content, lastSavedContent: content, externalChangePending: null, activeView: 'chapter', saveStatus: 'idle', commits: [] }),
 
   setActiveView: (view: ActiveView) => set({ activeView: view }),
 
@@ -108,6 +116,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) =>
     set({ syncAutosaveSaved: fn }),
+
+  setLastSavedContent: (content: string) => set({ lastSavedContent: content }),
+
+  setExternalChangePending: (pending: { path: string; diskContent: string } | null) =>
+    set({ externalChangePending: pending }),
 
   setTriggerOpenProject: (fn: (() => void) | null) => set({ triggerOpenProject: fn }),
 }));

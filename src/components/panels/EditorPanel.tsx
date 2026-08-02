@@ -12,6 +12,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAutosave } from '@/hooks/useAutosave';
+import ExternalChangeBanner from '@/components/editor/ExternalChangeBanner';
 
 function ChapterView() {
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
@@ -63,6 +64,7 @@ function ChapterView() {
 
   return (
     <div className="h-full flex flex-col bg-bg-editor">
+      <ExternalChangeBanner />
       <div className="flex items-center justify-end px-3 py-1.5 border-b border-border-subtle shrink-0">
         <div className="relative flex items-center">
           <button

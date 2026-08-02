@@ -10,6 +10,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
+import { useProjectWatcher } from '@/hooks/useProjectWatcher';
 import { readGlobalSettings, pathExists } from '@/lib/settings';
 import { openProjectByPath } from '@/lib/open-project-flow';
 
@@ -21,6 +22,7 @@ function App() {
 
   useKeyboardShortcuts();
   useSettingsPersistence();
+  useProjectWatcher();
 
   useEffect(() => {
     useSettingsStore.getState().load();
