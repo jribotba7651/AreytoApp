@@ -14,7 +14,7 @@ pub async fn import_docx(app: AppHandle, input_path: String) -> Result<String, S
         .map_err(|e| format!("No se pudo encontrar pandoc: {}", e))?
         .args([
             "-f", "docx",
-            "-t", "markdown",
+            "-t", "gfm",
             "--wrap=none",
             "-o", temp_path.to_str().unwrap_or(""),
             &input_path,
