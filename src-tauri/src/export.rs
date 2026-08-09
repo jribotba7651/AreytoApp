@@ -12,6 +12,7 @@ fn build_full_markdown(
     append_content: Option<String>,
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
+    chapter_headings: Option<HashMap<String, String>>,
 ) -> Result<String, String> {
     let mut all_parts: Vec<String> = Vec::new();
 
@@ -49,6 +50,7 @@ fn build_full_markdown(
     }
 
     let slugs = chapter_slugs.unwrap_or_default();
+    let headings = chapter_headings.unwrap_or_default();
 
     for file in &chapter_files {
         let content = fs::read_to_string(file)
@@ -56,10 +58,18 @@ fn build_full_markdown(
         let trimmed = content.trim_end_matches('\n').to_string();
 
         let filename = file.file_name().and_then(|n| n.to_str()).unwrap_or("");
-        let part = if let Some(slug) = slugs.get(filename) {
-            format!("<a id=\"{}\"></a>\n\n{}", slug, trimmed)
+
+        // Non-destructive heading promotion: replace bold-only first line with H1
+        let processed = if let Some(heading) = headings.get(filename) {
+            promote_bold_to_heading(&trimmed, heading)
         } else {
             trimmed
+        };
+
+        let part = if let Some(slug) = slugs.get(filename) {
+            format!("<a id=\"{}\"></a>\n\n{}", slug, processed)
+        } else {
+            processed
         };
 
         all_parts.push(part);
@@ -79,6 +89,22 @@ fn build_full_markdown(
     let mut output = all_parts.join("\n\n---\n\n");
     output.push('\n');
     Ok(output)
+}
+
+/// Replace the first non-empty line (expected to be bold-only like **Title**)
+/// with the provided heading (e.g. "# Title").
+fn promote_bold_to_heading(content: &str, heading: &str) -> String {
+    let mut lines: Vec<&str> = content.lines().collect();
+    for (i, line) in lines.iter().enumerate() {
+        let l = line.trim();
+        if l.is_empty() {
+            continue;
+        }
+        // Replace first non-empty line with the heading
+        lines[i] = heading;
+        break;
+    }
+    lines.join("\n")
 }
 
 fn collect_md_files(dir: &PathBuf, files: &mut Vec<PathBuf>) -> Result<(), String> {
@@ -115,6 +141,7 @@ pub fn export_book_markdown(
     append_content: Option<String>,
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
+    chapter_headings: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
     let output = build_full_markdown(
         &project_path,
@@ -125,6 +152,7 @@ pub fn export_book_markdown(
         append_content,
         indice_content,
         chapter_slugs,
+        chapter_headings,
     )?;
 
     if let Some(parent) = PathBuf::from(&output_path).parent() {
@@ -150,6 +178,7 @@ pub async fn export_book_docx(
     append_content: Option<String>,
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
+    chapter_headings: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
     use tauri_plugin_shell::ShellExt;
 
@@ -162,6 +191,7 @@ pub async fn export_book_docx(
         append_content,
         indice_content,
         chapter_slugs,
+        chapter_headings,
     )?;
 
     // D-170: escribir markdown a temp file para mejor diagnóstico de pandoc
@@ -213,6 +243,7 @@ pub async fn export_book_epub(
     append_content: Option<String>,
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
+    chapter_headings: Option<HashMap<String, String>>,
     epub_css: String,
     cover_path: Option<String>,
 ) -> Result<(), String> {
@@ -227,6 +258,7 @@ pub async fn export_book_epub(
         append_content,
         indice_content,
         chapter_slugs,
+        chapter_headings,
     )?;
 
     let pid = std::process::id();
@@ -313,6 +345,7 @@ mod tests {
             include_terminados,
             include_en_progreso,
             out.to_str().unwrap().to_string(),
+            None,
             None,
             None,
             None,
@@ -458,6 +491,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -482,6 +516,7 @@ mod tests {
             None,
             None,
             Some("## Agradecimientos\n\nGracias a todos.".to_string()),
+            None,
             None,
             None,
         ).unwrap();
@@ -510,6 +545,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -532,6 +568,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -549,6 +586,7 @@ mod tests {
             false,
             true,
             out.to_str().unwrap().to_string(),
+            None,
             None,
             None,
             None,
@@ -578,6 +616,7 @@ mod tests {
             Some("# Mi libro".to_string()),
             None,
             Some("## Índice\n\n- [Capítulo 1](#cap-01)".to_string()),
+            None,
             None,
         ).unwrap();
 
@@ -612,6 +651,7 @@ mod tests {
             None,
             None,
             Some(slugs),
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -642,6 +682,7 @@ mod tests {
             None,
             None,
             Some(slugs),
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -668,6 +709,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -691,6 +733,7 @@ mod tests {
             project.to_str().unwrap(),
             false,
             true,
+            None,
             None,
             None,
             None,

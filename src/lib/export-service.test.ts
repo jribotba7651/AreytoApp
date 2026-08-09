@@ -48,6 +48,7 @@ describe('exportBookMarkdown', () => {
       appendContent: null,
       indiceContent: null,
       chapterSlugs: {},
+      chapterHeadings: {},
     });
   });
 
@@ -63,6 +64,7 @@ describe('exportBookMarkdown', () => {
       appendContent: null,
       indiceContent: null,
       chapterSlugs: {},
+      chapterHeadings: {},
     });
   });
 
@@ -78,6 +80,7 @@ describe('exportBookMarkdown', () => {
       appendContent: null,
       indiceContent: null,
       chapterSlugs: {},
+      chapterHeadings: {},
     });
   });
 
@@ -232,7 +235,7 @@ describe('buildExportAdditions', () => {
     });
 
     const result = await buildExportAdditions('/proyecto', { scope: 'terminados' });
-    expect(result.indiceContent).toContain('[cap-01](#cap-01)');
+    expect(result.indiceContent).toContain('[Sin encabezado, solo texto.](#cap-01)');
   });
 });
 
@@ -249,6 +252,7 @@ describe('exportBookDocx', () => {
       appendContent: null,
       indiceContent: null,
       chapterSlugs: {},
+      chapterHeadings: {},
     });
   });
 
@@ -264,6 +268,7 @@ describe('exportBookDocx', () => {
       appendContent: null,
       indiceContent: null,
       chapterSlugs: {},
+      chapterHeadings: {},
     });
   });
 
@@ -279,6 +284,7 @@ describe('exportBookDocx', () => {
       appendContent: null,
       indiceContent: null,
       chapterSlugs: {},
+      chapterHeadings: {},
     });
   });
 

@@ -7,6 +7,50 @@ export const SECTION_SEPARATOR = '\n\n---\n\n';
 // D-145: re-export from project-fs — single source of truth, discoverable from export-composer.
 export { _extractChapterTitle as extractChapterTitle };
 
+const H1_RE = /^#\s+(.+)$/m;
+const BOLD_ONLY_RE = /^\*\*(.+)\*\*$/;
+
+export interface ChapterExportInfo {
+  title: string;
+  headingToInject: string | null;
+}
+
+export function deriveExportChapterInfo(content: string, fallbackFilename: string): ChapterExportInfo {
+  const trimmed = content.trim();
+  if (!trimmed) {
+    return { title: fallbackFilename.replace(/\.md$/, ''), headingToInject: null };
+  }
+
+  // Check for H1 anywhere in the content
+  const h1Match = H1_RE.exec(trimmed);
+  if (h1Match?.[1]) {
+    return { title: h1Match[1].trim(), headingToInject: null };
+  }
+
+  // Check if first non-empty line is bold-only
+  const lines = trimmed.split('\n');
+  for (const line of lines) {
+    const l = line.trim();
+    if (!l) continue;
+    const boldMatch = BOLD_ONLY_RE.exec(l);
+    if (boldMatch?.[1]) {
+      const title = boldMatch[1].trim();
+      return { title, headingToInject: `# ${title}` };
+    }
+    break;
+  }
+
+  // Fallback: first non-empty line truncated, or filename
+  for (const line of lines) {
+    const l = line.trim();
+    if (!l) continue;
+    const truncated = l.length > 60 ? l.slice(0, 57) + '...' : l;
+    return { title: truncated, headingToInject: null };
+  }
+
+  return { title: fallbackFilename.replace(/\.md$/, ''), headingToInject: null };
+}
+
 // D-151: slug determinista basado en el input (filename sin extensión en la práctica).
 export function slugify(input: string): string {
   return input
@@ -105,11 +149,13 @@ export function buildAgradecimientosSection(contenido: string | null | undefined
 export function buildPandocFrontmatterBlock(
   titulo: TituloData | null,
   copyright: CopyrightData | null,
-  metadata: MetadataData | null
+  metadata: MetadataData | null,
+  projectName?: string,
 ): string | null {
   const obj: Record<string, unknown> = {};
 
   if (titulo?.titulo?.trim()) obj.title = titulo.titulo.trim();
+  else if (projectName?.trim()) obj.title = projectName.trim();
   if (titulo?.subtitulo?.trim()) obj.subtitle = titulo.subtitulo.trim();
   if (titulo?.autor?.trim()) obj.author = titulo.autor.trim();
 

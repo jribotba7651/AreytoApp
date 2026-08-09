@@ -63,7 +63,7 @@ function BookTabContent() {
         return;
       }
 
-      await exportBookMarkdown(currentProject.rootPath, { scope }, outputPath);
+      await exportBookMarkdown(currentProject.rootPath, { scope }, outputPath, currentProject.nombre);
 
       setShowExportDialog(false);
       setExportLoading(false);
@@ -99,7 +99,7 @@ function BookTabContent() {
         return;
       }
 
-      await exportBookDocx(currentProject.rootPath, { scope }, outputPath);
+      await exportBookDocx(currentProject.rootPath, { scope }, outputPath, currentProject.nombre);
 
       setShowDocxDialog(false);
       setDocxLoading(false);
@@ -141,6 +141,7 @@ function BookTabContent() {
         outputPath,
         currentProject.tema,
         currentProject.temaOverrides,
+        currentProject.nombre,
       );
 
       setShowEpubDialog(false);

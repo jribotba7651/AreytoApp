@@ -8,16 +8,18 @@ import {
   buildAgradecimientosSection,
   buildIndiceSection,
   buildPandocFrontmatterBlock,
-  extractChapterTitle,
+  deriveExportChapterInfo,
   slugify,
   SECTION_SEPARATOR,
 } from '@/lib/export-composer';
 import type { IndiceItem } from '@/lib/export-composer';
 
 export type ExportScope = 'terminados' | 'en-progreso' | 'ambos';
+export type ExportFormat = 'md' | 'docx' | 'epub';
 
 export interface ExportOptions {
   scope: ExportScope;
+  format?: ExportFormat;
 }
 
 export interface ExportAdditions {
@@ -26,6 +28,7 @@ export interface ExportAdditions {
   appendContent: string | null;
   indiceContent: string | null;
   chapterSlugs: Record<string, string>;
+  chapterHeadings: Record<string, string>;
 }
 
 interface RawDirEntry {
@@ -56,7 +59,8 @@ async function readFileContent(filePath: string): Promise<string | null> {
 
 export async function buildExportAdditions(
   projectPath: string,
-  opts: ExportOptions
+  opts: ExportOptions,
+  projectName?: string,
 ): Promise<ExportAdditions> {
   const [titulo, copyright, dedicatoria, agradecimientos, metadata] = await Promise.all([
     readTitulo(projectPath),
@@ -76,39 +80,47 @@ export async function buildExportAdditions(
 
   const indiceItems: IndiceItem[] = [];
   const chapterSlugs: Record<string, string> = {};
+  const chapterHeadings: Record<string, string> = {};
 
   for (const dir of chapterDirs) {
     const filenames = await listSortedMdFilenames(dir);
     for (const filename of filenames) {
       const content = await readFileContent(`${dir}/${filename}`);
-      const title = extractChapterTitle(content ?? '', filename);
+      const info = deriveExportChapterInfo(content ?? '', filename);
       const slug = slugify(filename.replace(/\.md$/, ''));
-      indiceItems.push({ title, slug });
+      indiceItems.push({ title: info.title, slug });
       chapterSlugs[filename] = slug;
+      if (info.headingToInject) {
+        chapterHeadings[filename] = info.headingToInject;
+      }
     }
   }
 
   const portada = buildPortadaSection(titulo, copyright);
   const dedicatoriaSection = buildDedicatoriaSection(dedicatoria?.contenido);
   const agradecimientosSection = buildAgradecimientosSection(agradecimientos?.contenido);
-  const indiceContent = buildIndiceSection(indiceItems);
-  const pandocFrontmatterBlock = buildPandocFrontmatterBlock(titulo, copyright, metadata);
+
+  // EPUB uses pandoc --toc for navigation; don't inject manual ToC
+  const indiceContent = opts.format === 'epub' ? null : buildIndiceSection(indiceItems);
+
+  const pandocFrontmatterBlock = buildPandocFrontmatterBlock(titulo, copyright, metadata, projectName);
 
   const prependParts = [portada, dedicatoriaSection].filter((s): s is string => s !== null);
   const prependContent = prependParts.length > 0 ? prependParts.join(SECTION_SEPARATOR) : null;
 
-  return { pandocFrontmatterBlock, prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs };
+  return { pandocFrontmatterBlock, prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs, chapterHeadings };
 }
 
 export async function exportBookMarkdown(
   projectPath: string,
   opts: ExportOptions,
-  outputPath: string
+  outputPath: string,
+  projectName?: string,
 ): Promise<void> {
   const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
   const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
-  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs } =
-    await buildExportAdditions(projectPath, opts);
+  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs, chapterHeadings } =
+    await buildExportAdditions(projectPath, { ...opts, format: 'md' }, projectName);
 
   await invoke('export_book_markdown', {
     projectPath,
@@ -120,18 +132,20 @@ export async function exportBookMarkdown(
     appendContent,
     indiceContent,
     chapterSlugs,
+    chapterHeadings,
   });
 }
 
 export async function exportBookDocx(
   projectPath: string,
   opts: ExportOptions,
-  outputPath: string
+  outputPath: string,
+  projectName?: string,
 ): Promise<void> {
   const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
   const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
-  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs } =
-    await buildExportAdditions(projectPath, opts);
+  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs, chapterHeadings } =
+    await buildExportAdditions(projectPath, { ...opts, format: 'docx' }, projectName);
 
   await invoke('export_book_docx', {
     projectPath,
@@ -143,6 +157,7 @@ export async function exportBookDocx(
     appendContent,
     indiceContent,
     chapterSlugs,
+    chapterHeadings,
   });
 }
 
@@ -175,11 +190,12 @@ export async function exportBookEpub(
   outputPath: string,
   tema?: string | null,
   temaOverrides?: Record<string, unknown> | null,
+  projectName?: string,
 ): Promise<void> {
   const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
   const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
-  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs } =
-    await buildExportAdditions(projectPath, opts);
+  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs, chapterHeadings } =
+    await buildExportAdditions(projectPath, { ...opts, format: 'epub' }, projectName);
 
   const theme = resolveTheme(tema, temaOverrides);
   const epubCss = themeToEpubCss(theme);
@@ -195,6 +211,7 @@ export async function exportBookEpub(
     appendContent,
     indiceContent,
     chapterSlugs,
+    chapterHeadings,
     epubCss: epubCss,
     coverPath,
   });

@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: item10-export-epub
+- Última feature completada: item7a-toc-titulos-metadata
 - Fecha de última actualización: 2026-08-09
 
 ## Features completadas
@@ -1092,4 +1092,23 @@ Ninguno.
   - PDF print (item 11)
   - Más temas built-in
 - Tests: 306 TS (9 nuevos themeToEpubCss + 297 existentes), cargo check OK, tsc --noEmit limpio
+- Bugs encontrados: ninguno
+
+### 2026-08-09 - item7a-toc-titulos-metadata: ToC con títulos reales, epub sin doble ToC, metadata fallback
+- Qué se hizo: función pura deriveExportChapterInfo en export-composer.ts — derivación de título (primer H1, bold-only -> H1, fallback primera línea/filename). buildExportAdditions usa deriveExportChapterInfo y pasa chapterHeadings (mapa de filename -> heading a inyectar) a Rust. Rust build_full_markdown aplica promote_bold_to_heading no destructivamente solo en el ensamblado. EPUB omite ## Índice manual (usa --toc de pandoc para nav nativo). Metadata title cae a proyecto.nombre si titulo.titulo vacío. ExportFormat type pasado por el flujo para condicionar el comportamiento por formato.
+- Archivos modificados:
+  - src/lib/export-composer.ts (+deriveExportChapterInfo, H1_RE, BOLD_ONLY_RE, ChapterExportInfo; buildPandocFrontmatterBlock acepta projectName? como fallback title)
+  - src/lib/export-composer.test.ts (+9 tests: deriveExportChapterInfo 7 + buildPandocFrontmatterBlock fallback 2)
+  - src/lib/export-service.ts (+ExportFormat, +chapterHeadings en ExportAdditions, buildExportAdditions usa deriveExportChapterInfo y formato, exportBookMarkdown/Docx/Epub pasan chapterHeadings y projectName)
+  - src/lib/export-service.test.ts (ajustar expects para chapterHeadings:{} y nuevo título derivado)
+  - src-tauri/src/export.rs (build_full_markdown +chapter_headings param, +promote_bold_to_heading fn; los 3 commands reciben chapter_headings; tests actualizados)
+  - src/components/layout/BookTabContent.tsx (pasa currentProject.nombre a los 3 exports)
+- Decisiones tomadas:
+  - D-206: DRY — título derivado en TS (un solo lugar), Rust solo hace la sustitución mecánica de la primera línea bold-only por el heading provisto.
+  - D-207: EPUB no recibe ## Índice manual; usa pandoc --toc para nav nativo (sin doble ToC).
+  - D-208: metadata fallback title = proyecto.nombre cuando titulo.titulo vacío (no más UNTITLED).
+  - D-209: promote_bold_to_heading es no destructivo (solo en markdown ensamblado, no en .md guardados).
+- Pendientes relacionados:
+  - item 7b: back matter adicional (Sobre el autor, etc.)
+- Tests: 315 TS (9 nuevos + 306 existentes), 24 Rust tests OK, tsc --noEmit limpio
 - Bugs encontrados: ninguno

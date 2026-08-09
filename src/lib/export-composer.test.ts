@@ -9,6 +9,7 @@ import {
   slugify,
   buildIndiceSection,
   buildPandocFrontmatterBlock,
+  deriveExportChapterInfo,
 } from './export-composer';
 import type { TituloData, CopyrightData, MetadataData } from '@/types/frontmatter';
 
@@ -397,5 +398,66 @@ describe('buildPandocFrontmatterBlock', () => {
     // el bloque completo debe ser parseable como YAML pandoc (starts and ends with ---)
     expect(result).toMatch(/^---\n/);
     expect(result).toMatch(/\n---$/);
+  });
+
+  it('titulo vacío + projectName → usa projectName como title', () => {
+    const titulo: TituloData = { titulo: '', autor: 'Juan' };
+    const result = buildPandocFrontmatterBlock(titulo, null, null, 'Mi Proyecto');
+    expect(result).toContain('title: Mi Proyecto');
+    expect(result).toContain('author: Juan');
+  });
+
+  it('titulo vacío + sin projectName → sin title en el bloque', () => {
+    const titulo: TituloData = { titulo: '', autor: 'Juan' };
+    const result = buildPandocFrontmatterBlock(titulo, null, null);
+    expect(result).toContain('author: Juan');
+    expect(result).not.toContain('title:');
+  });
+});
+
+describe('deriveExportChapterInfo', () => {
+  it('H1 existente → título del H1, sin heading a inyectar', () => {
+    const info = deriveExportChapterInfo('# Mi capítulo\n\nTexto.', 'cap-01.md');
+    expect(info.title).toBe('Mi capítulo');
+    expect(info.headingToInject).toBeNull();
+  });
+
+  it('bold-only como primera línea no vacía → título derivado, heading a inyectar', () => {
+    const info = deriveExportChapterInfo('**El inicio**\n\nTexto del capítulo.', 'cap-01.md');
+    expect(info.title).toBe('El inicio');
+    expect(info.headingToInject).toBe('# El inicio');
+  });
+
+  it('split de dos niveles: **PARTE** seguido de # Cap → usa el # Cap', () => {
+    const content = '**PARTE I**\n\n# Capítulo 1\n\nTexto.';
+    const info = deriveExportChapterInfo(content, 'cap-01.md');
+    expect(info.title).toBe('Capítulo 1');
+    expect(info.headingToInject).toBeNull();
+  });
+
+  it('sin H1, sin bold-only → primera línea como título', () => {
+    const info = deriveExportChapterInfo('Esto es el inicio del texto.', 'cap-01.md');
+    expect(info.title).toBe('Esto es el inicio del texto.');
+    expect(info.headingToInject).toBeNull();
+  });
+
+  it('primera línea larga → truncada a 60 chars', () => {
+    const longLine = 'A'.repeat(100);
+    const info = deriveExportChapterInfo(longLine, 'cap-01.md');
+    expect(info.title.length).toBeLessThanOrEqual(60);
+    expect(info.title).toContain('...');
+  });
+
+  it('contenido vacío → fallback a filename sin extensión', () => {
+    const info = deriveExportChapterInfo('', 'cap-05.md');
+    expect(info.title).toBe('cap-05');
+    expect(info.headingToInject).toBeNull();
+  });
+
+  it('H1 no en primera línea → aún lo detecta', () => {
+    const content = '\n\nTexto suelto\n\n# El capítulo real\n\nMás texto.';
+    const info = deriveExportChapterInfo(content, 'cap-01.md');
+    expect(info.title).toBe('El capítulo real');
+    expect(info.headingToInject).toBeNull();
   });
 });
