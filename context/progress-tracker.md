@@ -5,8 +5,8 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: F38-fix - Escapes de pandoc en import (-t gfm)
-- Fecha de última actualización: 2026-08-08
+- Última feature completada: import-hardening-cloudsync
+- Fecha de última actualización: 2026-08-09
 
 ## Features completadas
 
@@ -1019,6 +1019,17 @@ Ninguno.
   - src-tauri/src/import.rs (línea 17: `-t markdown` → `-t gfm`)
 - Decisiones tomadas:
   - D-192: gfm como formato de salida de pandoc para import. Produce markdown limpio sin escapes innecesarios, mantiene encabezados ATX compatibles con el split adaptativo.
+- Pendientes relacionados: ninguno
+- Tests: 284 TS (sin cambios), cargo check OK, tsc --noEmit limpio
+- Bugs encontrados: ninguno
+
+### 2026-08-09 - import-hardening-cloudsync: Endurecer import vs Synology/iCloud
+- Qué se hizo: import_docx ahora lee los bytes del .docx en Rust con retry (3 intentos, 250ms entre cada uno) antes de invocar pandoc. Los bytes se escriben a un temp local y pandoc corre sobre ese temp en vez del path original (que puede ser un stub de cloud-sync no hidratado). NotFound corta sin retry; errores transitorios (ESTALE, resource vanished) reintentan y tras 3 fallos dan mensaje accionable mencionando Synology/iCloud. Ambos temps (entrada .docx y salida .md) se limpian al terminar.
+- Archivos modificados:
+  - src-tauri/src/import.rs (read_docx_bytes helper + temp de entrada + cleanup)
+- Decisiones tomadas:
+  - D-193: retry 3x con 250ms sleep para errores transitorios de cloud-sync. NotFound es terminal inmediato.
+  - D-194: temp de entrada sigue el mismo patrón manual (std::env::temp_dir + pid) que el temp de salida existente. Sin dependencia nueva (no tempfile crate).
 - Pendientes relacionados: ninguno
 - Tests: 284 TS (sin cambios), cargo check OK, tsc --noEmit limpio
 - Bugs encontrados: ninguno
