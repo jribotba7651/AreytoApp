@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveTheme, themeToCssVars, DEFAULT_THEME_ID } from './theme';
+import { resolveTheme, themeToCssVars, themeToEpubCss, DEFAULT_THEME_ID } from './theme';
 
 describe('resolveTheme', () => {
   it('returns JELA when no args', () => {
@@ -76,5 +76,63 @@ describe('themeToCssVars', () => {
     expect(vars['--book-body-size']).toBe('20px');
     expect(vars['--book-h1-size']).toBe(`${20 * 1.8}px`);
     expect(vars['--book-justify']).toBe('start');
+  });
+});
+
+describe('themeToEpubCss', () => {
+  it('emits reader-friendly body (100% font-size, no px)', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).toContain('font-size: 100%');
+    expect(css).not.toMatch(/font-size:\s*\d+px/);
+  });
+
+  it('uses em for heading sizes', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).toContain('font-size: 1.8em');
+    expect(css).toContain('font-size: 1.4em');
+    expect(css).toContain('font-size: 1.2em');
+  });
+
+  it('includes font-family for body and headings', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).toContain('Iowan Old Style');
+    expect(css).toContain('JetBrains Mono');
+  });
+
+  it('includes paragraph indent and justify for JELA', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).toContain('text-indent: 1.5em');
+    expect(css).toContain('text-align: justify');
+  });
+
+  it('includes chapter heading align', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).toMatch(/h1\s*\{[^}]*text-align:\s*center/);
+  });
+
+  it('includes section break ornament styling', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).toContain('content: "* * *"');
+  });
+
+  it('omits drop caps by default', () => {
+    const css = themeToEpubCss(resolveTheme());
+    expect(css).not.toContain('first-letter');
+  });
+
+  it('includes drop caps when enabled', () => {
+    const theme = resolveTheme('jela-serif', { dropCaps: true });
+    const css = themeToEpubCss(theme);
+    expect(css).toContain('first-letter');
+    expect(css).toContain('font-size: 3em');
+  });
+
+  it('reflects overrides (no justify, no indent)', () => {
+    const theme = resolveTheme('jela-serif', {
+      typography: { paragraph: { justify: false, indentEm: 0 } },
+    });
+    const css = themeToEpubCss(theme);
+    expect(css).not.toContain('text-align: justify');
+    expect(css).not.toContain('text-indent');
   });
 });

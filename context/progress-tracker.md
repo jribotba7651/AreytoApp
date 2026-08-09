@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: item6-modelo-tema
+- Última feature completada: item10-export-epub
 - Fecha de última actualización: 2026-08-09
 
 ## Features completadas
@@ -1067,7 +1067,29 @@ Ninguno.
   - D-201: editor-theme.ts (CodeMirror) no se toca; el tema solo aplica al preview y futuro export.
 - Pendientes relacionados:
   - Theme builder UI (item 14)
-  - themeToEpubCss / export cableado (item 10)
   - Más temas built-in
 - Tests: 297 TS (9 nuevos + 288 existentes), tsc --noEmit limpio
+- Bugs encontrados: ninguno
+
+### 2026-08-09 - item10-export-epub: Export EPUB con tema aplicado
+- Qué se hizo: compilador puro themeToEpubCss(theme) en theme.ts que emite CSS real reader-friendly (body font-size:100%, headings en em, text-indent, justify, section break ornament, drop caps). Comando Rust export_book_epub en export.rs que reusa build_full_markdown, escribe temps .md+.css, corre pandoc -f markdown -t epub --toc --css [--epub-cover-image si hay portada]. Detección de portada por convención (portada/cover .png/.jpg/.jpeg en la raíz). Flujo TS exportBookEpub en export-service.ts: resuelve tema, compila CSS, detecta cover, invoca Rust. Diálogo ExportBookEpubDialog con scope selector. Botón EPUB en BookTabContent junto a Word y Exportar.
+- Archivos creados:
+  - src/components/book/ExportBookEpubDialog.tsx (diálogo scope para epub)
+- Archivos modificados:
+  - src/lib/theme.ts (+themeToEpubCss)
+  - src/lib/theme.test.ts (+9 tests de themeToEpubCss)
+  - src-tauri/src/export.rs (+export_book_epub command)
+  - src-tauri/src/lib.rs (+registro export_book_epub)
+  - src/lib/export-service.ts (+exportBookEpub, +detectCoverImage, +COVER_FILENAMES)
+  - src/components/layout/BookTabContent.tsx (+botón EPUB, +handleExportEpub, +estado epub dialog)
+- Decisiones tomadas:
+  - D-202: themeToEpubCss usa body font-size:100% (reader-friendly, no fuerza tamaño absoluto); headings en em relativos.
+  - D-203: pandoc -t epub con --toc genera ToC navegable automáticamente.
+  - D-204: portada por convención de archivo (portada.png/jpg/jpeg, cover.png/jpg/jpeg) en la raíz del proyecto. Sin portada si no existe.
+  - D-205: export_book_epub reusa build_full_markdown (no duplica ensamblado).
+- Pendientes relacionados:
+  - UI para setear/gestionar portada (v1 es por convención de archivo)
+  - PDF print (item 11)
+  - Más temas built-in
+- Tests: 306 TS (9 nuevos themeToEpubCss + 297 existentes), cargo check OK, tsc --noEmit limpio
 - Bugs encontrados: ninguno

@@ -42,6 +42,7 @@ pub fn run() {
             git::git_commit_all,
             export::export_book_markdown,
             export::export_book_docx,
+            export::export_book_epub,
             settings::read_global_settings,
             settings::write_global_settings,
             settings::read_project_state,

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Download, FileText } from 'lucide-react';
+import { BookOpen, Download, FileText } from 'lucide-react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { loadBook } from '@/lib/book-loader';
-import { exportBookMarkdown, exportBookDocx } from '@/lib/export-service';
+import { exportBookMarkdown, exportBookDocx, exportBookEpub } from '@/lib/export-service';
 import { slugify } from '@/lib/export-composer';
 import BookHeader from '@/components/book/BookHeader';
 import BookChapter from '@/components/book/BookChapter';
@@ -17,6 +17,7 @@ import BookIndice from '@/components/book/BookIndice';
 import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgradecimientos';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
+import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
 import type { BookData } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
 
@@ -29,6 +30,8 @@ function BookTabContent() {
   const [exportLoading, setExportLoading] = useState(false);
   const [showDocxDialog, setShowDocxDialog] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
+  const [showEpubDialog, setShowEpubDialog] = useState(false);
+  const [epubLoading, setEpubLoading] = useState(false);
 
   useEffect(() => {
     if (activeTab !== 'libro' || !currentProject) {
@@ -107,6 +110,48 @@ function BookTabContent() {
       });
     } catch (err) {
       setDocxLoading(false);
+      await message(`Error al exportar: ${String(err)}`, {
+        title: 'Error de exportación',
+        kind: 'error',
+      });
+    }
+  }
+
+  async function handleExportEpub(scope: ExportScope) {
+    if (!currentProject) return;
+    setEpubLoading(true);
+
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const defaultPath = `${currentProject.rootPath}/${currentProject.nombre}-${today}.epub`;
+
+      const outputPath = await save({
+        defaultPath,
+        filters: [{ name: 'EPUB', extensions: ['epub'] }],
+      });
+
+      if (!outputPath) {
+        setEpubLoading(false);
+        return;
+      }
+
+      await exportBookEpub(
+        currentProject.rootPath,
+        { scope },
+        outputPath,
+        currentProject.tema,
+        currentProject.temaOverrides,
+      );
+
+      setShowEpubDialog(false);
+      setEpubLoading(false);
+
+      await message(`Libro exportado en:\n${outputPath}`, {
+        title: 'Exportación completada',
+        kind: 'info',
+      });
+    } catch (err) {
+      setEpubLoading(false);
       await message(`Error al exportar: ${String(err)}`, {
         title: 'Error de exportación',
         kind: 'error',
@@ -199,6 +244,15 @@ function BookTabContent() {
           <span>Exportar a Word</span>
         </button>
         <button
+          onClick={() => setShowEpubDialog(true)}
+          disabled={epubLoading}
+          className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
+          title="Exportar libro a EPUB"
+        >
+          <BookOpen size={14} />
+          <span>EPUB</span>
+        </button>
+        <button
           onClick={() => setShowExportDialog(true)}
           disabled={exportLoading}
           className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
@@ -225,6 +279,13 @@ function BookTabContent() {
           onClose={() => { if (!docxLoading) setShowDocxDialog(false); }}
           onExport={handleExportDocx}
           loading={docxLoading}
+        />
+      )}
+      {showEpubDialog && (
+        <ExportBookEpubDialog
+          onClose={() => { if (!epubLoading) setShowEpubDialog(false); }}
+          onExport={handleExportEpub}
+          loading={epubLoading}
         />
       )}
     </div>

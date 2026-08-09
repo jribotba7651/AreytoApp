@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { readTitulo, readCopyright, readDedicatoria, readMetadata } from '@/lib/frontmatter-fs';
 import { readAgradecimientos } from '@/lib/backmatter-fs';
+import { resolveTheme, themeToEpubCss } from '@/lib/theme';
 import {
   buildPortadaSection,
   buildDedicatoriaSection,
@@ -152,6 +153,51 @@ async function countMdInDir(dirPath: string): Promise<number> {
   } catch {
     return 0;
   }
+}
+
+const COVER_FILENAMES = [
+  'portada.png', 'portada.jpg', 'portada.jpeg',
+  'cover.png', 'cover.jpg', 'cover.jpeg',
+];
+
+async function detectCoverImage(projectPath: string): Promise<string | null> {
+  for (const name of COVER_FILENAMES) {
+    const path = `${projectPath}/${name}`;
+    const exists = await invoke<boolean>('path_exists', { path });
+    if (exists) return path;
+  }
+  return null;
+}
+
+export async function exportBookEpub(
+  projectPath: string,
+  opts: ExportOptions,
+  outputPath: string,
+  tema?: string | null,
+  temaOverrides?: Record<string, unknown> | null,
+): Promise<void> {
+  const includeTerminados = opts.scope === 'terminados' || opts.scope === 'ambos';
+  const includeEnProgreso = opts.scope === 'en-progreso' || opts.scope === 'ambos';
+  const { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs } =
+    await buildExportAdditions(projectPath, opts);
+
+  const theme = resolveTheme(tema, temaOverrides);
+  const epubCss = themeToEpubCss(theme);
+  const coverPath = await detectCoverImage(projectPath);
+
+  await invoke('export_book_epub', {
+    projectPath,
+    includeTerminados,
+    includeEnProgreso,
+    outputPath,
+    pandocFrontmatterBlock,
+    prependContent,
+    appendContent,
+    indiceContent,
+    chapterSlugs,
+    epubCss: epubCss,
+    coverPath,
+  });
 }
 
 export async function countExportableFiles(

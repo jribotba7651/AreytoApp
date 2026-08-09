@@ -201,6 +201,91 @@ pub async fn export_book_docx(
     Ok(())
 }
 
+#[tauri::command]
+pub async fn export_book_epub(
+    app: tauri::AppHandle,
+    project_path: String,
+    include_terminados: bool,
+    include_en_progreso: bool,
+    output_path: String,
+    pandoc_frontmatter: Option<String>,
+    prepend_content: Option<String>,
+    append_content: Option<String>,
+    indice_content: Option<String>,
+    chapter_slugs: Option<HashMap<String, String>>,
+    epub_css: String,
+    cover_path: Option<String>,
+) -> Result<(), String> {
+    use tauri_plugin_shell::ShellExt;
+
+    let md_content = build_full_markdown(
+        &project_path,
+        include_terminados,
+        include_en_progreso,
+        pandoc_frontmatter,
+        prepend_content,
+        append_content,
+        indice_content,
+        chapter_slugs,
+    )?;
+
+    let pid = std::process::id();
+    let temp_md = std::env::temp_dir().join(format!("areyto-epub-{}.md", pid));
+    let temp_css = std::env::temp_dir().join(format!("areyto-epub-{}.css", pid));
+
+    fs::write(&temp_md, md_content.as_bytes())
+        .map_err(|e| format!("No se pudo escribir temp markdown: {}", e))?;
+    fs::write(&temp_css, epub_css.as_bytes())
+        .map_err(|e| format!("No se pudo escribir temp CSS: {}", e))?;
+
+    if let Some(parent) = PathBuf::from(&output_path).parent() {
+        if !parent.as_os_str().is_empty() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("No se pudo crear el directorio de salida: {}", e))?;
+        }
+    }
+
+    let mut args = vec![
+        "-f".to_string(), "markdown".to_string(),
+        "-t".to_string(), "epub".to_string(),
+        "--toc".to_string(),
+        "--css".to_string(), temp_css.to_str().unwrap_or("").to_string(),
+        "-o".to_string(), output_path.clone(),
+    ];
+
+    if let Some(ref cover) = cover_path {
+        args.push("--epub-cover-image".to_string());
+        args.push(cover.clone());
+    }
+
+    args.push(temp_md.to_str().unwrap_or("").to_string());
+
+    let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+
+    let result = app
+        .shell()
+        .sidecar("pandoc")
+        .map_err(|e| format!("No se pudo encontrar pandoc: {}", e))?
+        .args(&args_ref)
+        .output()
+        .await
+        .map_err(|e| {
+            let _ = fs::remove_file(&temp_md);
+            let _ = fs::remove_file(&temp_css);
+            format!("Error al ejecutar pandoc: {}", e)
+        })?;
+
+    let _ = fs::remove_file(&temp_md);
+    let _ = fs::remove_file(&temp_css);
+
+    if !result.status.success() {
+        let stderr = String::from_utf8_lossy(&result.stderr).to_string();
+        return Err(format!("pandoc falló: {}", stderr));
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

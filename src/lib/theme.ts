@@ -105,6 +105,73 @@ export function themeToCssVars(theme: Theme): Record<string, string> {
   };
 }
 
+export function themeToEpubCss(theme: Theme): string {
+  const t = theme.typography;
+  const hs = t.headingScale;
+  const p = t.paragraph;
+  const ch = theme.chapterHeading;
+
+  const lines: string[] = [];
+
+  lines.push('body {');
+  lines.push(`  font-family: ${t.bodyFont};`);
+  lines.push('  font-size: 100%;');
+  lines.push(`  line-height: ${t.lineHeight};`);
+  lines.push('}');
+
+  lines.push('p {');
+  if (p.indentEm > 0) lines.push(`  text-indent: ${p.indentEm}em;`);
+  if (p.spacingEm > 0) lines.push(`  margin-bottom: ${p.spacingEm}em;`);
+  else lines.push('  margin-bottom: 0;');
+  lines.push('  margin-top: 0;');
+  if (p.justify) lines.push('  text-align: justify;');
+  lines.push('}');
+
+  const headingEntries: [string, number][] = [
+    ['h1', hs.h1], ['h2', hs.h2], ['h3', hs.h3],
+    ['h4', hs.h4], ['h5', hs.h5], ['h6', hs.h6],
+  ];
+  for (const [tag, scale] of headingEntries) {
+    lines.push(`${tag} {`);
+    lines.push(`  font-family: ${t.headingFont};`);
+    lines.push(`  font-size: ${scale}em;`);
+    if (tag === 'h1') lines.push(`  text-align: ${ch.align};`);
+    lines.push('}');
+  }
+
+  lines.push('code, pre {');
+  lines.push(`  font-family: ${t.monoFont};`);
+  lines.push('}');
+
+  lines.push('blockquote {');
+  lines.push('  font-style: italic;');
+  lines.push('  margin-left: 1em;');
+  lines.push('  margin-right: 1em;');
+  lines.push('}');
+
+  if (theme.sectionBreak.ornament) {
+    lines.push('hr {');
+    lines.push('  border: none;');
+    lines.push('  text-align: center;');
+    lines.push('}');
+    lines.push('hr::after {');
+    lines.push(`  content: "${theme.sectionBreak.ornament}";`);
+    lines.push('  letter-spacing: 0.5em;');
+    lines.push('}');
+  }
+
+  if (theme.dropCaps) {
+    lines.push('p:first-of-type::first-letter {');
+    lines.push('  font-size: 3em;');
+    lines.push('  float: left;');
+    lines.push('  line-height: 1;');
+    lines.push('  margin-right: 0.1em;');
+    lines.push('}');
+  }
+
+  return lines.join('\n');
+}
+
 export function getBuiltInTheme(id: string): Theme | undefined {
   return BUILT_IN_THEMES[id];
 }
