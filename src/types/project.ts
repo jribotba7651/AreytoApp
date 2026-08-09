@@ -12,6 +12,8 @@ export interface Project {
   nombre: string;
   creado: string;
   capituloActivo: string | null;
+  tema?: string;
+  temaOverrides?: Record<string, unknown>;
 }
 
 export type ProjectFsError =

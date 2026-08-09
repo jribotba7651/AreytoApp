@@ -13,7 +13,7 @@ function BookBackmatterAgradecimientos({ agradecimientos }: Props) {
       <h2 className="font-serif text-lg font-semibold text-text-primary mb-6">
         Agradecimientos
       </h2>
-      <BookMarkdown content={agradecimientos.contenido} maxWidth={700} />
+      <BookMarkdown content={agradecimientos.contenido} />
     </div>
   );
 }

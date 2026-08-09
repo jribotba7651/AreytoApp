@@ -101,7 +101,11 @@ function ChapterView() {
             isPreview ? '' : 'invisible pointer-events-none',
           ].join(' ')}
         >
-          <BookMarkdown content={activeChapterContent} maxWidth={900} />
+          <BookMarkdown
+            content={activeChapterContent}
+            themeId={currentProject?.tema}
+            themeOverrides={currentProject?.temaOverrides}
+          />
         </div>
       </div>
     </div>

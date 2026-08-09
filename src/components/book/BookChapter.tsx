@@ -9,7 +9,7 @@ interface BookChapterProps {
 function BookChapter({ content, isLast, slug }: BookChapterProps) {
   return (
     <div id={slug} className={!isLast ? 'border-b border-border-subtle' : ''}>
-      <BookMarkdown content={content} maxWidth={700} />
+      <BookMarkdown content={content} />
     </div>
   );
 }

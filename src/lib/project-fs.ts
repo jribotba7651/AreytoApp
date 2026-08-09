@@ -5,6 +5,8 @@ interface ProyectoJson {
   nombre: string;
   creado: string;
   capituloActivo: string | null;
+  tema?: string;
+  temaOverrides?: Record<string, unknown>;
 }
 
 interface RawDirEntry {
@@ -194,7 +196,7 @@ export async function createChapter(
 
 export async function updateProjectMeta(
   project: Project,
-  updates: Partial<Pick<Project, 'capituloActivo'>>
+  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides'>>
 ): Promise<ProjectResult<Project>> {
   const updated: Project = { ...project, ...updates };
   const meta: ProyectoJson = {
@@ -202,6 +204,8 @@ export async function updateProjectMeta(
     creado: updated.creado,
     capituloActivo: updated.capituloActivo,
   };
+  if (updated.tema !== undefined) meta.tema = updated.tema;
+  if (updated.temaOverrides !== undefined) meta.temaOverrides = updated.temaOverrides;
 
   const jsonPath = `${project.rootPath}/proyecto.json`;
   const write = await writeFile(jsonPath, JSON.stringify(meta, null, 2));

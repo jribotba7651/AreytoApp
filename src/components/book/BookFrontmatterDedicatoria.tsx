@@ -11,7 +11,7 @@ function BookFrontmatterDedicatoria({ dedicatoria }: Props) {
   return (
     <div className="max-w-[700px] mx-auto px-8 py-12 text-center border-t border-border-subtle">
       <div className="italic">
-        <BookMarkdown content={dedicatoria.contenido} maxWidth={700} />
+        <BookMarkdown content={dedicatoria.contenido} />
       </div>
     </div>
   );

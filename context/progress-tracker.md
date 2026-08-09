@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: split-granularidad-dos-niveles
+- Última feature completada: item6-modelo-tema
 - Fecha de última actualización: 2026-08-09
 
 ## Features completadas
@@ -1045,4 +1045,29 @@ Ninguno.
   - D-197: prosa-intro (contenido entre encabezado de parte y primer capítulo) se conserva en el primer capítulo de la parte, debajo del marcador.
 - Pendientes relacionados: ninguno
 - Tests: 288 TS (4 nuevos + 284 existentes), tsc --noEmit limpio
+- Bugs encontrados: ninguno
+
+### 2026-08-09 - item6-modelo-tema: Modelo de tema de salida + preview cableado
+- Qué se hizo: tipo Theme parametrizado (tipografía, heading scale, paragraph indent/spacing/justify, chapter heading, section break, drop caps, measure) en src/lib/theme.ts. Tema built-in JELA Serif como seed. Función resolveTheme (lookup por id con fallback a JELA, deep-merge de overrides). Compilador puro themeToCssVars que genera --book-* custom properties. proyecto.json extendido con campos opcionales tema (id string) y temaOverrides (partial). Backward compat: proyecto viejo sin tema -> JELA. BookMarkdown reescrito para consumir las CSS vars del tema en vez de tamaños/fuentes Tailwind hardcodeados (body, headings, párrafos con sangría+justificación, mono, measure como maxWidthCh).
+- Archivos creados:
+  - src/lib/theme.ts (Theme type, JELA built-in, resolveTheme, themeToCssVars, DeepPartial, getBuiltInTheme, listBuiltInThemes)
+  - src/lib/theme.test.ts (9 tests: resolveTheme fallback/merge/backward-compat, themeToCssVars output)
+- Archivos modificados:
+  - src/types/project.ts (Project: +tema?, +temaOverrides?)
+  - src/lib/project-fs.ts (ProyectoJson: +tema?, +temaOverrides?; updateProjectMeta acepta tema/temaOverrides)
+  - src/components/book/BookMarkdown.tsx (consume CSS vars del tema; props themeId/themeOverrides en vez de maxWidth)
+  - src/components/panels/EditorPanel.tsx (pasa tema del proyecto a BookMarkdown)
+  - src/components/book/BookChapter.tsx (quita maxWidth prop)
+  - src/components/book/BookFrontmatterDedicatoria.tsx (quita maxWidth prop)
+  - src/components/book/BookBackmatterAgradecimientos.tsx (quita maxWidth prop)
+- Decisiones tomadas:
+  - D-198: colores NO van en el tema (siguen con tokens stone del ui-context). Theme solo controla tipografía, layout de texto, y ornamentos.
+  - D-199: temaOverrides en proyecto.json como Record<string, unknown> para flexibilidad JSON; deepMerge interno maneja el casting.
+  - D-200: measure en ch (68ch default JELA) reemplaza maxWidth en px; más fiel a tipografía de libro.
+  - D-201: editor-theme.ts (CodeMirror) no se toca; el tema solo aplica al preview y futuro export.
+- Pendientes relacionados:
+  - Theme builder UI (item 14)
+  - themeToEpubCss / export cableado (item 10)
+  - Más temas built-in
+- Tests: 297 TS (9 nuevos + 288 existentes), tsc --noEmit limpio
 - Bugs encontrados: ninguno
