@@ -5,7 +5,7 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: import-hardening-cloudsync
+- Última feature completada: split-granularidad-dos-niveles
 - Fecha de última actualización: 2026-08-09
 
 ## Features completadas
@@ -1032,4 +1032,17 @@ Ninguno.
   - D-194: temp de entrada sigue el mismo patrón manual (std::env::temp_dir + pid) que el temp de salida existente. Sin dependencia nueva (no tempfile crate).
 - Pendientes relacionados: ninguno
 - Tests: 284 TS (sin cambios), cargo check OK, tsc --noEmit limpio
+- Bugs encontrados: ninguno
+
+### 2026-08-09 - split-granularidad-dos-niveles: Dividir por capítulo con PARTES como marcador
+- Qué se hizo: splitIntoChapters ahora detecta dos niveles de encabezado repetidos (partLevel + chapterLevel). Si hay dos niveles, divide por chapterLevel. Secciones hoja (sin capítulos internos, ej. NOTA DEL AUTOR) producen un capítulo cada una con su encabezado promovido a H1. Secciones parte con capítulos: el primer capítulo de cada parte recibe un marcador bold (**PARTE X**) y la prosa-intro (si hay) antes del H1 promovido. Si solo hay un nivel repetido, comportamiento idéntico al anterior.
+- Archivos modificados:
+  - src/lib/split-import.ts (heurística de dos niveles, helpers isHeadingAt/headingText/splitAtLevel/promoteHeading/cleanSegment, funciones splitSingleLevel y splitTwoLevels)
+  - src/lib/split-import.test.ts (4 tests nuevos, 5 existentes intactos)
+- Decisiones tomadas:
+  - D-195: partLevel = repeated[0], chapterLevel = repeated[1]. Siempre dividimos por chapterLevel. H3+ no se usan como nivel de split.
+  - D-196: marcador de PARTE como bold (**texto**) sin '#', para que no interfiera con el H1 promovido del capítulo.
+  - D-197: prosa-intro (contenido entre encabezado de parte y primer capítulo) se conserva en el primer capítulo de la parte, debajo del marcador.
+- Pendientes relacionados: ninguno
+- Tests: 288 TS (4 nuevos + 284 existentes), tsc --noEmit limpio
 - Bugs encontrados: ninguno
