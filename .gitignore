@@ -7,3 +7,9 @@ dist-ssr/
 src-tauri/target/
 src-tauri/gen/
 *.log
+.areyto/
+/capitulos/
+/frontmatter/
+/backmatter/
+/proyecto.json
+/package-lock.json
