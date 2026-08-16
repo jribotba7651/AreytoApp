@@ -108,7 +108,11 @@ export async function buildExportAdditions(
   const prependParts = [portada, dedicatoriaSection].filter((s): s is string => s !== null);
   const prependContent = prependParts.length > 0 ? prependParts.join(SECTION_SEPARATOR) : null;
 
-  return { pandocFrontmatterBlock, prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs, chapterHeadings };
+  // Anchors only serve the manual ToC (docx/md); epub uses pandoc --toc, so anchors
+  // would create an empty section before the first chapter.
+  const finalSlugs = opts.format === 'epub' ? {} : chapterSlugs;
+
+  return { pandocFrontmatterBlock, prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs: finalSlugs, chapterHeadings };
 }
 
 export async function exportBookMarkdown(

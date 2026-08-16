@@ -4,7 +4,7 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
-vi.mock('@/lib/frontmatter-fs', () => ({
+vi.mock('@/lib/frontmatter-fs', async () => ({
   readTitulo: vi.fn().mockResolvedValue(null),
   readCopyright: vi.fn().mockResolvedValue(null),
   readDedicatoria: vi.fn().mockResolvedValue(null),
@@ -16,7 +16,7 @@ vi.mock('@/lib/backmatter-fs', () => ({
 }));
 
 import { invoke } from '@tauri-apps/api/core';
-import { readTitulo, readCopyright, readDedicatoria } from '@/lib/frontmatter-fs';
+import { readTitulo, readCopyright, readDedicatoria, readMetadata } from '@/lib/frontmatter-fs';
 import { readAgradecimientos } from '@/lib/backmatter-fs';
 import { exportBookMarkdown, exportBookDocx, countExportableFiles, buildExportAdditions } from './export-service';
 
@@ -24,6 +24,7 @@ const mockInvoke = vi.mocked(invoke);
 const mockReadTitulo = vi.mocked(readTitulo);
 const mockReadCopyright = vi.mocked(readCopyright);
 const mockReadDedicatoria = vi.mocked(readDedicatoria);
+const mockReadMetadata = vi.mocked(readMetadata);
 const mockReadAgradecimientos = vi.mocked(readAgradecimientos);
 
 beforeEach(() => {
@@ -236,6 +237,47 @@ describe('buildExportAdditions', () => {
 
     const result = await buildExportAdditions('/proyecto', { scope: 'terminados' });
     expect(result.indiceContent).toContain('[Sin encabezado, solo texto.](#cap-01)');
+  });
+
+  it('format epub → chapterSlugs vacío (no anchors), chapterHeadings preservado', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'list_dir') {
+        return Promise.resolve([{ name: 'cap-01.md', is_file: true, is_dir: false }]);
+      }
+      if (cmd === 'read_text_file') {
+        return Promise.resolve('**El inicio**\n\nTexto del capítulo.');
+      }
+      return Promise.resolve(undefined);
+    });
+
+    const result = await buildExportAdditions('/proyecto', { scope: 'terminados', format: 'epub' });
+    expect(result.chapterSlugs).toEqual({});
+    expect(result.chapterHeadings).toEqual({ 'cap-01.md': '# El inicio' });
+    expect(result.indiceContent).toBeNull();
+  });
+
+  it('format md → chapterSlugs poblado (con anchors)', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'list_dir') {
+        return Promise.resolve([{ name: 'cap-01.md', is_file: true, is_dir: false }]);
+      }
+      if (cmd === 'read_text_file') {
+        return Promise.resolve('# Capítulo 1\n\nContenido.');
+      }
+      return Promise.resolve(undefined);
+    });
+
+    const result = await buildExportAdditions('/proyecto', { scope: 'terminados', format: 'md' });
+    expect(result.chapterSlugs).toEqual({ 'cap-01.md': 'cap-01' });
+  });
+
+  it('titulo vacío + projectName → pandocFrontmatterBlock con title del proyecto', async () => {
+    mockReadTitulo.mockResolvedValueOnce({ titulo: '', autor: '' });
+    mockReadMetadata.mockResolvedValueOnce({ idioma: 'es', descripcion: '', editorial: '', isbn: '', genero: '', fechaPublicacion: '' });
+
+    const result = await buildExportAdditions('/proyecto', { scope: 'ambos', format: 'epub' }, 'Mi Proyecto');
+    expect(result.pandocFrontmatterBlock).not.toBeNull();
+    expect(result.pandocFrontmatterBlock).toContain('title: Mi Proyecto');
   });
 });
 
