@@ -1,0 +1,191 @@
+name: AreytoApp Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # ─────────────────────────────────────────────
+  # BOT 1: TypeCheck Bot
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: "🤖 TypeCheck Bot"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+  # ─────────────────────────────────────────────
+  # BOT 2: Lint Bot
+  # ─────────────────────────────────────────────
+  lint:
+    name: "🤖 Lint Bot"
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: ESLint
+        run: |
+          if [ -f ".eslintrc*" ] || [ -f "eslint.config*" ]; then
+            npx eslint src --ext .ts,.tsx
+          else
+            echo "No ESLint config found — skipping (add one to enable)"
+          fi
+
+  # ─────────────────────────────────────────────
+  # BOT 3: TS Test Bot
+  # ─────────────────────────────────────────────
+  test-ts:
+    name: "🤖 TS Test Bot"
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Vitest
+        run: npx vitest run --reporter=verbose
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-results
+          path: test-results/
+          if-no-files-found: ignore
+
+  # ─────────────────────────────────────────────
+  # BOT 4: Cargo Check Bot
+  # ─────────────────────────────────────────────
+  cargo-check:
+    name: "🤖 Cargo Check Bot"
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+
+      - name: Install Tauri system deps (macOS)
+        run: |
+          # macOS already has WebKit, nothing extra needed
+
+      - name: cargo check
+        run: cd src-tauri && cargo check
+
+  # ─────────────────────────────────────────────
+  # BOT 5: Rust Test Bot
+  # ─────────────────────────────────────────────
+  test-rust:
+    name: "🤖 Rust Test Bot"
+    runs-on: macos-latest
+    needs: cargo-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+
+      - name: cargo test
+        run: cd src-tauri && cargo test
+
+  # ─────────────────────────────────────────────
+  # BOT 6: Build Bot (frontend only — rápido)
+  # ─────────────────────────────────────────────
+  build-frontend:
+    name: "🤖 Build Bot (frontend)"
+    runs-on: ubuntu-latest
+    needs: [typecheck, test-ts]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # BOT 7: Gate Bot — resumen final del pipeline
+  # ─────────────────────────────────────────────
+  pipeline-gate:
+    name: "🤖 Pipeline Gate"
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint, test-ts, cargo-check, test-rust, build-frontend]
+    if: always()
+    steps:
+      - name: Check all bots passed
+        run: |
+          echo "TypeCheck : ${{ needs.typecheck.result }}"
+          echo "Lint       : ${{ needs.lint.result }}"
+          echo "TS Tests   : ${{ needs.test-ts.result }}"
+          echo "Cargo Check: ${{ needs.cargo-check.result }}"
+          echo "Rust Tests : ${{ needs.test-rust.result }}"
+          echo "Build      : ${{ needs.build-frontend.result }}"
+
+          if [[ "${{ needs.typecheck.result }}"    != "success" ||
+                "${{ needs.lint.result }}"         != "success" ||
+                "${{ needs.test-ts.result }}"      != "success" ||
+                "${{ needs.cargo-check.result }}"  != "success" ||
+                "${{ needs.test-rust.result }}"    != "success" ||
+                "${{ needs.build-frontend.result }}" != "success" ]]; then
+            echo "❌ Pipeline FAILED — uno o más bots fallaron."
+            exit 1
+          fi
+
+          echo "✅ Pipeline PASSED — todos los bots verdes."
