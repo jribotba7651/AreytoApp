@@ -1,5 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => ({
+      'modal.exportDocx.title': 'Exportar a Word',
+      'modal.exportDocx.description': 'Elige qué capítulos incluir en el archivo .docx exportado vía pandoc.',
+      'modal.exportDocx.cancel': 'Cancelar',
+      'modal.exportDocx.export': 'Exportar',
+      'modal.exportDocx.exporting': 'Exportando…',
+      'modal.exportScope.both': 'Ambos (terminados + en progreso)',
+      'modal.exportScope.finished': 'Solo terminados',
+      'modal.exportScope.inProgress': 'Solo en progreso',
+    } as Record<string, string>)[key] ?? key,
+  }),
+}));
+
 import ExportBookDocxDialog from './ExportBookDocxDialog';
 
 describe('ExportBookDocxDialog', () => {

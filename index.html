@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Areyto</title>
+    <script>
+      (function () {
+        try {
+          var m = localStorage.getItem('areyto-theme-mode') || 'light';
+          var dark = m === 'dark' || (m === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+          document.documentElement.style.backgroundColor = dark ? '#18181b' : '#FAFAF9';
+        } catch (_) {}
+      })();
+    </script>
   </head>
 
   <body>

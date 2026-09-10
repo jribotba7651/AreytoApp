@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import i18n from '@/i18n/i18n';
 import type { Chapter, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
 
 interface ProyectoJson {
@@ -185,7 +186,7 @@ export async function createChapter(
 
   // Número humano sin padding: cap-02.md → 2
   const num = parseInt(filename.replace(/^cap-(\d+)\.md$/, '$1'), 10);
-  const chapterTitle = title ?? `Capítulo ${num}`;
+  const chapterTitle = title ?? i18n.t('common.defaultChapterTitle', { num });
   const content = `# ${chapterTitle}\n\n`;
 
   const write = await writeFile(chapterPath, content);
@@ -254,6 +255,19 @@ export async function reopenChapter(
   }
 
   return ok({ newPath });
+}
+
+export async function createProjectInNewFolder(
+  parentPath: string,
+  nombre: string
+): Promise<ProjectResult<Project>> {
+  const safeName = nombre.trim().replace(/[/\\:*?"<>|]/g, '_');
+  const rootPath = `${parentPath}/${safeName}`;
+
+  const dirResult = await ensureDir(rootPath);
+  if (!dirResult.ok) return dirResult;
+
+  return createProject(rootPath, nombre.trim());
 }
 
 export async function closeChapter(

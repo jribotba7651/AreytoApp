@@ -1,5 +1,6 @@
 import * as yaml from 'js-yaml';
 import type { TituloData, CopyrightData, MetadataData, FrontmatterKind } from '@/types/frontmatter';
+import i18n from '@/i18n/i18n';
 
 const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---\n?/;
 
@@ -59,7 +60,7 @@ export function defaultTitulo(): TituloData {
 }
 
 export function defaultCopyright(): CopyrightData {
-  return { ano: null, titular: '', licencia: 'Todos los derechos reservados' };
+  return { ano: null, titular: '', licencia: i18n.t('common.defaultCopyrightLicense') };
 }
 
 export function parseMetadata(raw: string): MetadataData {
@@ -92,12 +93,12 @@ export function serializeMetadata(data: MetadataData): string {
   return yaml.dump(obj, { lineWidth: -1 }).trimEnd();
 }
 
-export function defaultMetadata(): MetadataData {
-  return { idioma: 'en', descripcion: '', editorial: '', isbn: '', genero: '', fechaPublicacion: '' };
+export function defaultMetadata(lang = 'en'): MetadataData {
+  return { idioma: lang, descripcion: '', editorial: '', isbn: '', genero: '', fechaPublicacion: '' };
 }
 
-export function defaultContent(kind: FrontmatterKind): string {
+export function defaultContent(kind: FrontmatterKind, lang?: string): string {
   if (kind === 'titulo') return serializeTitulo(defaultTitulo());
-  if (kind === 'metadata') return serializeMetadata(defaultMetadata());
+  if (kind === 'metadata') return serializeMetadata(defaultMetadata(lang));
   return serializeCopyright(defaultCopyright());
 }

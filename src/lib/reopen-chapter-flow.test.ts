@@ -137,6 +137,7 @@ describe('performReopenChapter', () => {
     const result = await performReopenChapter(PROJECT, CLOSED_CHAPTER);
 
     expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.kind).toBe('WriteFailed');
     expect(mockCommitAll).not.toHaveBeenCalled();
   });
 

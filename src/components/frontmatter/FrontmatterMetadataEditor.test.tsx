@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
+vi.mock('@/i18n/i18n', () => ({ default: { t: (key: string) => key } }));
+
 vi.mock('@/lib/frontmatter-fs', () => ({
   readMetadata: vi.fn(),
   writeMetadata: vi.fn(),
@@ -8,6 +10,24 @@ vi.mock('@/lib/frontmatter-fs', () => ({
 
 vi.mock('@/stores/projectStore', () => ({
   useProjectStore: vi.fn(),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => ({
+      'frontmatter.metadata.sectionTitle': 'Detalles del libro',
+      'frontmatter.metadata.idioma.label': 'Idioma',
+      'frontmatter.metadata.descripcion.label': 'Descripción',
+      'frontmatter.metadata.descripcion.placeholder': 'Sinopsis del libro',
+      'frontmatter.metadata.editorial.label': 'Editorial',
+      'frontmatter.metadata.editorial.placeholder': 'Nombre de la editorial',
+      'frontmatter.metadata.genero.label': 'Género',
+      'frontmatter.metadata.genero.placeholder': 'Novela, ensayo, poesía…',
+      'frontmatter.metadata.fechaPublicacion.label': 'Fecha de publicación',
+      'common.saving': 'Guardando…',
+      'common.saved': 'Guardado',
+    } as Record<string, string>)[key] ?? key,
+  }),
 }));
 
 import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { readTitulo, writeTitulo } from '@/lib/frontmatter-fs';
 import type { TituloData } from '@/types/frontmatter';
@@ -29,6 +30,7 @@ function Field({
 }
 
 function FrontmatterTituloEditor() {
+  const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const [data, setData] = useState<TituloData>({ titulo: '', autor: '' });
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -68,33 +70,33 @@ function FrontmatterTituloEditor() {
       <div className="max-w-xl mx-auto flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-sans font-medium text-text-secondary uppercase tracking-wider">
-            Título y autor
+            {t('frontmatter.titulo.sectionTitle')}
           </h2>
           {saveStatus === 'saving' && (
-            <span className="text-xs text-text-tertiary">Guardando…</span>
+            <span className="text-xs text-text-tertiary">{t('common.saving')}</span>
           )}
           {saveStatus === 'saved' && (
-            <span className="text-xs text-accent">Guardado</span>
+            <span className="text-xs text-accent">{t('common.saved')}</span>
           )}
         </div>
 
         <Field
-          label="Título"
+          label={t('frontmatter.titulo.titulo.label')}
           value={data.titulo}
           onChange={(v) => handleChange('titulo', v)}
-          placeholder="El título del libro"
+          placeholder={t('frontmatter.titulo.titulo.placeholder')}
         />
         <Field
-          label="Subtítulo (opcional)"
+          label={t('frontmatter.titulo.subtitulo.label')}
           value={data.subtitulo ?? ''}
           onChange={(v) => handleChange('subtitulo', v)}
-          placeholder="Un subtítulo descriptivo"
+          placeholder={t('frontmatter.titulo.subtitulo.placeholder')}
         />
         <Field
-          label="Autor"
+          label={t('frontmatter.titulo.autor.label')}
           value={data.autor}
           onChange={(v) => handleChange('autor', v)}
-          placeholder="Nombre del autor"
+          placeholder={t('frontmatter.titulo.autor.placeholder')}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { open } from '@tauri-apps/plugin-dialog';
 import { FileText } from 'lucide-react';
 import { openProject } from '@/lib/project-fs';
@@ -14,9 +15,12 @@ interface WelcomeScreenProps {
 }
 
 function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
+  const { t } = useTranslation();
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
   const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
+  const setTriggerNewProject = useProjectStore((s) => s.setTriggerNewProject);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [importDocxPath, setImportDocxPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +34,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
       selected = await open({
         directory: true,
         multiple: false,
-        title: 'Selecciona la carpeta del proyecto',
+        title: t('welcome.dialogTitle'),
       });
     } catch {
       setLoading(false);
@@ -49,7 +53,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
       try {
         await setupProjectInStores(result.value);
       } catch {
-        setError('No se pudo cargar el capítulo activo.');
+        setError(t('welcome.errorLoad'));
       }
       setLoading(false);
       return;
@@ -61,14 +65,37 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
       return;
     }
 
-    setError('No se pudo abrir el proyecto. Intenta de nuevo.');
+    setError(t('welcome.errorOpen'));
     setLoading(false);
+  }, [t]);
+
+  const handleNew = useCallback(() => {
+    setError('');
+    setShowNewProjectModal(true);
   }, []);
 
   useEffect(() => {
     setTriggerOpenProject(handleOpen);
     return () => setTriggerOpenProject(null);
   }, [handleOpen, setTriggerOpenProject]);
+
+  useEffect(() => {
+    setTriggerNewProject(handleNew);
+    return () => setTriggerNewProject(null);
+  }, [handleNew, setTriggerNewProject]);
+
+  // Fire pending action set by useMenuEvents when a project was open at the time of the event
+  useEffect(() => {
+    const store = useProjectStore.getState();
+    if (store.pendingMenuAction === 'open') {
+      store.setPendingMenuAction(null);
+      handleOpen();
+    } else if (store.pendingMenuAction === 'new') {
+      store.setPendingMenuAction(null);
+      handleNew();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleImportDocx() {
     setError('');
@@ -91,18 +118,23 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
     setCurrentProject(project);
   }
 
+  function handleNewCreated(project: Project) {
+    setShowNewProjectModal(false);
+    setCurrentProject(project);
+  }
+
   return (
     <div className="h-screen flex flex-col items-center justify-center bg-bg-primary gap-3">
       <h1 className="font-serif text-4xl text-text-primary tracking-tight">
         Areyto
       </h1>
       <p className="text-sm text-text-secondary">
-        Editor de escritura por capítulos
+        {t('welcome.tagline')}
       </p>
 
       {restoreMessage && (
         <p className="text-sm text-text-secondary mt-1 max-w-sm text-center">
-          {restoreMessage}. Selecciona uno nuevo abajo.
+          {restoreMessage}{t('welcome.restoreMessageSuffix')}
         </p>
       )}
 
@@ -112,7 +144,7 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
           disabled={loading}
           className="px-5 py-2 text-sm bg-accent-muted text-text-primary rounded hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-150"
         >
-          {loading ? 'Abriendo…' : 'Abrir proyecto'}
+          {loading ? t('welcome.opening') : t('welcome.openProject')}
         </button>
         <div className="absolute top-1/2 left-full -translate-y-1/2 pl-2">
           <ShortcutHint text="⌘⇧O" />
@@ -136,6 +168,13 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
           folderPath={pendingPath}
           onClose={() => { setPendingPath(null); setLoading(false); }}
           onCreated={handleCreated}
+        />
+      )}
+
+      {showNewProjectModal && (
+        <CreateProjectModal
+          onClose={() => setShowNewProjectModal(false)}
+          onCreated={handleNewCreated}
         />
       )}
 

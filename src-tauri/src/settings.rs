@@ -31,6 +31,22 @@ pub struct GlobalSettings {
     pub auto_commit: bool,
     #[serde(default = "default_autosave_interval_ms")]
     pub autosave_interval_ms: u32,
+    #[serde(default = "default_theme_mode")]
+    pub theme_mode: String,
+    #[serde(default = "default_editor_font_family")]
+    pub editor_font_family: String,
+    #[serde(default = "default_editor_font_size")]
+    pub editor_font_size: u32,
+    #[serde(default = "default_project_language")]
+    pub default_project_language: String,
+    #[serde(default = "default_book_font_family")]
+    pub book_font_family: String,
+    #[serde(default = "default_book_font_size")]
+    pub book_font_size: u32,
+    #[serde(default = "default_export_folder")]
+    pub export_folder: String,
+    #[serde(default = "default_ui_locale")]
+    pub ui_locale: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -52,6 +68,38 @@ fn default_auto_commit() -> bool {
 
 fn default_autosave_interval_ms() -> u32 {
     500
+}
+
+fn default_theme_mode() -> String {
+    "light".to_string()
+}
+
+fn default_editor_font_family() -> String {
+    "serif".to_string()
+}
+
+fn default_editor_font_size() -> u32 {
+    16
+}
+
+fn default_project_language() -> String {
+    "en".to_string()
+}
+
+fn default_book_font_family() -> String {
+    "serif".to_string()
+}
+
+fn default_book_font_size() -> u32 {
+    18
+}
+
+fn default_export_folder() -> String {
+    String::new()
+}
+
+fn default_ui_locale() -> String {
+    "en".to_string()
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -203,6 +251,170 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.autosave_interval_ms, 5000, "autosave_interval_ms 5000 debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn default_theme_mode_es_light_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.theme_mode, "light", "theme_mode debe ser 'light' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_theme_mode_dark() {
+        let original = GlobalSettings {
+            version: 1,
+            theme_mode: "dark".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.theme_mode, "dark", "theme_mode 'dark' debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn roundtrip_theme_mode_auto() {
+        let original = GlobalSettings {
+            version: 1,
+            theme_mode: "auto".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.theme_mode, "auto", "theme_mode 'auto' debe preservarse en roundtrip");
+    }
+
+    #[test]
+    fn default_editor_font_family_es_serif_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.editor_font_family, "serif", "editor_font_family debe ser 'serif' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn default_editor_font_size_es_16_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.editor_font_size, 16, "editor_font_size debe ser 16 cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_editor_font_family_inter() {
+        let original = GlobalSettings {
+            version: 1,
+            editor_font_family: "inter".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.editor_font_family, "inter");
+    }
+
+    #[test]
+    fn roundtrip_editor_font_size_20() {
+        let original = GlobalSettings {
+            version: 1,
+            editor_font_size: 20,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.editor_font_size, 20);
+    }
+
+    #[test]
+    fn default_project_language_es_en_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.default_project_language, "en", "default_project_language debe ser 'en' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_default_project_language_es() {
+        let original = GlobalSettings {
+            version: 1,
+            default_project_language: "es".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.default_project_language, "es");
+    }
+
+    #[test]
+    fn default_book_font_family_es_serif_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.book_font_family, "serif", "book_font_family debe ser 'serif' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn default_book_font_size_es_18_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.book_font_size, 18, "book_font_size debe ser 18 cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_book_font_family_inter() {
+        let original = GlobalSettings {
+            version: 1,
+            book_font_family: "inter".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.book_font_family, "inter");
+    }
+
+    #[test]
+    fn roundtrip_book_font_size_22() {
+        let original = GlobalSettings {
+            version: 1,
+            book_font_size: 22,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.book_font_size, 22);
+    }
+
+    #[test]
+    fn default_export_folder_es_vacio_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.export_folder, "", "export_folder debe ser vacío cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_export_folder() {
+        let original = GlobalSettings {
+            version: 1,
+            export_folder: "/Users/juan/Documents".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.export_folder, "/Users/juan/Documents");
+    }
+
+    #[test]
+    fn default_ui_locale_es_en_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.ui_locale, "en", "ui_locale debe ser 'en' cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_ui_locale_es() {
+        let original = GlobalSettings {
+            version: 1,
+            ui_locale: "es".to_string(),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.ui_locale, "es");
     }
 
     #[test]

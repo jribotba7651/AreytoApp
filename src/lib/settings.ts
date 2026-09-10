@@ -14,6 +14,14 @@ export interface GlobalSettings {
   version: number;
   autoCommit?: boolean;
   autosaveIntervalMs?: number;
+  themeMode?: 'light' | 'dark' | 'auto';
+  editorFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
+  editorFontSize?: number;
+  defaultProjectLanguage?: string;
+  bookFontFamily?: 'serif' | 'sans' | 'mono' | 'inter';
+  bookFontSize?: number;
+  exportFolder?: string;
+  uiLocale?: string;
 }
 
 export interface ProjectState {

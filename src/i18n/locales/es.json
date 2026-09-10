@@ -1,0 +1,292 @@
+{
+  "tabs": {
+    "capitulo": "Capítulo Activo",
+    "libro": "Libro",
+    "terminados": "Terminados",
+    "ajustes": "Ajustes"
+  },
+  "common": {
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "saveError": "Error al guardar",
+    "loading": "Cargando…",
+    "failedToListChapters": "No se pudo listar los capítulos",
+    "defaultCopyrightLicense": "Todos los derechos reservados",
+    "noProjectOpen": "Sin proyecto abierto",
+    "chapterCount_one": "{{count}} capítulo",
+    "chapterCount_other": "{{count}} capítulos",
+    "defaultChapterTitle": "Capítulo {{num}}"
+  },
+  "app": {
+    "restoreError": "No se pudo abrir el último proyecto: {{path}}"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "moreComingSoon": "Más ajustes próximamente.",
+    "uiLocale": {
+      "sectionTitle": "Interfaz",
+      "label": "Idioma de la interfaz",
+      "description": "Cambia el idioma de visualización de Areyto. No afecta el idioma del libro ni su metadata."
+    },
+    "versioning": {
+      "sectionTitle": "Versionado",
+      "autoCommit": {
+        "label": "Commit automático en cada guardado",
+        "description": "Cuando está activo, Areyto crea un commit de Git automáticamente cada vez que se guarda un capítulo. Apaga esto si prefieres controlar los commits manualmente."
+      }
+    },
+    "editor": {
+      "sectionTitle": "Editor",
+      "autosave": {
+        "label": "Intervalo de guardado automático",
+        "description": "Tiempo de espera tras el último cambio antes de guardar automáticamente."
+      },
+      "fontFamily": {
+        "label": "Fuente del editor",
+        "description": "Familia tipográfica del área de escritura."
+      },
+      "fontSize": {
+        "label": "Tamaño de fuente",
+        "description": "Tamaño del texto en el área de escritura."
+      }
+    },
+    "appearance": {
+      "sectionTitle": "Apariencia",
+      "theme": {
+        "label": "Tema de la interfaz",
+        "description": "Claro u oscuro fijos, o auto para seguir la configuración del sistema."
+      }
+    },
+    "projects": {
+      "sectionTitle": "Proyectos",
+      "defaultLanguage": {
+        "label": "Idioma por defecto",
+        "description": "Idioma que se asigna a nuevos proyectos en el campo idioma del archivo metadata.yaml.",
+        "options": {
+          "es": "Español (es)",
+          "en": "Inglés (en)",
+          "pt": "Portugués (pt)",
+          "fr": "Francés (fr)",
+          "de": "Alemán (de)",
+          "it": "Italiano (it)",
+          "ca": "Catalán (ca)",
+          "gl": "Gallego (gl)",
+          "eu": "Euskera (eu)",
+          "zh": "Chino (zh)",
+          "ja": "Japonés (ja)",
+          "ar": "Árabe (ar)"
+        }
+      }
+    },
+    "book": {
+      "sectionTitle": "Libro",
+      "fontFamily": {
+        "label": "Fuente del lector",
+        "description": "Familia tipográfica del tab Libro."
+      },
+      "fontSize": {
+        "label": "Tamaño de fuente",
+        "description": "Tamaño del texto en el tab Libro."
+      }
+    },
+    "export": {
+      "sectionTitle": "Export",
+      "folder": {
+        "label": "Carpeta de destino",
+        "description": "Carpeta donde se abre el Save As al exportar. Se actualiza automáticamente con la última carpeta usada.",
+        "default": "Carpeta del proyecto (por defecto)"
+      },
+      "browse": "Examinar…",
+      "reset": "Restablecer"
+    }
+  },
+  "topbar": {
+    "closeProject": "Cerrar proyecto",
+    "about": "Acerca de"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "auto": "Auto (sistema)"
+  },
+  "font": {
+    "serif": "Serif (Iowan / Georgia)",
+    "inter": "Inter",
+    "sans": "Sans-serif del sistema",
+    "mono": "Monoespaciada"
+  },
+  "frontmatter": {
+    "titulo": {
+      "sectionTitle": "Título y autor",
+      "titulo":    { "label": "Título",              "placeholder": "El título del libro" },
+      "subtitulo": { "label": "Subtítulo (opcional)", "placeholder": "Un subtítulo descriptivo" },
+      "autor":     { "label": "Autor",               "placeholder": "Nombre del autor" }
+    },
+    "copyright": {
+      "sectionTitle": "Copyright",
+      "ano":      { "label": "Año" },
+      "titular":  { "label": "Titular",          "placeholder": "Nombre del titular del copyright" },
+      "licencia": { "label": "Licencia",         "placeholder": "Todos los derechos reservados" },
+      "notas":    { "label": "Notas (opcional)", "placeholder": "Notas adicionales" }
+    },
+    "metadata": {
+      "sectionTitle": "Detalles del libro",
+      "idioma":           { "label": "Idioma" },
+      "descripcion":      { "label": "Descripción",        "placeholder": "Sinopsis del libro" },
+      "editorial":        { "label": "Editorial",          "placeholder": "Nombre de la editorial" },
+      "genero":           { "label": "Género",             "placeholder": "Novela, ensayo, poesía…" },
+      "fechaPublicacion": { "label": "Fecha de publicación" }
+    },
+    "dedicatoria": {
+      "sectionTitle": "Dedicatoria"
+    }
+  },
+  "backmatter": {
+    "agradecimientos": {
+      "sectionTitle": "Agradecimientos"
+    }
+  },
+  "welcome": {
+    "tagline": "Editor de escritura por capítulos",
+    "dialogTitle": "Selecciona la carpeta del proyecto",
+    "newProjectDialogTitle": "Selecciona la carpeta para el nuevo proyecto",
+    "openProject": "Abrir proyecto",
+    "opening": "Abriendo…",
+    "restoreMessageSuffix": ". Selecciona uno nuevo abajo.",
+    "errorOpen": "No se pudo abrir el proyecto. Intenta de nuevo.",
+    "errorLoad": "No se pudo cargar el capítulo activo."
+  },
+  "modal": {
+    "createProject": {
+      "title": "Crear proyecto",
+      "description": "Esta carpeta no tiene un proyecto. Puedes crear uno aquí.",
+      "descriptionNew": "Elige un nombre y carpeta donde crear el nuevo proyecto.",
+      "placeholder": "Nombre del proyecto",
+      "locationLabel": "Guardar en:",
+      "chooseLocation": "Elegir ubicación",
+      "noLocationSelected": "Sin carpeta seleccionada",
+      "errorAlreadyExists": "Ya existe un proyecto en esta carpeta.",
+      "errorWriteFailed": "No se pudo crear el proyecto: {{reason}}",
+      "errorGeneric": "Error al crear el proyecto. Intenta de nuevo.",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "creating": "Creando…"
+    },
+    "closeChapter": {
+      "title": "Cerrar capítulo",
+      "checking": "Verificando…",
+      "conflictPart1": "Este capítulo ya fue cerrado antes. El tag ",
+      "conflictPart2": " existe en el historial. Vas a crear un nuevo tag ",
+      "conflictPart3": " que marcará este nuevo momento como terminado. Los tags anteriores quedan como marcas históricas.",
+      "normalPart1": "Vas a marcar ",
+      "normalPart2": " como terminado. El archivo se moverá a Terminados y quedará marcado con un tag de git.",
+      "cancel": "Cancelar",
+      "closeChapter": "Cerrar capítulo",
+      "createTag": "Crear {{tagName}}",
+      "closing": "Cerrando…",
+      "errorTagFailed": "No se pudo crear el tag git",
+      "errorWriteFailed": "No se pudo mover el archivo",
+      "errorPathNotFound": "Archivo no encontrado",
+      "errorReadFailed": "No se pudo leer el archivo",
+      "errorGeneric": "Ocurrió un error inesperado"
+    },
+    "reopenChapter": {
+      "title": "Reabrir capítulo",
+      "bodyPart1": "Vas a reabrir ",
+      "bodyPart2": ". El archivo volverá a ",
+      "bodyPart3": " y se activará automáticamente en el editor. El tag git ",
+      "bodyPart4": " se mantiene como marca histórica.",
+      "cancel": "Cancelar",
+      "reopen": "Reabrir capítulo",
+      "reopening": "Reabriendo…",
+      "errorWriteFailed": "No se pudo mover el archivo",
+      "errorPathNotFound": "Archivo no encontrado",
+      "errorReadFailed": "No se pudo leer el archivo",
+      "errorGeneric": "Ocurrió un error inesperado"
+    },
+    "restoreVersion": {
+      "title": "Restaurar versión",
+      "description": "El contenido actual se guardará antes de restaurar. La versión actual quedará en el historial.",
+      "cancel": "Cancelar",
+      "restore": "Restaurar",
+      "restoring": "Restaurando…"
+    },
+    "exportMarkdown": {
+      "title": "Exportar libro",
+      "description": "Elige qué capítulos incluir en el archivo markdown exportado.",
+      "cancel": "Cancelar",
+      "export": "Exportar",
+      "exporting": "Exportando…"
+    },
+    "exportDocx": {
+      "title": "Exportar a Word",
+      "description": "Elige qué capítulos incluir en el archivo .docx exportado vía pandoc.",
+      "cancel": "Cancelar",
+      "export": "Exportar",
+      "exporting": "Exportando…"
+    },
+    "exportScope": {
+      "both": "Ambos (terminados + en progreso)",
+      "finished": "Solo terminados",
+      "inProgress": "Solo en progreso"
+    }
+  },
+  "book": {
+    "loading": "Cargando libro…",
+    "emptyTitle": "El libro está vacío",
+    "emptyBody": "Crea tu primer capítulo desde la vista Capítulo Activo",
+    "indice": "Índice",
+    "chapterLoadError": "No se pudo cargar {{filename}}",
+    "export": {
+      "successBody": "Libro exportado en:\n{{path}}",
+      "successTitle": "Exportación completada",
+      "errorBody": "Error al exportar: {{error}}",
+      "errorTitle": "Error de exportación",
+      "toWordTitle": "Exportar libro a Word (.docx)",
+      "toWordLabel": "Exportar a Word",
+      "toMarkdownTitle": "Exportar libro a markdown",
+      "toMarkdownLabel": "Exportar"
+    }
+  },
+  "editor": {
+    "edit": "Editar",
+    "preview": "Previsualizar",
+    "noActiveChapter": "No hay capítulo activo"
+  },
+  "versions": {
+    "title": "Versiones",
+    "noActiveChapter": "Sin capítulo activo",
+    "noHistory": "Sin historial todavía",
+    "expandPanel": "Expandir panel de versiones",
+    "collapsePanel": "Colapsar panel de versiones"
+  },
+  "finished": {
+    "title": "Capítulos terminados",
+    "emptyTitle": "No hay capítulos terminados",
+    "emptyBody": "Cuando cierres un capítulo desde el sidebar aparecerá aquí"
+  },
+  "sidebar": {
+    "frontmatter": "Frontmatter",
+    "chapters": "Capítulos",
+    "backmatter": "Backmatter",
+    "noProject": "Sin proyecto",
+    "noChapters": "Sin capítulos",
+    "newChapter": "Nuevo capítulo",
+    "closeChapter": "Cerrar capítulo activo",
+    "refreshList": "Recargar lista",
+    "refreshListAria": "Recargar lista de capítulos",
+    "items": {
+      "titulo": "Título y autor",
+      "copyright": "Copyright",
+      "dedicatoria": "Dedicatoria",
+      "metadata": "Detalles",
+      "agradecimientos": "Agradecimientos"
+    }
+  },
+  "about": {
+    "tagline": "Un IDE para escritores serios.",
+    "company": "Jíbaro en la Luna LLC",
+    "version": "Versión {{version}}",
+    "close": "Cerrar"
+  }
+}

@@ -3,7 +3,6 @@ import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 import { Extension } from '@codemirror/state';
 
-const SERIF = '"Iowan Old Style", Charter, Georgia, serif';
 const MONO = '"JetBrains Mono", "Fira Code", monospace';
 
 const baseTheme = EditorView.theme({
@@ -11,12 +10,12 @@ const baseTheme = EditorView.theme({
     height: '100%',
     backgroundColor: 'var(--bg-editor)',
     color: 'var(--text-editor)',
-    fontSize: '16px',
-    fontFamily: SERIF,
+    fontSize: 'var(--font-size-editor)',
+    fontFamily: 'var(--font-editor)',
     lineHeight: '1.7',
   },
   '.cm-scroller': {
-    fontFamily: SERIF,
+    fontFamily: 'var(--font-editor)',
     overflow: 'auto',
   },
   '.cm-content': {
@@ -59,7 +58,7 @@ const baseTheme = EditorView.theme({
 const markdownHighlight = HighlightStyle.define([
   {
     tag: tags.heading1,
-    fontFamily: SERIF,
+    fontFamily: 'var(--font-editor)',
     fontWeight: '600',
     fontSize: '1.8em',
     color: 'var(--text-primary)',
@@ -67,7 +66,7 @@ const markdownHighlight = HighlightStyle.define([
   },
   {
     tag: tags.heading2,
-    fontFamily: SERIF,
+    fontFamily: 'var(--font-editor)',
     fontWeight: '600',
     fontSize: '1.4em',
     color: 'var(--text-primary)',
@@ -75,7 +74,7 @@ const markdownHighlight = HighlightStyle.define([
   },
   {
     tag: tags.heading3,
-    fontFamily: SERIF,
+    fontFamily: 'var(--font-editor)',
     fontWeight: '600',
     fontSize: '1.2em',
     color: 'var(--text-primary)',

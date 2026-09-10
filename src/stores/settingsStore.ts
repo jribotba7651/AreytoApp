@@ -1,30 +1,106 @@
 import { create } from 'zustand';
 import { readGlobalSettings, writeGlobalSettings } from '@/lib/settings';
+import i18n from '@/i18n/i18n';
 
 export const AUTOSAVE_DELAY_MS = 500;
+export const THEME_STORAGE_KEY = 'areyto-theme-mode';
+
+export type ThemeMode = 'light' | 'dark' | 'auto';
+export type EditorFontFamily = 'serif' | 'sans' | 'mono' | 'inter';
+export type BookFontFamily = 'serif' | 'sans' | 'mono' | 'inter';
+
+const EDITOR_FONT_STACKS: Record<EditorFontFamily, string> = {
+  serif: '"Iowan Old Style", Charter, Georgia, serif',
+  sans: 'system-ui, sans-serif',
+  mono: '"JetBrains Mono", "Fira Code", monospace',
+  inter: 'Inter, system-ui, sans-serif',
+};
+
+export function applyTheme(mode: ThemeMode): void {
+  const dark =
+    mode === 'dark' ||
+    (mode === 'auto' && typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, mode);
+  } catch (_) {}
+}
+
+export function applyEditorFont(family: EditorFontFamily, size: number): void {
+  document.documentElement.style.setProperty('--font-editor', EDITOR_FONT_STACKS[family]);
+  document.documentElement.style.setProperty('--font-size-editor', `${size}px`);
+}
+
+export function applyBookFont(family: BookFontFamily, size: number): void {
+  document.documentElement.style.setProperty('--font-book', EDITOR_FONT_STACKS[family]);
+  document.documentElement.style.setProperty('--font-size-book', `${size}px`);
+}
 
 interface SettingsState {
   autoCommit: boolean;
   autosaveIntervalMs: number;
+  themeMode: ThemeMode;
+  editorFontFamily: EditorFontFamily;
+  editorFontSize: number;
+  defaultProjectLanguage: string;
+  bookFontFamily: BookFontFamily;
+  bookFontSize: number;
+  exportFolder: string;
+  uiLocale: string;
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
   setAutosaveIntervalMs: (ms: number) => Promise<void>;
+  setThemeMode: (mode: ThemeMode) => Promise<void>;
+  setEditorFontFamily: (family: EditorFontFamily) => Promise<void>;
+  setEditorFontSize: (size: number) => Promise<void>;
+  setDefaultProjectLanguage: (lang: string) => Promise<void>;
+  setBookFontFamily: (family: BookFontFamily) => Promise<void>;
+  setBookFontSize: (size: number) => Promise<void>;
+  setExportFolder: (folder: string) => Promise<void>;
+  setUiLocale: (locale: string) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   autoCommit: true,
   autosaveIntervalMs: AUTOSAVE_DELAY_MS,
+  themeMode: 'light',
+  editorFontFamily: 'serif',
+  editorFontSize: 16,
+  defaultProjectLanguage: 'en',
+  bookFontFamily: 'serif',
+  bookFontSize: 18,
+  exportFolder: '',
+  uiLocale: 'en',
   loaded: false,
 
   load: async () => {
     try {
       const settings = await readGlobalSettings();
+      const themeMode = (settings.themeMode ?? 'light') as ThemeMode;
+      const editorFontFamily = (settings.editorFontFamily ?? 'serif') as EditorFontFamily;
+      const editorFontSize = settings.editorFontSize ?? 16;
+      const bookFontFamily = (settings.bookFontFamily ?? 'serif') as BookFontFamily;
+      const bookFontSize = settings.bookFontSize ?? 18;
+      const uiLocale = settings.uiLocale ?? 'en';
       set({
         autoCommit: settings.autoCommit ?? true,
         autosaveIntervalMs: settings.autosaveIntervalMs ?? AUTOSAVE_DELAY_MS,
+        themeMode,
+        editorFontFamily,
+        editorFontSize,
+        defaultProjectLanguage: settings.defaultProjectLanguage ?? 'en',
+        bookFontFamily,
+        bookFontSize,
+        exportFolder: settings.exportFolder ?? '',
+        uiLocale,
         loaded: true,
       });
+      applyTheme(themeMode);
+      applyEditorFont(editorFontFamily, editorFontSize);
+      applyBookFont(bookFontFamily, bookFontSize);
+      void i18n.changeLanguage(uiLocale);
     } catch {
       set({ loaded: true });
     }
@@ -47,6 +123,96 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, autosaveIntervalMs: ms });
     } catch (err) {
       console.warn('[areyto] Failed to persist autosaveIntervalMs:', err);
+    }
+  },
+
+  setThemeMode: async (mode: ThemeMode) => {
+    set({ themeMode: mode });
+    applyTheme(mode);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, themeMode: mode });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist themeMode:', err);
+    }
+  },
+
+  setEditorFontFamily: async (family: EditorFontFamily) => {
+    set({ editorFontFamily: family });
+    const size = useSettingsStore.getState().editorFontSize;
+    applyEditorFont(family, size);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, editorFontFamily: family });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist editorFontFamily:', err);
+    }
+  },
+
+  setEditorFontSize: async (size: number) => {
+    set({ editorFontSize: size });
+    const family = useSettingsStore.getState().editorFontFamily;
+    applyEditorFont(family, size);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, editorFontSize: size });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist editorFontSize:', err);
+    }
+  },
+
+  setDefaultProjectLanguage: async (lang: string) => {
+    set({ defaultProjectLanguage: lang });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, defaultProjectLanguage: lang });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist defaultProjectLanguage:', err);
+    }
+  },
+
+  setBookFontFamily: async (family: BookFontFamily) => {
+    set({ bookFontFamily: family });
+    const size = useSettingsStore.getState().bookFontSize;
+    applyBookFont(family, size);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, bookFontFamily: family });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist bookFontFamily:', err);
+    }
+  },
+
+  setBookFontSize: async (size: number) => {
+    set({ bookFontSize: size });
+    const family = useSettingsStore.getState().bookFontFamily;
+    applyBookFont(family, size);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, bookFontSize: size });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist bookFontSize:', err);
+    }
+  },
+
+  setExportFolder: async (folder: string) => {
+    set({ exportFolder: folder });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, exportFolder: folder });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist exportFolder:', err);
+    }
+  },
+
+  setUiLocale: async (locale: string) => {
+    set({ uiLocale: locale });
+    void i18n.changeLanguage(locale);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, uiLocale: locale });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist uiLocale:', err);
     }
   },
 }));

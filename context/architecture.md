@@ -2,7 +2,7 @@
 
 ## Stack
 - Framework: Tauri (no Electron, más liviano y arranque rápido)
-- UI: React 18 + TypeScript strict
+- UI: React 19 + TypeScript strict
 - Styling: Tailwind CSS
 - Estado global: Zustand (sin Redux, sin boilerplate)
 - Editor: CodeMirror 6 (más liviano que Monaco, mejor para prosa)
@@ -12,6 +12,7 @@
 - Webview: Tauri WebviewWindow o iframe
 - Markdown rendering (tab Libro): react-markdown con tema custom
 - Resizable panels: react-resizable-panels
+- i18n (aprobado F43): react-i18next v17 + i18next v26. Idiomas: en (default), es. Recursos inline JSON en src/i18n/locales/. I18nextProvider en main.tsx. uiLocale persiste en GlobalSettings (distinto de defaultProjectLanguage que es metadata del libro).
 
 ## Boundaries (separación de capas)
 
@@ -62,6 +63,8 @@ mi-libro/
 5. Tauri commands son thin wrappers: la lógica vive en TypeScript. Rust solo hace lo que TypeScript no puede (filesystem, pty, dialogs).
 
 6. Settings persisten en archivo JSON local: no en localStorage. La app debe poder migrar entre máquinas copiando el folder de config.
+
+   **Excepción acotada (D-186, aprobada por el arquitecto):** localStorage está permitido únicamente para el caché anti-FOUC de `themeMode` (clave `areyto-theme-mode`), leído por el script inline del `<head>` antes del primer render de React. settings.json sigue siendo la única fuente de verdad para todos los settings. Prohibido para cualquier otro uso.
 
 7. Nunca commitear sin cambios reales: el versioning verifica diff antes de commit para no inflar el log.
 

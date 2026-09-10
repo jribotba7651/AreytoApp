@@ -5,10 +5,82 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish
 - Feature en progreso: ninguna
-- Última feature completada: item7a-toc-titulos-metadata
-- Fecha de última actualización: 2026-08-09
+- Última feature completada: F49 Menú File nativo con Open / New / Close Project
+- Fecha de última actualización: 2026-06-05
 
 ## Features completadas
+
+### 2026-06-05 - F49 - Menú File nativo con Open / New / Close Project
+- Qué se hizo: menú de aplicación Tauri 2.x nativo con submenú "File" (Open Project…, New Project…, Close Project). Los ítems del menú emiten eventos Tauri al frontend vía el patrón emit/listen ya existente (igual que terminal.rs/useTerminal.ts). El frontend reutiliza la lógica existente sin duplicar.
+- Archivos modificados:
+  - src-tauri/src/lib.rs (menú Areyto + File con 3 ítems y aceleradores; on_menu_event emite menu:open-project / menu:new-project / menu:close-project; imports tauri::menu::* + Emitter)
+  - src/stores/projectStore.ts (añadidos pendingMenuAction: 'open' | null y setPendingMenuAction — permiten coordinar la acción cuando el menú se dispara con un proyecto ya abierto)
+  - src/hooks/useMenuEvents.ts (nuevo hook; listen de 3 eventos; si hay proyecto abierto → setPendingMenuAction + closeProject; si no → triggerOpenProject)
+  - src/components/welcome/WelcomeScreen.tsx (useEffect de montaje: lee pendingMenuAction → dispara handleOpen automáticamente al renderizar WelcomeScreen tras closeProject)
+  - src/App.tsx (useMenuEvents() añadido junto a useKeyboardShortcuts y useSettingsPersistence)
+- Decisiones tomadas:
+  - D-186: Labels del menú nativo en inglés fijo ("File", "Open Project…", etc.). Los menús nativos de Tauri no pasan fácilmente por react-i18next (el menú se construye en Rust en tiempo de arranque). i18n del menú nativo = tarea futura aparte.
+  - D-187: "Open Project" y "New Project" usan el mismo handler (triggerOpenProject / handleOpen de WelcomeScreen). La distinción open/create la decide la carpeta elegida: si tiene proyecto.json lo abre; si no, muestra CreateProjectModal. Semántica suficiente para F49.
+  - D-188: Coordinación menú-con-proyecto-abierto vía pendingMenuAction en el store: closeProject() → WelcomeScreen monta → useEffect lee pendingMenuAction → llama handleOpen. Evita duplicar el dialog logic fuera de WelcomeScreen.
+  - D-189: ⌘⇧W sigue funcionando como shortcut de teclado además del menú nativo. closeProject() es idempotente — doble disparo no rompe nada.
+- Pendientes relacionados:
+  - F50 (siguiente): validación de estructura al abrir proyecto (proyecto.json + 4 carpetas). openProject hoy solo verifica proyecto.json.
+- Tests: 348 TS + 41 Rust — todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-06-05 - F48 - i18n Fase 6 (cierra i18n al 100%): componentes escapados + 2 gaps
+- Qué se hizo: migración de los ~25 strings restantes de UI en componentes no cubiertos por F43-F47. i18n queda al 100%. Incluye plurales (i18next count), interpolaciones, shortcuts, y 2 gaps descubiertos en el audit.
+- Archivos modificados:
+  - src/i18n/locales/en.json (añadidas claves: common.noProjectOpen, common.chapterCount_one/other, book.loading, book.emptyTitle/Body, book.indice, book.chapterLoadError, book.export.*, editor.edit/preview/noActiveChapter, versions.title/noActiveChapter/noHistory/expandPanel/collapsePanel, finished.title/emptyTitle/emptyBody, sidebar.refreshList/refreshListAria, settings.projects.defaultLanguage.options.*)
+  - src/i18n/locales/es.json (mismas claves en español)
+  - src/components/layout/BookTabContent.tsx (useTranslation; 10 strings migrados incl. interpolaciones de ruta/error y noProjectOpen)
+  - src/components/panels/EditorPanel.tsx (useTranslation en ChapterView y EditorPanel; shortcuts patrón `${t('editor.edit')} (⌘E)`)
+  - src/components/book/BookHeader.tsx (useTranslation; plural common.chapterCount)
+  - src/components/layout/FinishedTabContent.tsx (useTranslation; noProjectOpen, finished.title, plural chapterCount)
+  - src/components/book/BookEmptyState.tsx (useTranslation; book.emptyTitle/emptyBody)
+  - src/components/terminados/TerminadosEmptyState.tsx (useTranslation; finished.emptyTitle/emptyBody)
+  - src/components/terminal/TerminalView.tsx (useTranslation; common.noProjectOpen)
+  - src/components/book/BookChapterError.tsx (useTranslation; book.chapterLoadError con interpolación filename)
+  - src/components/sidebar/RefreshChaptersButton.tsx (useTranslation; sidebar.refreshList + shortcut, sidebar.refreshListAria)
+  - src/components/versions/CommitList.tsx (useTranslation; versions.noActiveChapter, versions.noHistory)
+  - src/components/book/BookIndice.tsx (useTranslation; book.indice)
+  - src/components/frontmatter/FrontmatterCopyrightEditor.tsx (licencia inicial → t('common.defaultCopyrightLicense'))
+  - src/components/layout/ChapterTabContent.tsx (useTranslation; versions.expandPanel)
+  - src/components/panels/VersionsPanel.tsx (useTranslation; versions.title, versions.collapsePanel)
+  - src/components/versions/RestoreConfirmModal.tsx (GAP 1: formatDate acepta locale param; usa i18n.language en vez de 'es-ES' hardcodeado)
+  - src/components/settings/SettingsTabContent.tsx (GAP 2: LANGUAGE_OPTIONS render usa t('settings.projects.defaultLanguage.options.' + opt.value); UI_LOCALE_OPTIONS sin tocar)
+  - src/components/book/BookIndice.test.tsx (vi.mock react-i18next añadido — BookIndice usa useTranslation ahora)
+- Decisiones tomadas:
+  - D-181: Plurales i18next: claves _one/_other con {{count}} interpolado. Ambos BookHeader y FinishedTabContent comparten common.chapterCount.
+  - D-182: Shortcut pattern (establecido en F44): símbolo concatenado FUERA de t(), e.g. `${t('editor.edit')} (⌘E)`.
+  - D-183: LANGUAGE_OPTIONS conserva el array con {value, label} pero el label ya no se usa en render — solo el value para construir la clave i18n. El array podría simplificarse a solo values en refactor futuro, pero está fuera de scope F48.
+  - D-184: UI_LOCALE_OPTIONS (English/Español en nombre nativo) NO se toca; es intencional que los nombres de idioma de UI se muestren siempre en su nombre nativo.
+  - D-185: formatDate en RestoreConfirmModal ahora recibe locale como parámetro (i18n.language) en vez de hardcodear 'es-ES'. Función pura, fácil de testear.
+- Pendientes relacionados: ninguno — i18n al 100%
+- Tests: 348 TS + 41 Rust — todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-06-05 - F47 - i18n Fase 5 (final, scope mínimo): lib/ + App.tsx + consolidación topbar→common
+- Qué se hizo: migración de los strings de UI restantes en lib/ y App.tsx, y consolidación de claves duplicadas topbar.saving/saved/saveError → common.*.
+- Archivos modificados:
+  - src/i18n/locales/en.json (añadidas common.saveError, common.failedToListChapters, common.defaultCopyrightLicense, app.restoreError; eliminadas topbar.saving, topbar.saved, topbar.saveError)
+  - src/i18n/locales/es.json (mismos cambios en español)
+  - src/components/layout/TopTabs.tsx (t('topbar.saving/saved/saveError') → t('common.saving/saved/saveError'))
+  - src/components/layout/TopTabs.test.tsx (mock actualizado a common.saving/saved/saveError)
+  - src/App.tsx (useTranslation añadido; "Cargando…" → t('common.loading'); mensaje restore → t('app.restoreError', { path }))
+  - src/lib/refresh-chapters.ts (import i18n; 'Failed to list chapters' → i18n.t('common.failedToListChapters'))
+  - src/lib/refresh-chapters.test.ts (vi.mock i18n; aserción actualizada a clave i18n)
+  - src/lib/yaml-frontmatter.ts (import i18n; 'Todos los derechos reservados' → i18n.t('common.defaultCopyrightLicense'))
+  - src/lib/yaml-frontmatter.test.ts (vi.mock i18n; aserción actualizada a clave i18n)
+  - src/components/frontmatter/FrontmatterMetadataEditor.test.tsx (vi.mock i18n añadido — dependencia transitiva yaml-frontmatter → i18n)
+- Decisiones tomadas:
+  - D-178: lib/ usa import directo de i18n (i18n.t()) en vez de hook. Patrón estándar para módulos non-React que necesitan i18n.
+  - D-179: Tests de lib/ mockean '@/i18n/i18n' con { t: key => key } y asertan sobre la clave i18n, no la traducción. Más robusto ante cambios de copy.
+  - D-180: topbar.saving/saved/saveError consolidados a common.*. topbar queda solo con closeProject y about.
+- Pendientes relacionados:
+  - **F48 (pendiente)**: ~25 strings escapados de componentes no cubiertos en F43-F47: BookTabContent (flujos de export con interpolación de rutas/errores), EditorPanel (Editar/Previsualizar), BookHeader y FinishedTabContent (plurales capítulo/capítulos), BookEmptyState, TerminadosEmptyState, TerminalView, BookChapterError, RefreshChaptersButton. Contiene PLURALES (capítulo/capítulos → i18next count) e interpolaciones. La i18n NO está 100% completa hasta F48.
+- Tests: 348 TS + 41 Rust — todos verdes
+- Bugs encontrados: dependencia transitiva yaml-frontmatter → i18n rompía FrontmatterMetadataEditor.test.tsx; resuelto añadiendo vi.mock('@/i18n/i18n') en ese test.
 
 ### 2026-05-21 - F0: Foundation Scaffold
 - Qué se hizo: clone local del repo, subida de archivos de contexto, scaffold inicial Tauri + React + TS + Tailwind + Zustand + Vitest, configuración de path aliases, estructura de carpetas según architecture.md
@@ -925,7 +997,6 @@ Ninguno actualmente.
   - D-070: `--initial-branch=main` como flag de `git init`, no como config local post-init
 
 ### Bugs resueltos
-- 2026-08-02: Blocker pnpm resuelto: `tauri.conf.json` usaba `pnpm dev`/`pnpm build` en beforeDevCommand/beforeBuildCommand pero pnpm no estaba en PATH. Cambiado a `npm run dev`/`npm run build`. Commit e7c5271.
 - 2026-05-21: TerminadosListItem mostraba "Invalid Date". `git_tag_info` y `git_list_chapter_tags` usaban `%(creatordate:iso8601)` que retorna `"2026-05-21 17:04:08 -0700"` (espacio, no T) que JS `new Date()` no parsea. Resuelto cambiando a `iso8601-strict`. Helper `formatRelativeTime` unificado en `src/lib/format-relative-time.ts` — antes duplicado en `CommitListItem` y `TerminadosListItem`. Fix en commit 1c64a7d.
 - 2026-05-21: `createChapter` no escribía contenido al disco cuando no se pasaba título explícito. Los capítulos creados vía botón + del sidebar quedaban vacíos, y el sidebar mostraba "cap-02" como fallback al no encontrar h1. Fix en commit be69201: el servicio ahora genera `# Capítulo N\n\n` internamente. `chapter-loader.ts` también simplificado para delegar a `createChapter` (DRY).
 
@@ -936,6 +1007,69 @@ Ninguno.
 - La primera compilación de Rust (cargo) tarda varios minutos en descargar y compilar las dependencias. Las siguientes son rápidas.
 - pnpm-workspace.yaml tiene allowBuilds: esbuild — no borrar, es necesario para que Vite funcione.
 - Tailwind v4: usar @theme {} para definir tokens, no tailwind.config.js. Clases de Tailwind mapean a --color-* por convención de v4.
+
+### 2026-06-04 - F46: i18n Fase 4 — Welcome + modales + sidebar + AboutDialog
+- Commit: (pendiente smoke del arquitecto)
+- Qué se hizo: migración de todos los strings visibles de WelcomeScreen, 7 modales (CreateProjectModal, CloseChapterModal, ReopenChapterModal, RestoreConfirmModal, ExportBookDialog, ExportBookDocxDialog, AboutDialog) y los componentes de sidebar (SidebarPanel, FrontmatterSection, BackmatterSection, ChapterList, NewChapterButton, CloseChapterButton).
+- Namespaces nuevos en en.json/es.json: `welcome.*` (tagline, dialogTitle, openProject, opening, restoreMessageSuffix, errorOpen, errorLoad), `modal.*` (createProject, closeChapter, reopenChapter, restoreVersion, exportMarkdown, exportDocx, exportScope con subclaves por modal), `sidebar.*` (frontmatter, chapters, backmatter, noProject, noChapters, newChapter, closeChapter, items.titulo/copyright/dedicatoria/metadata/agradecimientos), `about.*` (tagline, company, version, close).
+- Componentes migrados: WelcomeScreen, CreateProjectModal, CloseChapterModal, ReopenChapterModal, RestoreConfirmModal, ExportBookDialog, ExportBookDocxDialog, AboutDialog, SidebarPanel, FrontmatterSection, BackmatterSection, ChapterList, NewChapterButton, CloseChapterButton.
+- Tests actualizados: AboutDialog.test.tsx, ExportBookDialog.test.tsx, ExportBookDocxDialog.test.tsx, TopTabs.test.tsx (mock react-i18next extendido con claves about.*).
+- Nota: AboutDialog tenía strings hardcodeados de F41 (se hizo antes de i18n). Migrados en esta fase.
+- Nota: `about.version` usa interpolación i18next: `t('about.version', { version })` — excepción aprobada por arquitecto (valor único al final, sin elementos JSX).
+- Nota: `modal.createProject.errorWriteFailed` también usa interpolación i18next: `t('modal.createProject.errorWriteFailed', { reason })` — mismo caso que about.version (valor único en error de texto plano).
+- Frases con elementos JSX (strong/code) en CloseChapterModal y ReopenChapterModal: troceadas en Part1/Part2/Part3/Part4 per decisión del arquitecto. NO se usa interpolación i18next para esas.
+- Botón Cancelar: clave propia por modal (modal.<nombre>.cancel), no reutiliza common.cancel.
+- Sidebar items (Título y autor, Agradecimientos, etc.): claves propias bajo sidebar.items.*, no reutilizan frontmatter.*/backmatter.* (contexto distinto: navegación vs encabezado de editor).
+- DEUDA MENOR: frases troceadas Part1/Part2 funcionan bien para en/es pero pueden romperse con idiomas de orden sintáctico distinto (alemán, japonés, árabe). Revisar si se añade un tercer idioma.
+- Tests: 347 TS + 41 Rust (sin cambio de conteo).
+- Pendientes F47: lib/, App.tsx, limpieza opcional topbar.saving/saved → common.saving/saved.
+
+### 2026-06-04 - F45: i18n Fase 3 — Editores de Frontmatter y Backmatter
+- Qué se hizo: migración de los 5 editores de frontmatter/backmatter (~25 strings). Namespace common.* nuevo para los strings repetidos (saving/saved/loading). Refactor de sub-componentes IdiomaField y DescripcionField en FrontmatterMetadataEditor para aceptar label/placeholder como props (consistente con el patrón Field existente).
+- Namespaces añadidos: common.* (saving, saved, loading), frontmatter.* (titulo, copyright, metadata, dedicatoria con sus labels/placeholders), backmatter.* (agradecimientos).
+- Strings NO traducidos (intencional): placeholder "en" en IdiomaField (código ISO), label "ISBN" (sigla estándar), placeholder "978-0-000-00000-0" (formato técnico), placeholder "2025" (año de ejemplo), placeholder dinámico `new Date().getFullYear()` en CopyrightEditor.
+- Coexistencia: topbar.saving/topbar.saved de F44 intactos. Los 5 componentes usan common.saving/common.saved. Limpieza de topbar.* → common.* queda para F47 si se decide.
+- Componentes migrados: FrontmatterTituloEditor, FrontmatterCopyrightEditor, FrontmatterMetadataEditor, FrontmatterDedicatoriaEditor, BackmatterAgradecimientosEditor.
+- Archivos modificados: src/i18n/locales/en.json, src/i18n/locales/es.json, los 5 componentes, FrontmatterMetadataEditor.test.tsx (mock react-i18next añadido).
+- Tests: 347 TS + 41 Rust (sin cambio de conteo; test actualizado para mock expandido).
+- Pendientes F46-F47: migrar Welcome/modales/sidebar (F46), lib/, App.tsx y limpieza opcional topbar→common (F47).
+
+### 2026-06-04 - F44: i18n Fase 2 — SettingsTabContent + resto de TopTabs
+- Qué se hizo: migración completa de todos los strings visibles de SettingsTabContent (~47 strings) y los 7 strings que quedaron de TopTabs en F43 (STATUS_LABEL × 3 + aria-label/title × 4).
+- Namespaces añadidos a en.json/es.json: `settings.*` (title, moreComingSoon + 6 secciones: versioning, editor, appearance, projects, book, export), `topbar.*` (saving, saved, saveError, closeProject, about), `theme.*` (light, dark, auto), `font.*` (serif, inter, sans, mono compartido entre editor y lector).
+- Decisiones: THEME_OPTIONS y FONT_FAMILY_OPTIONS simplificados a arrays de valores puros (label eliminado, ahora `t('theme.'+value)` / `t('font.'+value)` en JSX). AUTOSAVE_PRESETS, FONT_SIZE_OPTIONS, LANGUAGE_OPTIONS, UI_LOCALE_OPTIONS mantienen labels hardcoded (unidades universales / nombres nativos de idiomas). `settings.export.sectionTitle` = "Export" en ambos locales (ya estaba en inglés en la UI original). STATUS_LABEL movido de módulo-scope a variable local inside el componente para poder usar `t()`. Shortcut ⌘⇧W concatenado fuera del string traducible per D-194.
+- Archivos modificados: src/i18n/locales/en.json, src/i18n/locales/es.json, src/components/settings/SettingsTabContent.tsx, src/components/layout/TopTabs.tsx, src/components/settings/SettingsTabContent.test.tsx, src/components/layout/TopTabs.test.tsx
+- Tests: 347 TS + 41 Rust (sin cambio de conteo; tests actualizados para mocks expandidos)
+- Pendientes F45-F47: migrar Frontmatter editors, Welcome/modales, sidebar, lib/, App.tsx
+
+### 2026-06-04 - F43: i18n Fase 1 — Infraestructura + piloto TopTabs
+- Qué se hizo: infraestructura react-i18next montada. Dos locales (en/es) con recursos JSON inline. uiLocale persistido en GlobalSettings (campo distinto de defaultProjectLanguage que es metadata del libro). TopTabs migrado como componente piloto. Selector "Idioma de la interfaz" nuevo en sección "Interfaz" de SettingsTabContent. Cambio de idioma al instante vía i18n.changeLanguage en setter y en load(). uiLocale incluido en useSettingsPersistence (bug F39 prevenido).
+- Dependencias nuevas (aprobadas por arquitecto): react-i18next 17.0.8, i18next 26.3.0 (React 19 compatible)
+- Archivos creados:
+  - src/i18n/i18n.ts (init i18next con initReactI18next, recursos inline, lng default 'en')
+  - src/i18n/locales/en.json (keys: tabs.capitulo/libro/terminados/ajustes + settings.uiLocale.*)
+  - src/i18n/locales/es.json (mismas keys en español)
+- Archivos modificados:
+  - src/main.tsx (import i18n, I18nextProvider wrapping App)
+  - src-tauri/src/settings.rs (campo ui_locale: String, serde default "en", 2 tests nuevos)
+  - src/lib/settings.ts (uiLocale?: string en GlobalSettings)
+  - src/stores/settingsStore.ts (uiLocale state + setUiLocale + changeLanguage en load())
+  - src/stores/settingsStore.test.ts (mock i18n, uiLocale en beforeEach, 7 tests nuevos)
+  - src/hooks/useSettingsPersistence.ts (uiLocale en objeto + deps)
+  - src/hooks/useSettingsPersistence.test.ts (uiLocale en makeSettingsState + 1 test nuevo)
+  - src/components/layout/TopTabs.tsx (useTranslation, t('tabs.'+id) sustituye labels hardcoded)
+  - src/components/layout/TopTabs.test.tsx (mock react-i18next con traducciones ES)
+  - src/components/settings/SettingsTabContent.tsx (useTranslation, UI_LOCALE_OPTIONS, sección Interfaz nueva)
+  - src/components/settings/SettingsTabContent.test.tsx (mock react-i18next, uiLocale+setUiLocale en makeState)
+  - context/architecture.md (i18n deps aprobadas documentadas, React 19 corregido de "18")
+- Decisiones:
+  - D-190: react-i18next v17 + i18next v26 como deps aprobadas; versiones compatibles con React 19
+  - D-191: uiLocale: String en GlobalSettings, serde default "en". Nombre distinto de defaultProjectLanguage (ese es para metadata.yaml del libro, no la UI)
+  - D-192: I18nextProvider en main.tsx envuelve App. i18n.ts importado antes del render como side effect de init
+  - D-193: i18n.changeLanguage llamado en load() y setUiLocale() — mismo patrón de side-effect que applyTheme()
+  - D-194: TopTabs como único piloto en F43. STATUS_LABEL y todos los demás strings quedan para F44-F47
+- Tests: 347 TS + 41 Rust (era 339 TS + 39 Rust antes)
+- Pendientes F44-F47: migrar el resto de strings al sistema i18n
 
 ### 2026-05-30 - F32: Intervalo de autosave configurable
 - Qué se hizo: campo autosave_interval_ms en GlobalSettings (Rust+TS), serde default 500, clamp [500,300000]. settingsStore.setAutosaveIntervalMs persiste inmediato. useAutosave lee del store y re-arma el timer en vivo al cambiar; null -> fallback AUTOSAVE_DELAY_MS=500. Tab Ajustes seccion Editor con dropdown de presets fijos 2/5/15/30s, default visible 2s. Legacy 500 en disco muestra 2s sin warning.
@@ -959,6 +1093,57 @@ Ninguno.
 - Tests: 272 TS (sin cambio), Rust sin cambio
 - Decisiones: D-181 nombres de token existentes mantenidos, valores actualizados (sin renombrar para no romper componentes). D-182 text-tertiary = stone-500 (#78716C) en vez de spec stone-400 (#A8A29E) para WCAG AA en panel VERSIONES (~4.1:1 vs 2.2:1). D-183 accent-muted = slate-400 (#94A3B8): visible como fondo de botón primario (5.4:1) y selección del editor al 50% de opacidad. D-184 backdrops de modales como bg-black/60 en lugar de rgba inline, elimina últimos colores crudos en componentes.
 - Commit: 5507d58
+
+### 2026-05-30 - F35: Divisores de panel visibles y agarrables
+- Commit: d4be013
+
+### 2026-05-30 - F36: Tipografía UI a Inter (fuente local empaquetada)
+- Commit: 61333cb
+
+### 2026-05-31 - F37: Selector de tema claro/oscuro/auto
+- Qué se hizo: selector de 3 modos (claro/oscuro/auto) persistido y restaurado. globals.css reorganizado con bloque html[data-theme="dark"] (paleta zinc recuperada de pre-F34). campo themeMode en GlobalSettings (Rust + TS). settingsStore con themeMode + setThemeMode + applyTheme(). Script anti-FOUC en <head> de index.html. Listener prefers-color-scheme para modo auto en App.tsx. Sección "Apariencia" en SettingsTabContent.
+- Archivos: src/styles/globals.css, index.html, src/lib/settings.ts, src-tauri/src/settings.rs, src/stores/settingsStore.ts, src/stores/settingsStore.test.ts, src/App.tsx, src/components/settings/SettingsTabContent.tsx, src/components/settings/SettingsTabContent.test.tsx, context/architecture.md
+- Tests: 281 TS, 27 Rust
+- Decisiones: D-185 data-theme en <html> como selector; CSS vars con dos nombres (--color-* Tailwind + --bg-* directo) sobreescritas en cascada, cero cambios en componentes. D-186 excepción consciente a D-010, aprobada por el arquitecto: localStorage (clave areyto-theme-mode) permitido exclusivamente como caché anti-FOUC leído por el script inline del <head> antes del primer render; settings.json sigue siendo la única fuente de verdad; prohibido para cualquier otro uso. D-187 serde default "light" para theme_mode preserva comportamiento en settings.json existentes. D-188 applyTheme() exportada desde settingsStore, aplica data-theme + escribe localStorage; llamada desde load() y setThemeMode(). D-189 listener prefers-color-scheme en App.tsx useEffect, activo solo cuando themeMode==='auto', limpieza en unmount/cambio.
+- Commit: aecdfb1
+
+### 2026-05-31 - F38: Setting de fuente del editor (familia + tamaño)
+- Commit: 8fcef11
+
+### 2026-05-31 - F42: Carpeta default de export configurable
+- Commit: 82bcdfc
+- Qué se hizo: Campo `exportFolder: String` en `GlobalSettings` (Rust serde default `String::new()` vacío; TS `exportFolder?: string`). `settingsStore`: estado `exportFolder` (default `''`), setter `setExportFolder` con read-modify-write, `load()` mapea con `?? ''`. `BookTabContent`: `baseDir = exportFolder || currentProject.rootPath` al construir `defaultPath` para `.md` y `.docx`; tras export exitoso, extrae dirname del `outputPath` elegido por el usuario y llama `setExportFolder` (comportamiento híbrido: fija desde Ajustes + recuerda la última carpeta usada). Sección "Export" en `SettingsTabContent` con display de ruta actual o "Carpeta del proyecto (por defecto)", botón "Examinar…" (`open({ directory: true, multiple: false })`), y botón "Restablecer" (visible solo si hay carpeta configurada, vuelve a `''`). `exportFolder` incluido en `useSettingsPersistence` (objeto hardcodeado + array de deps) para evitar regresión del bug F39. Smoke confirmado: vacío abre en carpeta del proyecto, configurado abre en la carpeta elegida, recuerda la última usada, persiste tras reinicio.
+- Archivos modificados: `src-tauri/src/settings.rs`, `src/lib/settings.ts`, `src/stores/settingsStore.ts`, `src/stores/settingsStore.test.ts`, `src/hooks/useSettingsPersistence.ts`, `src/hooks/useSettingsPersistence.test.ts`, `src/components/layout/BookTabContent.tsx`, `src/components/settings/SettingsTabContent.tsx`, `src/components/settings/SettingsTabContent.test.tsx`
+- Tests: 339 TS + 39 Rust
+
+### 2026-05-31 - F41: Modal Acerca de Areyto
+- Commit: 4df1bd6
+- Qué se hizo: Modal "Acerca de Areyto" abierto desde un botón-icono `Info` (14px, lucide-react) en el extremo derecho de `TopTabs`. Estado local `const [showAbout, setShowAbout] = useState(false)` en `TopTabs` — NO toca `layoutStore`. `AboutDialog` nuevo sigue el patrón de modal del proyecto: backdrop `fixed inset-0 z-50 bg-black/60`, panel `bg-bg-tertiary border border-border-default rounded-lg`, cierra con X / Escape / click en backdrop. Contenido: nombre "Areyto", línea descriptiva, "Jíbaro en la Luna LLC", versión `0.1.0` obtenida con `getVersion()` de `@tauri-apps/api/app` (sin comando Rust nuevo, sin permiso extra en capabilities). Smoke confirmado.
+- Archivos creados: `src/components/about/AboutDialog.tsx`, `src/components/about/AboutDialog.test.tsx`, `src/components/layout/TopTabs.test.tsx`
+- Archivos modificados: `src/components/layout/TopTabs.tsx`
+- Tests: 333 TS + 37 Rust. Feature solo-frontend.
+
+### 2026-05-31 - F40: Fuente del tab Libro
+- Commit: 22c163b
+- Qué se hizo: Campos `bookFontFamily` (default `"serif"`) y `bookFontSize` (default `18`) en `GlobalSettings` Rust + TS. `applyBookFont(family, size)` en `settingsStore` inyecta `--font-book` y `--font-size-book` como inline style en `<html>`, paralelo a `applyEditorFont` de F38. `BookMarkdown.tsx` y `BookFrontmatterTitle.tsx` sustituyen `font-serif` hardcodeado por `var(--font-book)` vía inline style en el contenedor, y los tamaños absolutos por ratios em escalados desde `--font-size-book` (h1=1.78em, h2=1.39em, h3=1.11em, body/p/li=1em). Sección "Libro" en `SettingsTabContent` con dropdown de familia (4 opciones) y tamaño (16/18/20/22px). `bookFontFamily`/`bookFontSize` incluidos en `useSettingsPersistence` para evitar regresión del bug F39. Smoke confirmado: cambio de familia/tamaño del Libro independiente del editor, persiste tras reinicio.
+- Archivos modificados: `src-tauri/src/settings.rs`, `src/lib/settings.ts`, `src/stores/settingsStore.ts`, `src/stores/settingsStore.test.ts`, `src/styles/globals.css`, `src/components/book/BookMarkdown.tsx`, `src/components/book/BookFrontmatterTitle.tsx`, `src/components/settings/SettingsTabContent.tsx`, `src/components/settings/SettingsTabContent.test.tsx`, `src/hooks/useSettingsPersistence.ts`, `src/hooks/useSettingsPersistence.test.ts`
+- Tests: 317 TS + 37 Rust
+
+### 2026-05-31 - F39: Idioma por defecto de proyectos nuevos
+- Commits: `14da0e7` feat(F39) + `9161957` fix(F39 bug useSettingsPersistence)
+- Qué se hizo: Campo `defaultProjectLanguage: string` (default `"en"`) en `GlobalSettings` Rust + TS. Estado y setter `setDefaultProjectLanguage` en `settingsStore` (patrón F32: update optimista + persist). `defaultMetadata(lang?)` y `defaultContent(kind, lang?)` aceptan idioma opcional. `ensureFrontmatterFiles(rootPath, lang?)` pasa el idioma al crear `metadata.yaml` de proyectos nuevos. `open-project-flow.ts` lee `defaultProjectLanguage` del store al abrir proyecto. Sección "Proyectos" en `SettingsTabContent` con dropdown de 12 idiomas curados. Smoke confirmado: idioma: es en `metadata.yaml` de proyecto creado con setting 'es'.
+- Archivos creados: `src/hooks/useSettingsPersistence.test.ts`
+- Archivos modificados: `src-tauri/src/settings.rs`, `src/lib/settings.ts`, `src/stores/settingsStore.ts`, `src/stores/settingsStore.test.ts`, `src/lib/yaml-frontmatter.ts`, `src/lib/frontmatter-fs.ts`, `src/lib/frontmatter-fs.test.ts`, `src/lib/open-project-flow.ts`, `src/components/settings/SettingsTabContent.tsx`, `src/components/settings/SettingsTabContent.test.tsx`, `src/hooks/useSettingsPersistence.ts`
+- Tests: 304 TS + 33 Rust
+
+**Bug destapado en smoke:** `useSettingsPersistence.ts` reconstruía `GlobalSettings` con solo 6 campos hardcodeados, sobreescribiendo `defaultProjectLanguage`, `themeMode`, `editorFontFamily`, `editorFontSize` con los defaults de Rust en cada cambio de proyecto o panel. Afectaba F34/F37/F38/F39. Fix: incluir los 4 campos faltantes leídos del store en el objeto y en las dependencias del `useEffect`.
+
+**Bug secundario WebKit:** el `<select>` de 12 opciones no repintaba el label al cambiar el valor (WebKit usa popup scrollable para >4 opciones, que no reacciona a updates de React sin remount). Fix: `key={defaultProjectLanguage}` fuerza remount cuando el valor cambia.
+
+**Deuda técnica — no refactorizar ahora:** `useSettingsPersistence` sigue usando un objeto hardcodeado con todos los campos de `GlobalSettings`. El patrón correcto es read-modify-write: leer el disco con `readGlobalSettings()`, sobreescribir solo los campos que este hook gestiona (`lastProjectPath`, `panels`, `editorViewMode`), y conservar el resto intacto. Con el patrón actual, cualquier setting nuevo que se añada a `GlobalSettings` y se olvide aquí reintroduce el bug. Refactor pendiente cuando se añada el próximo setting de layout.
+
+
+## Features del branch local (item6/10/7a, F37, F38)
 
 ### 2026-08-02 - F37: File watcher automático
 - Qué se hizo: detección automática de cambios externos en .md de capitulos/ y capitulos-terminados/. Crate notify (Rust) con watcher.rs (watch_project/unwatch_project + WatcherState managed). Evento Tauri project-files-changed emitido en cada Create/Modify/Remove. Función pura decideReload en lib/watcher-reconcile.ts con 3 decisiones: ignore (eco del autosave), reload (sin ediciones locales), prompt (con ediciones locales). Hook useProjectWatcher con debounce 300ms: refreshChapters siempre + reload/prompt del capítulo activo. Store: lastSavedContent sincronizado en autosave (doSave + syncSaved) y en setActiveChapter; externalChangePending para el banner. Banner ExternalChangeBanner no bloqueante en EditorPanel con botón "Recargar" y X para descartar. Reload usa el mismo mecanismo que el restore de versiones (updateContent + syncAutosaveSaved + incrementEditorVersion).

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { IndiceItem } from '@/lib/export-composer';
 
 interface Props {
@@ -5,11 +6,12 @@ interface Props {
 }
 
 function BookIndice({ items }: Props) {
+  const { t } = useTranslation();
   if (items.length === 0) return null;
 
   return (
     <div className="max-w-[700px] mx-auto px-8 py-8 border-b border-border-subtle">
-      <h2 className="font-serif text-lg font-semibold text-text-primary mb-4">Índice</h2>
+      <h2 className="font-serif text-lg font-semibold text-text-primary mb-4">{t('book.indice')}</h2>
       <nav>
         <ul className="space-y-1">
           {items.map((item) => (
