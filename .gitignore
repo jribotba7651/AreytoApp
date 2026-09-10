@@ -13,3 +13,4 @@ src-tauri/gen/
 /backmatter/
 /proyecto.json
 /package-lock.json
+src-tauri/binaries/
