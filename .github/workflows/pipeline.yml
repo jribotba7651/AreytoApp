@@ -24,10 +24,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -45,17 +44,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: ESLint
         run: |
-          if [ -f ".eslintrc*" ] || [ -f "eslint.config*" ]; then
+          if [ -f "eslint.config.js" ] || [ -f "eslint.config.ts" ] || [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
             npx eslint src --ext .ts,.tsx
           else
-            echo "No ESLint config found — skipping (add one to enable)"
+            echo "No ESLint config found — skipping. Add eslint.config.js to enable."
           fi
 
   # ─────────────────────────────────────────────
@@ -71,10 +69,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: Vitest
         run: npx vitest run --reporter=verbose
@@ -88,7 +85,7 @@ jobs:
           if-no-files-found: ignore
 
   # ─────────────────────────────────────────────
-  # BOT 4: Cargo Check Bot
+  # BOT 4: Cargo Check Bot (macOS — Tauri nativo)
   # ─────────────────────────────────────────────
   cargo-check:
     name: "🤖 Cargo Check Bot"
@@ -104,15 +101,11 @@ jobs:
         with:
           workspaces: "src-tauri -> target"
 
-      - name: Install Tauri system deps (macOS)
-        run: |
-          # macOS already has WebKit, nothing extra needed
-
       - name: cargo check
-        run: cd src-tauri && cargo check
+        run: cd src-tauri && cargo check 2>&1
 
   # ─────────────────────────────────────────────
-  # BOT 5: Rust Test Bot
+  # BOT 5: Rust Test Bot (macOS)
   # ─────────────────────────────────────────────
   test-rust:
     name: "🤖 Rust Test Bot"
@@ -145,10 +138,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: Build frontend
         run: npm run build
@@ -178,11 +170,11 @@ jobs:
           echo "Rust Tests : ${{ needs.test-rust.result }}"
           echo "Build      : ${{ needs.build-frontend.result }}"
 
-          if [[ "${{ needs.typecheck.result }}"    != "success" ||
-                "${{ needs.lint.result }}"         != "success" ||
-                "${{ needs.test-ts.result }}"      != "success" ||
-                "${{ needs.cargo-check.result }}"  != "success" ||
-                "${{ needs.test-rust.result }}"    != "success" ||
+          if [[ "${{ needs.typecheck.result }}"      != "success" ||
+                "${{ needs.lint.result }}"           != "success" ||
+                "${{ needs.test-ts.result }}"        != "success" ||
+                "${{ needs.cargo-check.result }}"    != "success" ||
+                "${{ needs.test-rust.result }}"      != "success" ||
                 "${{ needs.build-frontend.result }}" != "success" ]]; then
             echo "❌ Pipeline FAILED — uno o más bots fallaron."
             exit 1
