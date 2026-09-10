@@ -12,5 +12,5 @@ src-tauri/gen/
 /frontmatter/
 /backmatter/
 /proyecto.json
-/package-lock.json
+# package-lock.json is tracked for CI (was excluded due to pnpm, now npm)
 src-tauri/binaries/

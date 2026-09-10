@@ -26,7 +26,7 @@ jobs:
           node-version: "22"
 
       - name: Install deps
-        run: npm install
+        run: npm ci
 
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -46,7 +46,7 @@ jobs:
           node-version: "22"
 
       - name: Install deps
-        run: npm install
+        run: npm ci
 
       - name: ESLint
         run: |
@@ -71,7 +71,7 @@ jobs:
           node-version: "22"
 
       - name: Install deps
-        run: npm install
+        run: npm ci
 
       - name: Vitest
         run: npx vitest run --reporter=verbose
@@ -101,6 +101,9 @@ jobs:
         with:
           workspaces: "src-tauri -> target"
 
+      - name: Create pandoc stub for CI
+        run: mkdir -p src-tauri/binaries && touch src-tauri/binaries/pandoc-aarch64-apple-darwin && chmod +x src-tauri/binaries/pandoc-aarch64-apple-darwin
+
       - name: cargo check
         run: cd src-tauri && cargo check 2>&1
 
@@ -122,6 +125,9 @@ jobs:
         with:
           workspaces: "src-tauri -> target"
 
+      - name: Create pandoc stub for CI
+        run: mkdir -p src-tauri/binaries && touch src-tauri/binaries/pandoc-aarch64-apple-darwin && chmod +x src-tauri/binaries/pandoc-aarch64-apple-darwin
+
       - name: cargo test
         run: cd src-tauri && cargo test
 
@@ -140,7 +146,7 @@ jobs:
           node-version: "22"
 
       - name: Install deps
-        run: npm install
+        run: npm ci
 
       - name: Build frontend
         run: npm run build
