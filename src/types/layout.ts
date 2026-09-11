@@ -18,6 +18,7 @@ export interface LayoutState {
   showCloseChapterModal: boolean;
   editorViewMode: EditorViewMode;
   showExportDialog: boolean;
+  showShortcutsModal: boolean;
   bookViewMode: BookViewMode;
   deviceFrame: DeviceFrame;
 }

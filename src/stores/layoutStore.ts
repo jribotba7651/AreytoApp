@@ -9,6 +9,7 @@ interface LayoutActions {
   setEditorViewMode: (mode: EditorViewMode) => void;
   toggleEditorViewMode: () => void;
   setShowExportDialog: (show: boolean) => void;
+  setShowShortcutsModal: (show: boolean) => void;
   setBookViewMode: (mode: BookViewMode) => void;
   setDeviceFrame: (frame: DeviceFrame) => void;
 }
@@ -29,6 +30,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   showCloseChapterModal: false,
   editorViewMode: 'edit',
   showExportDialog: false,
+  showShortcutsModal: false,
   bookViewMode: 'write',
   deviceFrame: 'none',
 
@@ -50,6 +52,8 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
     })),
 
   setShowExportDialog: (show: boolean) => set({ showExportDialog: show }),
+
+  setShowShortcutsModal: (show: boolean) => set({ showShortcutsModal: show }),
 
   setBookViewMode: (mode: BookViewMode) => set({ bookViewMode: mode }),
 

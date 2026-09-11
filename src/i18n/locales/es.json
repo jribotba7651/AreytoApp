@@ -103,6 +103,7 @@
   "topbar": {
     "closeProject": "Cerrar proyecto",
     "export": "Exportar",
+    "shortcuts": "Atajos de teclado",
     "about": "Acerca de"
   },
   "theme": {
@@ -350,5 +351,20 @@
     "company": "Jíbaro en la Luna LLC",
     "version": "Versión {{version}}",
     "close": "Cerrar"
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "save": "Guardar",
+    "newChapter": "Nuevo capitulo",
+    "closeChapter": "Cerrar capitulo",
+    "refresh": "Refrescar capitulos",
+    "toggleEditor": "Editar / Previsualizar",
+    "tabChapter": "Tab Capitulo Activo",
+    "tabBook": "Tab Libro",
+    "tabFinished": "Tab Terminados",
+    "tabSettings": "Tab Ajustes",
+    "openProject": "Abrir proyecto",
+    "closeProject": "Cerrar proyecto",
+    "showShortcuts": "Mostrar atajos"
   }
 }

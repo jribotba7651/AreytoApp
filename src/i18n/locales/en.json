@@ -103,6 +103,7 @@
   "topbar": {
     "closeProject": "Close project",
     "export": "Export",
+    "shortcuts": "Keyboard shortcuts",
     "about": "About"
   },
   "theme": {
@@ -350,5 +351,20 @@
     "company": "Jíbaro en la Luna LLC",
     "version": "Version {{version}}",
     "close": "Close"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "save": "Save",
+    "newChapter": "New chapter",
+    "closeChapter": "Close chapter",
+    "refresh": "Refresh chapters",
+    "toggleEditor": "Edit / Preview",
+    "tabChapter": "Chapter tab",
+    "tabBook": "Book tab",
+    "tabFinished": "Finished tab",
+    "tabSettings": "Settings tab",
+    "openProject": "Open project",
+    "closeProject": "Close project",
+    "showShortcuts": "Show shortcuts"
   }
 }

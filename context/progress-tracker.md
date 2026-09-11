@@ -3,12 +3,23 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: Epic 4 (Theming)
+- Fase activa: Polish/UX
 - Feature en progreso: ninguna
-- Ultima feature completada: Item 14 - Theme builder preview en tiempo real
+- Ultima feature completada: F50 - Validacion de estructura al abrir proyecto
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - F50 - Validacion de estructura al abrir proyecto
+- Que se hizo: openProject ahora verifica y crea automaticamente las 4 subcarpetas requeridas (frontmatter, capitulos, capitulos-terminados, backmatter) al abrir un proyecto. Si proyecto.json existe pero faltan carpetas (por ejemplo, un proyecto migrado o con estructura incompleta), se crean con ensureDir en vez de fallar. Constante REQUIRED_SUBDIRS extraida para DRY con createProject.
+- Archivos modificados:
+  - src/lib/project-fs.ts (REQUIRED_SUBDIRS constante, openProject ahora llama ensureDir por cada subcarpeta tras parsear proyecto.json)
+  - src/lib/project-fs.test.ts (test actualizado para mockear ensure_dir x4, verifica que las 4 subcarpetas se aseguran al abrir)
+- Decisiones tomadas:
+  - D-218: Estrategia de autocuracion en vez de error. Si proyecto.json existe, las carpetas faltantes se crean automaticamente. Mas robusto que mostrar error al usuario.
+  - D-219: Se reutiliza la misma lista REQUIRED_SUBDIRS que createProject usa. DRY.
+- Tests: 415 TS -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - Item 14 - Theme builder: preview en tiempo real
 - Que se hizo: En el panel ThemeControls (modo Formatear), se agrego una muestra de texto en tiempo real que refleja el tema actual. La muestra incluye un heading H1 ("El viaje comienza"), dos parrafos de prosa con tipografia, sangria, interlineado y justificacion del tema aplicados, y el ornamento de section break si esta configurado. La muestra se actualiza instantaneamente al cambiar cualquier control del tema (font family, font size, line height, indent, spacing, justify, ornament, drop caps). CSS vars del tema aplicadas via themeToCssVars sobre el contenedor del preview.

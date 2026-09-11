@@ -91,6 +91,8 @@ function parseProyectoJson(raw: string, path: string): ProjectResult<ProyectoJso
 
 // --- API pública ---
 
+const REQUIRED_SUBDIRS = ['frontmatter', 'capitulos', 'capitulos-terminados', 'backmatter'];
+
 export async function openProject(rootPath: string): Promise<ProjectResult<Project>> {
   const jsonPath = `${rootPath}/proyecto.json`;
 
@@ -102,6 +104,12 @@ export async function openProject(rootPath: string): Promise<ProjectResult<Proje
 
   const parsed = parseProyectoJson(read.value, jsonPath);
   if (!parsed.ok) return parsed;
+
+  // Ensure the 4 required subdirectories exist (create if missing)
+  for (const dir of REQUIRED_SUBDIRS) {
+    const result = await ensureDir(`${rootPath}/${dir}`);
+    if (!result.ok) return result;
+  }
 
   return ok({ rootPath, ...parsed.value });
 }

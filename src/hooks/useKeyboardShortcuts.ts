@@ -18,6 +18,13 @@ export function useKeyboardShortcuts() {
         return;
       }
 
+      // Cmd+?: toggle shortcuts modal (always-on)
+      if (matchShortcut(e, SHORTCUTS.SHOW_SHORTCUTS)) {
+        e.preventDefault();
+        layout.setShowShortcutsModal(!layout.showShortcutsModal);
+        return;
+      }
+
       // All other shortcuts blocked when modal is open
       if (layout.showCloseChapterModal) return;
 

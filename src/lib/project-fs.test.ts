@@ -82,10 +82,11 @@ describe('generateNextChapterFilename', () => {
 // --- Funciones con invoke mockeado ---
 
 describe('openProject', () => {
-  it('abre un proyecto válido con proyecto.json', async () => {
+  it('abre un proyecto válido con proyecto.json y asegura subcarpetas', async () => {
     mockInvoke
-      .mockResolvedValueOnce(true)        // path_exists
-      .mockResolvedValueOnce(PROYECTO_JSON); // read_text_file
+      .mockResolvedValueOnce(true)          // path_exists
+      .mockResolvedValueOnce(PROYECTO_JSON) // read_text_file
+      .mockResolvedValue(undefined);        // ensure_dir x4
 
     const result = await openProject('/tmp/mi-libro');
 
@@ -94,6 +95,14 @@ describe('openProject', () => {
       expect(result.value.nombre).toBe('Mi Libro');
       expect(result.value.rootPath).toBe('/tmp/mi-libro');
     }
+
+    const ensuredDirs = mockInvoke.mock.calls
+      .filter(([cmd]) => cmd === 'ensure_dir')
+      .map(([, args]) => (args as { path: string }).path);
+    expect(ensuredDirs).toContain('/tmp/mi-libro/frontmatter');
+    expect(ensuredDirs).toContain('/tmp/mi-libro/capitulos');
+    expect(ensuredDirs).toContain('/tmp/mi-libro/capitulos-terminados');
+    expect(ensuredDirs).toContain('/tmp/mi-libro/backmatter');
   });
 
   it('falla con NotAProject cuando no hay proyecto.json', async () => {
