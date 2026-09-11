@@ -283,7 +283,8 @@
       "presetSaved": "Preset saved",
       "presetNameRequired": "Enter a name for the preset",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "previewTitle": "Preview"
     },
     "bookSettings": {
       "title": "Book Settings",

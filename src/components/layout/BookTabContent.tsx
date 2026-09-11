@@ -291,6 +291,7 @@ function BookTabContent() {
                   themeId={currentProject?.tema}
                   themeOverrides={currentProject?.temaOverrides}
                   bookSettings={currentProject?.bookSettings}
+                  projectRootPath={currentProject?.rootPath}
                 />
               );
             }

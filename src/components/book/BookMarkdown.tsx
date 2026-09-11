@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { resolveTheme, themeToCssVars } from '@/lib/theme';
 import { DEFAULT_BOOK_SETTINGS, type BookSettings } from '@/types/project';
 import { Info, AlertTriangle, Quote } from 'lucide-react';
@@ -120,6 +121,7 @@ interface BookMarkdownProps {
   themeId?: string | null;
   themeOverrides?: Record<string, unknown> | null;
   bookSettings?: BookSettings;
+  projectRootPath?: string;
 }
 
 const MD_COMPONENTS: Components = {
@@ -249,11 +251,45 @@ function bookSettingsToStyle(bs: BookSettings): React.CSSProperties {
   };
 }
 
-function BookMarkdown({ content, themeId, themeOverrides, bookSettings }: BookMarkdownProps) {
+function resolveImageSrc(src: string, projectRootPath?: string): string {
+  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
+    return src;
+  }
+  if (projectRootPath) {
+    const absolutePath = src.startsWith('/') ? src : `${projectRootPath}/${src}`;
+    return convertFileSrc(absolutePath);
+  }
+  return src;
+}
+
+function BookMarkdown({ content, themeId, themeOverrides, bookSettings, projectRootPath }: BookMarkdownProps) {
   const theme = resolveTheme(themeId, themeOverrides);
   const cssVars = themeToCssVars(theme);
   const bs = bookSettings ?? DEFAULT_BOOK_SETTINGS;
   const trimStyle = bookSettingsToStyle(bs);
+
+  const components = useMemo<Components>(() => ({
+    ...MD_COMPONENTS,
+    img: ({ src, alt }: { src?: string; alt?: string }) => {
+      if (!src) return null;
+      const resolved = resolveImageSrc(src, projectRootPath);
+      return (
+        <figure className="my-6 flex flex-col items-center">
+          <img
+            src={resolved}
+            alt={alt ?? ''}
+            style={{ maxWidth: '100%', height: 'auto' }}
+            className="rounded"
+          />
+          {alt && (
+            <figcaption className="text-sm text-text-secondary mt-2 text-center italic">
+              {alt}
+            </figcaption>
+          )}
+        </figure>
+      );
+    },
+  }), [projectRootPath]);
 
   return (
     <div
@@ -261,7 +297,7 @@ function BookMarkdown({ content, themeId, themeOverrides, bookSettings }: BookMa
       className={`mx-auto${theme.dropCaps ? ' book-md-dropcaps' : ''}`}
     >
       {theme.dropCaps && <style>{DROP_CAPS_CSS}</style>}
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
     </div>

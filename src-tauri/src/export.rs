@@ -214,6 +214,7 @@ pub async fn export_book_docx(
         .args([
             "-f", "markdown",
             "-t", "docx",
+            "--resource-path", &project_path,
             "-o", &output_path,
             temp_path.to_str().unwrap_or(""),
         ])
@@ -281,6 +282,7 @@ pub async fn export_book_epub(
         "-f".to_string(), "markdown".to_string(),
         "-t".to_string(), "epub".to_string(),
         "--toc".to_string(),
+        "--resource-path".to_string(), project_path.clone(),
         "--css".to_string(), temp_css.to_str().unwrap_or("").to_string(),
         "-o".to_string(), output_path.clone(),
     ];

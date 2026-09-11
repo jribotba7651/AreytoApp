@@ -109,6 +109,7 @@ function ChapterView() {
             content={activeChapterContent}
             themeId={currentProject?.tema}
             themeOverrides={currentProject?.temaOverrides}
+            projectRootPath={currentProject?.rootPath}
           />
         </div>
       </div>

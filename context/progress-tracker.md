@@ -5,10 +5,38 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Ultima feature completada: F37 performance - Watcher debounce Rust
+- Ultima feature completada: Item 14 - Theme builder preview en tiempo real
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - Item 14 - Theme builder: preview en tiempo real
+- Que se hizo: En el panel ThemeControls (modo Formatear), se agrego una muestra de texto en tiempo real que refleja el tema actual. La muestra incluye un heading H1 ("El viaje comienza"), dos parrafos de prosa con tipografia, sangria, interlineado y justificacion del tema aplicados, y el ornamento de section break si esta configurado. La muestra se actualiza instantaneamente al cambiar cualquier control del tema (font family, font size, line height, indent, spacing, justify, ornament, drop caps). CSS vars del tema aplicadas via themeToCssVars sobre el contenedor del preview.
+- Archivos modificados:
+  - src/components/book/ThemeControls.tsx (import themeToCssVars, bloque "Live preview" con heading/parrafos/section break)
+  - src/i18n/locales/en.json (book.themeControls.previewTitle)
+  - src/i18n/locales/es.json (book.themeControls.previewTitle)
+- Decisiones tomadas:
+  - D-212: El preview usa texto de muestra en espanol hardcodeado (no i18n) porque es contenido literario de ejemplo, no UI chrome. Consistente con que el producto es para escritores en espanol.
+  - D-213: El preview se coloca entre los controles y el boton "Guardar como preset", separado por borde superior sutil.
+- Tests: 415 TS + 41 Rust -- todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-09-11 - Item 12 - Soporte de imagenes en capitulos markdown
+- Que se hizo: Las imagenes insertadas en capitulos via sintaxis markdown estandar (![alt](ruta)) ahora se renderizan en el preview del tab Libro y en el preview del editor. Rutas relativas al proyecto se resuelven via convertFileSrc de Tauri (protocolo asset). En exports EPUB y DOCX, pandoc recibe --resource-path apuntando al directorio del proyecto, lo que permite resolver y embeber las imagenes automaticamente. En export markdown, las rutas se mantienen relativas.
+- Archivos modificados:
+  - src/components/book/BookMarkdown.tsx (import convertFileSrc y useMemo; funcion resolveImageSrc para resolver rutas relativas; componente img dinamico en useMemo con figure centrada, max-width 100%, figcaption con alt text; prop projectRootPath)
+  - src/components/book/BookChapter.tsx (prop projectRootPath propagado a BookMarkdown)
+  - src/components/layout/BookTabContent.tsx (pasa currentProject.rootPath como projectRootPath a BookChapter)
+  - src/components/panels/EditorPanel.tsx (pasa currentProject.rootPath como projectRootPath a BookMarkdown)
+  - src-tauri/src/export.rs (--resource-path project_path en export_book_docx y export_book_epub para que pandoc resuelva imagenes relativas)
+- Decisiones tomadas:
+  - D-214: Las imagenes se renderizan centradas en un <figure> con max-width: 100% y height: auto. El alt text se muestra como <figcaption> en italica debajo de la imagen.
+  - D-215: Rutas absolutas y URLs externas (http/https/data:) se pasan sin modificar. Solo las rutas relativas se resuelven contra projectRootPath via convertFileSrc.
+  - D-216: Para exports, --resource-path de pandoc resuelve imagenes relativas sin necesidad de copiar archivos. EPUB las embebe dentro del .epub, DOCX las incluye inline. No se requieren dependencias nuevas.
+  - D-217: El protocolo asset de Tauri v2 funciona sin configuracion adicional cuando CSP es null (configuracion actual del proyecto).
+- Tests: 415 TS + 41 Rust -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - F37 performance - Watcher debounce en Rust
 - Que se hizo: El file watcher en Rust (watcher.rs) ahora incluye debounce de 500ms y deduplicacion de eventos redundantes del mismo archivo dentro de 100ms. Antes, cada evento del filesystem se emitia inmediatamente al front, causando rafagas excesivas. Ahora un hilo flusher acumula paths en un buffer compartido (Arc<Mutex>), y solo emite el batch al front cuando pasan 500ms sin nuevos eventos. Ademas, eventos del mismo path dentro de 100ms se descartan (dedup por timestamp). El debounce de 300ms en el front (useProjectWatcher) se mantiene sin cambios. Comportamiento visible identico.

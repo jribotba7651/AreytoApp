@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Save } from 'lucide-react';
-import { resolveTheme, type Theme, type DeepPartial } from '@/lib/theme';
+import { resolveTheme, themeToCssVars, type Theme, type DeepPartial } from '@/lib/theme';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 
@@ -185,6 +185,66 @@ function ThemeControls({ themeId, themeOverrides }: ThemeControlsProps) {
         />
         <span className="text-xs text-text-secondary">{t('book.themeControls.dropCaps')}</span>
       </label>
+
+      {/* Live preview */}
+      <div className="mt-4 pt-3 border-t border-border-subtle">
+        <h4 className="text-xs font-medium text-text-secondary mb-2">
+          {t('book.themeControls.previewTitle')}
+        </h4>
+        <div
+          className="p-4 border border-border-default rounded bg-bg-editor overflow-hidden"
+          style={themeToCssVars(resolved) as React.CSSProperties}
+        >
+          <h1
+            className="font-semibold text-text-primary leading-tight mb-3"
+            style={{
+              fontFamily: 'var(--book-heading-font)',
+              fontSize: 'var(--book-h1-size)',
+              textAlign: 'var(--book-chapter-align)' as React.CSSProperties['textAlign'],
+            }}
+          >
+            El viaje comienza
+          </h1>
+          <p
+            className="text-text-editor"
+            style={{
+              fontFamily: 'var(--book-body-font)',
+              fontSize: 'var(--book-body-size)',
+              lineHeight: 'var(--book-line-height)',
+              textIndent: 'var(--book-indent)',
+              marginBottom: 'var(--book-para-space)',
+              textAlign: 'var(--book-justify)' as React.CSSProperties['textAlign'],
+            }}
+          >
+            La manana estaba tranquila cuando salio de la casa. El sol apenas
+            asomaba por encima de los arboles, y el aire traia consigo el aroma
+            fresco de la tierra mojada por la lluvia de la noche anterior.
+          </p>
+          <p
+            className="text-text-editor"
+            style={{
+              fontFamily: 'var(--book-body-font)',
+              fontSize: 'var(--book-body-size)',
+              lineHeight: 'var(--book-line-height)',
+              textIndent: 'var(--book-indent)',
+              marginBottom: 'var(--book-para-space)',
+              textAlign: 'var(--book-justify)' as React.CSSProperties['textAlign'],
+            }}
+          >
+            Camino sin prisa por el sendero de piedra, sintiendo cada paso como
+            una promesa silenciosa. No sabia lo que encontraria al final del
+            camino, pero algo dentro de ella la empujaba a seguir adelante.
+          </p>
+          {resolved.sectionBreak.ornament && (
+            <div className="text-center text-text-secondary my-4" style={{
+              fontFamily: 'var(--book-body-font)',
+              fontSize: 'var(--book-body-size)',
+            }}>
+              {resolved.sectionBreak.ornament}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Save as preset */}
       {!showPresetDialog ? (
