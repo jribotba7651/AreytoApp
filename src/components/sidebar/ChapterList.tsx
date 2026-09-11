@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
-import { readChapter, updateProjectMeta } from '@/lib/project-fs';
+import { readChapter, updateProjectMeta, renameChapterTitle } from '@/lib/project-fs';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
 
@@ -11,13 +11,14 @@ function ChapterList() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const setCommits = useProjectStore((s) => s.setCommits);
+  const setChapters = useProjectStore((s) => s.setChapters);
 
   async function handleSelect(chapterPath: string, filename: string) {
     if (chapterPath === activeChapterPath || !currentProject) return;
 
     const read = await readChapter(chapterPath);
     if (!read.ok) {
-      console.error('Error al leer capítulo:', read.error);
+      console.error('Error al leer capitulo:', read.error);
       return;
     }
 
@@ -26,6 +27,26 @@ function ChapterList() {
 
     const commitsResult = await loadCommitsForActiveChapter(currentProject.rootPath, chapterPath);
     if (commitsResult.ok) setCommits(commitsResult.value);
+  }
+
+  async function handleRename(chapter: { path: string; filename: string }, newTitle: string) {
+    const result = await renameChapterTitle(chapter.path, newTitle);
+    if (!result.ok) return;
+
+    // Update chapters list with new title
+    setChapters(
+      chapters.map((c) =>
+        c.path === chapter.path ? { ...c, title: newTitle } : c
+      )
+    );
+
+    // If this is the active chapter, update its content too
+    if (chapter.path === activeChapterPath) {
+      const store = useProjectStore.getState();
+      store.updateContent(result.value);
+      store.setLastSavedContent(result.value);
+      store.incrementEditorVersion();
+    }
   }
 
   if (chapters.length === 0) {
@@ -44,6 +65,7 @@ function ChapterList() {
           chapter={chapter}
           isActive={chapter.path === activeChapterPath}
           onClick={() => handleSelect(chapter.path, chapter.filename)}
+          onRename={(newTitle) => handleRename(chapter, newTitle)}
         />
       ))}
     </div>

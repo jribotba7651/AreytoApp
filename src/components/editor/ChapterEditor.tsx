@@ -4,6 +4,7 @@ import { EditorView, keymap, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { createEditorTheme } from './editor-theme';
+import { markdownFormatKeymap } from './markdown-format';
 
 interface ChapterEditorProps {
   initialContent: string;
@@ -30,7 +31,7 @@ function ChapterEditor({ initialContent, onChange }: ChapterEditorProps) {
         createEditorTheme(),
         history(),
         highlightActiveLine(),
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        keymap.of([...markdownFormatKeymap, ...defaultKeymap, ...historyKeymap]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChangeRef.current?.(update.state.doc.toString());

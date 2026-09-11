@@ -5,10 +5,42 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Polish/UX
 - Feature en progreso: ninguna
-- Ultima feature completada: F50 - Validacion de estructura al abrir proyecto
+- Ultima feature completada: Polish - Renombrar capitulo desde sidebar
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - Polish - Renombrar capitulo desde sidebar (doble-click)
+- Que se hizo: Doble-click en un capitulo en la sidebar entra en modo edicion inline. El usuario puede editar el titulo y confirmar con Enter o blur, o cancelar con Escape. Al confirmar, se reemplaza el H1 del archivo .md en disco, se actualiza la lista de capitulos, y si es el capitulo activo se recarga el contenido en el editor. Funcion pura replaceChapterTitle en project-fs.ts reemplaza el primer H1 o prepend uno nuevo si no existe.
+- Archivos creados: ninguno
+- Archivos modificados:
+  - src/components/sidebar/ChapterListItem.tsx (estado editing/draft, input inline con doble-click, commit con Enter/blur, cancel con Escape, prop onRename)
+  - src/components/sidebar/ChapterList.tsx (handleRename que llama renameChapterTitle, actualiza store chapters, recarga editor si es capitulo activo)
+  - src/lib/project-fs.ts (replaceChapterTitle funcion pura, renameChapterTitle funcion async que lee/reemplaza/escribe)
+  - src/lib/project-fs.test.ts (3 tests nuevos para replaceChapterTitle: reemplazo, prepend sin H1, solo primer H1)
+- Decisiones tomadas:
+  - D-223: Renombrar edita el H1 del contenido .md, no el filename del archivo. El filename (cap-01.md, cap-02.md) permanece estable para no romper referencias de git.
+  - D-224: Si el capitulo renombrado es el activo, se hace updateContent + setLastSavedContent + incrementEditorVersion para que el editor remonte con el contenido actualizado.
+  - D-225: replaceChapterTitle es funcion pura exportada, testeada independientemente.
+- Tests: 425 TS -- todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-09-11 - Polish - Atajos de formato en editor (Cmd+B/I/K)
+- Que se hizo: Atajos de formato markdown en el editor CodeMirror. Cmd+B alterna negrita (**texto**), Cmd+I alterna cursiva (*texto*), Cmd+K inserta enlace ([texto](url)). Todos los atajos funcionan como toggle: si el texto seleccionado ya esta envuelto en marcadores, los remueve. Si no hay seleccion, inserta los marcadores y posiciona el cursor entre ellos. Los atajos aparecen en el modal de atajos de teclado (ShortcutsDialog).
+- Archivos creados:
+  - src/components/editor/markdown-format.ts (toggleWrap generico + insertLink, keymap de CodeMirror)
+  - src/components/editor/markdown-format.test.ts (7 tests: bold wrap/unwrap/cursor, italic wrap/unwrap, link con seleccion/sin seleccion)
+- Archivos modificados:
+  - src/components/editor/ChapterEditor.tsx (import y registro de markdownFormatKeymap antes de defaultKeymap)
+  - src/components/shortcuts/ShortcutsDialog.tsx (3 filas nuevas para bold/italic/link con display manual)
+  - src/i18n/locales/en.json (shortcuts.bold/italic/link)
+  - src/i18n/locales/es.json (shortcuts.bold/italic/link)
+- Decisiones tomadas:
+  - D-220: markdownFormatKeymap registrado ANTES de defaultKeymap para que Cmd+B/I/K intercepten antes que cualquier binding default de CodeMirror.
+  - D-221: toggleWrap es generico (recibe el marcador como string). Soporta **, *, ~~, etc. sin duplicar logica.
+  - D-222: Los atajos de formato son keybindings de CodeMirror (no globales via useKeyboardShortcuts) porque solo aplican cuando el editor tiene foco.
+- Tests: 422 TS -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - F50 - Validacion de estructura al abrir proyecto
 - Que se hizo: openProject ahora verifica y crea automaticamente las 4 subcarpetas requeridas (frontmatter, capitulos, capitulos-terminados, backmatter) al abrir un proyecto. Si proyecto.json existe pero faltan carpetas (por ejemplo, un proyecto migrado o con estructura incompleta), se crean con ensureDir en vez de fallar. Constante REQUIRED_SUBDIRS extraida para DRY con createProject.

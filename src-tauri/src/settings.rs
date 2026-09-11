@@ -29,6 +29,8 @@ pub struct GlobalSettings {
     pub version: u32,
     #[serde(default = "default_auto_commit")]
     pub auto_commit: bool,
+    #[serde(default = "default_autosave_enabled")]
+    pub autosave_enabled: bool,
     #[serde(default = "default_autosave_interval_ms")]
     pub autosave_interval_ms: u32,
     #[serde(default = "default_theme_mode")]
@@ -63,6 +65,10 @@ fn default_version() -> u32 {
 }
 
 fn default_auto_commit() -> bool {
+    true
+}
+
+fn default_autosave_enabled() -> bool {
     true
 }
 

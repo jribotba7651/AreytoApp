@@ -10,7 +10,8 @@ interface ShortcutsDialogProps {
 
 interface ShortcutRow {
   labelKey: string;
-  shortcut: ShortcutDef;
+  shortcut?: ShortcutDef;
+  display?: string;
 }
 
 const SHORTCUT_ROWS: ShortcutRow[] = [
@@ -19,6 +20,9 @@ const SHORTCUT_ROWS: ShortcutRow[] = [
   { labelKey: 'shortcuts.closeChapter', shortcut: SHORTCUTS.CLOSE_CHAPTER },
   { labelKey: 'shortcuts.refresh', shortcut: SHORTCUTS.REFRESH },
   { labelKey: 'shortcuts.toggleEditor', shortcut: SHORTCUTS.TOGGLE_EDITOR_VIEW },
+  { labelKey: 'shortcuts.bold', display: '\u2318B' },
+  { labelKey: 'shortcuts.italic', display: '\u2318I' },
+  { labelKey: 'shortcuts.link', display: '\u2318K' },
   { labelKey: 'shortcuts.tabChapter', shortcut: SHORTCUTS.TAB_CHAPTER },
   { labelKey: 'shortcuts.tabBook', shortcut: SHORTCUTS.TAB_BOOK },
   { labelKey: 'shortcuts.tabFinished', shortcut: SHORTCUTS.TAB_FINISHED },
@@ -66,7 +70,7 @@ function ShortcutsDialog({ onClose }: ShortcutsDialogProps) {
             >
               <span className="text-text-secondary">{t(row.labelKey)}</span>
               <kbd className="px-2 py-0.5 rounded bg-bg-secondary border border-border-subtle text-xs font-mono text-text-primary">
-                {formatShortcut(row.shortcut)}
+                {row.shortcut ? formatShortcut(row.shortcut) : row.display}
               </kbd>
             </div>
           ))}

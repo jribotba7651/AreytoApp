@@ -183,6 +183,28 @@ export async function writeChapter(
   return writeFile(chapterPath, contents);
 }
 
+export function replaceChapterTitle(content: string, newTitle: string): string {
+  const h1Re = /^#\s+.+$/m;
+  if (h1Re.test(content)) {
+    return content.replace(h1Re, `# ${newTitle}`);
+  }
+  return `# ${newTitle}\n\n${content}`;
+}
+
+export async function renameChapterTitle(
+  chapterPath: string,
+  newTitle: string
+): Promise<ProjectResult<string>> {
+  const read = await readFile(chapterPath);
+  if (!read.ok) return read;
+
+  const updated = replaceChapterTitle(read.value, newTitle);
+  const write = await writeFile(chapterPath, updated);
+  if (!write.ok) return write;
+
+  return ok(updated);
+}
+
 export async function createChapter(
   project: Project,
   title?: string

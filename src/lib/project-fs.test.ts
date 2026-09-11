@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   extractChapterTitle,
   generateNextChapterFilename,
+  replaceChapterTitle,
   openProject,
   createProject,
   listChapters,
@@ -55,6 +56,23 @@ describe('extractChapterTitle', () => {
   it('ignora h2 y h3, solo extrae h1', () => {
     const content = '## Subtítulo\n\n### Otra cosa';
     expect(extractChapterTitle(content, 'cap-02.md')).toBe('cap-02');
+  });
+});
+
+describe('replaceChapterTitle', () => {
+  it('reemplaza el H1 existente con el nuevo titulo', () => {
+    const content = '# Viejo titulo\n\nContenido aqui.';
+    expect(replaceChapterTitle(content, 'Nuevo titulo')).toBe('# Nuevo titulo\n\nContenido aqui.');
+  });
+
+  it('prepend H1 si no existe', () => {
+    const content = 'Solo contenido sin heading.';
+    expect(replaceChapterTitle(content, 'Mi titulo')).toBe('# Mi titulo\n\nSolo contenido sin heading.');
+  });
+
+  it('solo reemplaza el primer H1', () => {
+    const content = '# Primero\n\n# Segundo\n\nTexto.';
+    expect(replaceChapterTitle(content, 'Nuevo')).toBe('# Nuevo\n\n# Segundo\n\nTexto.');
   });
 });
 
