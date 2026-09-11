@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Download, FileText } from 'lucide-react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
@@ -21,9 +20,11 @@ import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
 import ThemeGallery from '@/components/book/ThemeGallery';
+import DeviceFrame from '@/components/book/DeviceFrame';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
+import type { BookViewMode, DeviceFrame as DeviceFrameType } from '@/types/layout';
 
 function BookTabContent() {
   const { t } = useTranslation();
@@ -33,7 +34,12 @@ function BookTabContent() {
   const setExportFolder = useSettingsStore((s) => s.setExportFolder);
   const [bookData, setBookData] = useState<BookData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
+  const showExportDialog = useLayoutStore((s) => s.showExportDialog);
+  const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
+  const bookViewMode = useLayoutStore((s) => s.bookViewMode);
+  const setBookViewMode = useLayoutStore((s) => s.setBookViewMode);
+  const deviceFrame = useLayoutStore((s) => s.deviceFrame);
+  const setDeviceFrame = useLayoutStore((s) => s.setDeviceFrame);
   const [exportLoading, setExportLoading] = useState(false);
   const [showDocxDialog, setShowDocxDialog] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
@@ -249,41 +255,62 @@ function BookTabContent() {
     );
   }
 
+  const VIEW_MODES: { id: BookViewMode; labelKey: string }[] = [
+    { id: 'write', labelKey: 'book.writeMode' },
+    { id: 'format', labelKey: 'book.formatMode' },
+  ];
+
+  const DEVICE_OPTIONS: { id: DeviceFrameType; labelKey: string }[] = [
+    { id: 'none', labelKey: 'book.deviceFrame.none' },
+    { id: 'kindle', labelKey: 'book.deviceFrame.kindle' },
+    { id: 'print', labelKey: 'book.deviceFrame.print' },
+    { id: 'tablet', labelKey: 'book.deviceFrame.tablet' },
+  ];
+
   return (
     <div className="h-full flex flex-col bg-bg-primary">
-      <div className="flex items-center justify-end gap-2 px-4 py-2 border-b border-border-subtle shrink-0">
-        <button
-          onClick={() => setShowDocxDialog(true)}
-          disabled={docxLoading}
-          className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
-          title={t('book.export.toWordTitle')}
-        >
-          <FileText size={14} />
-          <span>{t('book.export.toWordLabel')}</span>
-        </button>
-        <button
-          onClick={() => setShowEpubDialog(true)}
-          disabled={epubLoading}
-          className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
-          title="Exportar libro a EPUB"
-        >
-          <BookOpen size={14} />
-          <span>EPUB</span>
-        </button>
-        <button
-          onClick={() => setShowExportDialog(true)}
-          disabled={exportLoading}
-          className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-40 rounded hover:bg-bg-tertiary transition-colors duration-150"
-          title={t('book.export.toMarkdownTitle')}
-        >
-          <Download size={14} />
-          <span>{t('book.export.toMarkdownLabel')}</span>
-        </button>
+      <div className="flex items-center gap-1 px-4 py-1.5 border-b border-border-subtle shrink-0">
+        {VIEW_MODES.map((mode) => (
+          <button
+            key={mode.id}
+            onClick={() => setBookViewMode(mode.id)}
+            className={[
+              'px-3 py-1 text-xs rounded transition-colors duration-150',
+              bookViewMode === mode.id
+                ? 'bg-accent-muted text-text-primary'
+                : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary',
+            ].join(' ')}
+          >
+            {t(mode.labelKey)}
+          </button>
+        ))}
+
+        {bookViewMode === 'write' && (
+          <>
+            <div className="w-px h-4 bg-border-subtle mx-2" />
+            <select
+              value={deviceFrame}
+              onChange={(e) => setDeviceFrame(e.target.value as DeviceFrameType)}
+              className="px-2 py-1 text-xs text-text-secondary bg-transparent border border-border-subtle rounded hover:border-border-default focus:border-accent outline-none transition-colors duration-150"
+            >
+              {DEVICE_OPTIONS.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {t(opt.labelKey)}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <ThemeGallery activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID} />
-        {renderContent()}
+        {bookViewMode === 'format' ? (
+          <ThemeGallery activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID} />
+        ) : (
+          <DeviceFrame device={deviceFrame}>
+            {renderContent()}
+          </DeviceFrame>
+        )}
       </div>
 
       {showExportDialog && (

@@ -102,6 +102,7 @@
   },
   "topbar": {
     "closeProject": "Close project",
+    "export": "Export",
     "about": "About"
   },
   "theme": {
@@ -237,6 +238,14 @@
     "emptyBody": "Create your first chapter from the Active Chapter view",
     "indice": "Table of Contents",
     "chapterLoadError": "Could not load {{filename}}",
+    "writeMode": "Write",
+    "formatMode": "Format",
+    "deviceFrame": {
+      "none": "No frame",
+      "kindle": "Kindle",
+      "print": "Print",
+      "tablet": "Tablet"
+    },
     "themeGallery": {
       "title": "Book themes",
       "activeLabel": "Active"

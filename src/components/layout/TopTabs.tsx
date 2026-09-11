@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Info } from 'lucide-react';
+import { X, Info, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
@@ -26,6 +26,7 @@ function TopTabs() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const closeProject = useProjectStore((s) => s.closeProject);
   const saveStatus = useProjectStore((s) => s.saveStatus);
+  const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
   const [showAbout, setShowAbout] = useState(false);
 
   const statusLabels: Record<SaveStatus, string> = {
@@ -72,6 +73,18 @@ function TopTabs() {
             <span className="text-xs text-text-secondary max-w-48 truncate">
               {currentProject.nombre}
             </span>
+            <button
+              onClick={() => {
+                setActiveTab('libro');
+                setShowExportDialog(true);
+              }}
+              aria-label={t('topbar.export')}
+              title={t('topbar.export')}
+              className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
+            >
+              <Upload size={14} />
+              <span>{t('topbar.export')}</span>
+            </button>
             <button
               onClick={closeProject}
               aria-label={t('topbar.closeProject')}

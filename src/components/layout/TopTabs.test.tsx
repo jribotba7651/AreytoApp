@@ -20,6 +20,7 @@ vi.mock('react-i18next', () => ({
         'common.saved': 'Guardado',
         'common.saveError': 'Error al guardar',
         'topbar.closeProject': 'Cerrar proyecto',
+        'topbar.export': 'Exportar',
         'topbar.about': 'Acerca de',
         'about.tagline': 'Un IDE para escritores serios.',
         'about.company': 'Jíbaro en la Luna LLC',
@@ -40,6 +41,7 @@ function makeLayoutState(overrides: Record<string, unknown> = {}) {
   return {
     activeTab: 'capitulo',
     setActiveTab: vi.fn(),
+    setShowExportDialog: vi.fn(),
     ...overrides,
   };
 }

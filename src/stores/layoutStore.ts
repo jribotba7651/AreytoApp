@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Tab, PanelSizes, LayoutState, EditorViewMode } from '@/types/layout';
+import type { Tab, PanelSizes, LayoutState, EditorViewMode, BookViewMode, DeviceFrame } from '@/types/layout';
 
 interface LayoutActions {
   setActiveTab: (tab: Tab) => void;
@@ -8,6 +8,9 @@ interface LayoutActions {
   setShowCloseChapterModal: (show: boolean) => void;
   setEditorViewMode: (mode: EditorViewMode) => void;
   toggleEditorViewMode: () => void;
+  setShowExportDialog: (show: boolean) => void;
+  setBookViewMode: (mode: BookViewMode) => void;
+  setDeviceFrame: (frame: DeviceFrame) => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -25,6 +28,9 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   isVersionsCollapsed: false,
   showCloseChapterModal: false,
   editorViewMode: 'edit',
+  showExportDialog: false,
+  bookViewMode: 'write',
+  deviceFrame: 'none',
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -42,4 +48,10 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
     set((state) => ({
       editorViewMode: state.editorViewMode === 'edit' ? 'preview' : 'edit',
     })),
+
+  setShowExportDialog: (show: boolean) => set({ showExportDialog: show }),
+
+  setBookViewMode: (mode: BookViewMode) => set({ bookViewMode: mode }),
+
+  setDeviceFrame: (frame: DeviceFrame) => set({ deviceFrame: frame }),
 }));

@@ -102,6 +102,7 @@
   },
   "topbar": {
     "closeProject": "Cerrar proyecto",
+    "export": "Exportar",
     "about": "Acerca de"
   },
   "theme": {
@@ -237,6 +238,14 @@
     "emptyBody": "Crea tu primer capítulo desde la vista Capítulo Activo",
     "indice": "Índice",
     "chapterLoadError": "No se pudo cargar {{filename}}",
+    "writeMode": "Escribir",
+    "formatMode": "Formatear",
+    "deviceFrame": {
+      "none": "Sin marco",
+      "kindle": "Kindle",
+      "print": "Impreso",
+      "tablet": "Tablet"
+    },
     "themeGallery": {
       "title": "Temas del libro",
       "activeLabel": "Activo"

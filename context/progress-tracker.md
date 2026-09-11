@@ -5,10 +5,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Última feature completada: Epic4-S1 Theme Gallery + preview gap + tests
-- Fecha de última actualización: 2026-09-11
+- Ultima feature completada: Epic4-S2 Export persistente + Escribir/Formatear + DeviceFrame
+- Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - Epic4-S2 - Export persistente + toggle Escribir/Formatear + marco de dispositivo
+- Que se hizo: Slice 2 del Epic 4 con 3 sub-tareas:
+  1. Boton Export persistente en TopTabs: boton con icono Upload visible en la barra superior cuando hay proyecto abierto, junto al nombre del proyecto. Al hacer click cambia al tab Libro y abre ExportBookDialog. Visible en todos los tabs.
+  2. Toggle Escribir/Formatear en tab Libro: barra secundaria con dos botones (Escribir/Formatear). Estado bookViewMode en layoutStore. Modo Escribir muestra el editor/preview normal del libro. Modo Formatear muestra ThemeGallery con el tema activo del proyecto.
+  3. Marco de dispositivo en preview: selector Kindle/Impreso/Tablet (visible solo en modo Escribir). DeviceFrame.tsx envuelve el contenido del libro con un marco visual CSS puro (sin dependencias nuevas). Cada dispositivo tiene dimensiones, border-radius, bezel y colores propios.
+- Archivos creados:
+  - src/components/book/DeviceFrame.tsx (componente de marco de dispositivo, CSS puro)
+- Archivos modificados:
+  - src/types/layout.ts (tipos BookViewMode, DeviceFrame)
+  - src/stores/layoutStore.ts (estado bookViewMode, deviceFrame con setters)
+  - src/components/layout/TopTabs.tsx (boton Export con setActiveTab('libro') + setShowExportDialog)
+  - src/components/layout/BookTabContent.tsx (toggle Escribir/Formatear, selector de dispositivo, DeviceFrame wrapper, ThemeGallery en modo Formatear)
+  - src/i18n/locales/en.json (book.writeMode, book.formatMode, book.deviceFrame.*)
+  - src/i18n/locales/es.json (mismas claves en espanol)
+  - src/components/layout/TopTabs.test.tsx (mock actualizado con topbar.export)
+- Decisiones tomadas:
+  - D-193: Export desde tab no-Libro cambia automaticamente al tab Libro antes de abrir el dialog. Evita mover el ExportBookDialog fuera de BookTabContent y mantiene toda la logica de exportacion en un solo lugar.
+  - D-194: Selector de dispositivo solo visible en modo Escribir (no en Formatear). En modo Formatear se muestra ThemeGallery sin marco.
+  - D-195: Colores del DeviceFrame (bezels, fondos internos) son hardcoded intencionalmente. Representan dispositivos fisicos, no elementos de UI, por lo que no usan design tokens.
+- Tests: 409 TS -- todos verdes
+- Bugs encontrados: ExportBookDialog solo se renderizaba dentro de BookTabContent (montado condicionalmente). Corregido haciendo que el boton Export cambie al tab Libro antes de abrir el dialog.
 
 ### 2026-09-11 - Epic4-S1 - Theme Gallery read-only + preview gap item6 + tests item6/item10
 - Que se hizo: Slice 1 del Epic 4 de Theming con 3 sub-tareas:

@@ -8,10 +8,16 @@ export interface PanelSizes {
   versions: number;
 }
 
+export type BookViewMode = 'write' | 'format';
+export type DeviceFrame = 'none' | 'kindle' | 'print' | 'tablet';
+
 export interface LayoutState {
   activeTab: Tab;
   sizes: PanelSizes;
   isVersionsCollapsed: boolean;
   showCloseChapterModal: boolean;
   editorViewMode: EditorViewMode;
+  showExportDialog: boolean;
+  bookViewMode: BookViewMode;
+  deviceFrame: DeviceFrame;
 }
