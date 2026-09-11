@@ -5,10 +5,33 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Ultima feature completada: Item 13 - Pre-export check modal
+- Ultima feature completada: F37 performance - Watcher debounce Rust
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - F37 performance - Watcher debounce en Rust
+- Que se hizo: El file watcher en Rust (watcher.rs) ahora incluye debounce de 500ms y deduplicacion de eventos redundantes del mismo archivo dentro de 100ms. Antes, cada evento del filesystem se emitia inmediatamente al front, causando rafagas excesivas. Ahora un hilo flusher acumula paths en un buffer compartido (Arc<Mutex>), y solo emite el batch al front cuando pasan 500ms sin nuevos eventos. Ademas, eventos del mismo path dentro de 100ms se descartan (dedup por timestamp). El debounce de 300ms en el front (useProjectWatcher) se mantiene sin cambios. Comportamiento visible identico.
+- Archivos modificados:
+  - src-tauri/src/watcher.rs (DebouncedBuffer con pending/recent/stopped, hilo flusher con tick de 50ms, dedup por path con ventana de 100ms, flush tras 500ms de quietud, limpieza de entries viejas en recent)
+  - src-tauri/src/lib.rs (WatcherState::new() en lugar de constructor manual)
+- Decisiones tomadas:
+  - D-209: Debounce en Rust es complementario al del front (300ms). El de Rust reduce el volumen de eventos IPC; el del front agrupa los que llegan cercanos. Total efectivo ~500ms en el peor caso.
+  - D-210: Dedup por path usa HashMap<String, Instant> con ventana de 100ms. Se limpia automaticamente tras cada flush para no crecer indefinidamente.
+  - D-211: Hilo flusher usa tick de 50ms para balance entre latencia y uso de CPU. Se detiene limpiamente via flag stopped al llamar unwatch_project.
+- Tests: 415 TS + 41 Rust -- todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-09-11 - Item 8 - Callouts/blockquotes visuales en preview Libro
+- Que se hizo: Los blockquotes de markdown en el preview del tab Libro ahora se renderizan como callouts visuales. Se detecta el tipo por la primera linea del blockquote: `> [!NOTA]`, `> [!AVISO]`, `> [!CITA]`. Cada tipo tiene icono (lucide-react), borde izquierdo de color (info/warning/accent-muted) y fondo suave con opacidad 5%. Blockquotes sin tag se renderizan como cita generica (estilo anterior). CSS puro via Tailwind tokens, sin dependencias nuevas.
+- Archivos modificados:
+  - src/components/book/BookMarkdown.tsx (componente BookCallout con deteccion de tipo, funciones extractTextFromNode y stripCalloutTag para parsear el tag del primer parrafo, import de iconos Info/AlertTriangle/Quote de lucide-react)
+- Decisiones tomadas:
+  - D-206: Los 3 tipos de callout (nota/aviso/cita) se detectan case-insensitive via regex en el texto del primer parrafo hijo del blockquote. El tag se remueve del contenido visible.
+  - D-207: Colores usan tokens existentes del tema (info, warning, accent-muted). Fondo con opacidad Tailwind /5 para efecto suave.
+  - D-208: Blockquotes sin tag [!...] mantienen el estilo anterior (borde accent-muted, italica, sin icono) como fallback a cita generica.
+- Tests: 415 TS -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - Item 13 - Pre-export check modal
 - Que se hizo: Validacion pre-export antes de abrir cualquier dialogo de exportacion. Antes de mostrar ExportBookDialog (md/docx/epub), se verifican 3 condiciones: titulo no vacio, autor no vacio, al menos 1 capitulo con contenido. Si alguna falla, se muestra PreExportCheckModal con la lista de problemas y opciones de "Continuar de todas formas" o "Cancelar". Tambien se corrigieron 2 errores de TypeScript: variables mockReadSobreElAutor y mockReadOtrosLibros declaradas pero no usadas en export-service.test.ts (eliminadas junto con sus imports innecesarios).

@@ -23,7 +23,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .manage(std::sync::Mutex::new(None::<terminal::PtySession>))
-        .manage(watcher::WatcherState(std::sync::Mutex::new(None)))
+        .manage(watcher::WatcherState::new())
         .menu(|app| {
             let app_menu = Submenu::with_items(
                 app,

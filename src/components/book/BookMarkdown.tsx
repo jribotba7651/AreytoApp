@@ -1,8 +1,119 @@
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { resolveTheme, themeToCssVars } from '@/lib/theme';
 import { DEFAULT_BOOK_SETTINGS, type BookSettings } from '@/types/project';
+import { Info, AlertTriangle, Quote } from 'lucide-react';
+
+type CalloutType = 'nota' | 'aviso' | 'cita';
+
+const CALLOUT_RE = /^\[!(NOTA|AVISO|CITA)\]\s*/i;
+
+const CALLOUT_CONFIG: Record<CalloutType, {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  borderColor: string;
+  bgColor: string;
+  textColor: string;
+}> = {
+  nota: {
+    icon: Info,
+    label: 'Nota',
+    borderColor: 'border-info',
+    bgColor: 'bg-info/5',
+    textColor: 'text-info',
+  },
+  aviso: {
+    icon: AlertTriangle,
+    label: 'Aviso',
+    borderColor: 'border-warning',
+    bgColor: 'bg-warning/5',
+    textColor: 'text-warning',
+  },
+  cita: {
+    icon: Quote,
+    label: 'Cita',
+    borderColor: 'border-accent-muted',
+    bgColor: 'bg-accent-muted/5',
+    textColor: 'text-accent-muted',
+  },
+};
+
+function extractTextFromNode(node: React.ReactNode): string {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (!React.isValidElement(node)) return '';
+  const el = node as React.ReactElement<{ children?: React.ReactNode }>;
+  if (!el.props.children) return '';
+  if (typeof el.props.children === 'string') return el.props.children;
+  if (Array.isArray(el.props.children)) {
+    return el.props.children.map(extractTextFromNode).join('');
+  }
+  return extractTextFromNode(el.props.children);
+}
+
+function stripCalloutTag(
+  children: React.ReactNode,
+): React.ReactNode {
+  const arr = React.Children.toArray(children);
+  if (arr.length === 0) return children;
+  const first = arr[0];
+  if (!React.isValidElement(first)) return children;
+  const el = first as React.ReactElement<{ children?: React.ReactNode }>;
+  const innerChildren = el.props.children;
+  if (typeof innerChildren === 'string') {
+    const stripped = innerChildren.replace(CALLOUT_RE, '');
+    const newFirst = React.cloneElement(el, {}, stripped);
+    return [newFirst, ...arr.slice(1)];
+  }
+  if (Array.isArray(innerChildren)) {
+    const firstInner = innerChildren[0];
+    if (typeof firstInner === 'string') {
+      const stripped = firstInner.replace(CALLOUT_RE, '');
+      const newInner = [stripped, ...innerChildren.slice(1)];
+      const newFirst = React.cloneElement(el, {}, ...newInner);
+      return [newFirst, ...arr.slice(1)];
+    }
+  }
+  return children;
+}
+
+function BookCallout({ children }: { children?: React.ReactNode }) {
+  const arr = React.Children.toArray(children);
+  const firstText = arr.length > 0 ? extractTextFromNode(arr[0]) : '';
+  const match = firstText.match(CALLOUT_RE);
+
+  if (!match) {
+    // Cita generica (fallback)
+    return (
+      <blockquote className="border-l-[3px] border-accent-muted pl-4 italic text-text-secondary my-6">
+        {children}
+      </blockquote>
+    );
+  }
+
+  const type = match[1]!.toLowerCase() as CalloutType;
+  const config = CALLOUT_CONFIG[type];
+  const Icon = config.icon;
+  const strippedChildren = stripCalloutTag(children);
+
+  return (
+    <blockquote
+      className={`border-l-[3px] ${config.borderColor} ${config.bgColor} pl-4 pr-4 py-3 my-6 rounded-r`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <Icon size={16} className={config.textColor} />
+        <span className={`text-sm font-semibold ${config.textColor}`}>
+          {config.label}
+        </span>
+      </div>
+      <div className="text-text-editor not-italic">
+        {strippedChildren}
+      </div>
+    </blockquote>
+  );
+}
 
 interface BookMarkdownProps {
   content: string;
@@ -59,11 +170,9 @@ const MD_COMPONENTS: Components = {
     <strong className="font-semibold text-text-primary">{children}</strong>
   ),
   em: ({ children }) => <em className="italic">{children}</em>,
-  blockquote: ({ children }) => (
-    <blockquote className="border-l-[3px] border-accent-muted pl-4 italic text-text-secondary my-6">
-      {children}
-    </blockquote>
-  ),
+  blockquote: ({ children }) => {
+    return <BookCallout>{children}</BookCallout>;
+  },
   code: ({ children, className }) => {
     const isBlock = className?.includes('language-');
     if (isBlock) {
