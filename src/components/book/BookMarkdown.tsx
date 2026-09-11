@@ -2,11 +2,13 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { resolveTheme, themeToCssVars } from '@/lib/theme';
+import { DEFAULT_BOOK_SETTINGS, type BookSettings } from '@/types/project';
 
 interface BookMarkdownProps {
   content: string;
   themeId?: string | null;
   themeOverrides?: Record<string, unknown> | null;
+  bookSettings?: BookSettings;
 }
 
 const MD_COMPONENTS: Components = {
@@ -126,14 +128,28 @@ const DROP_CAPS_CSS = `
   margin-right: 0.1em;
 }`;
 
-function BookMarkdown({ content, themeId, themeOverrides }: BookMarkdownProps) {
+function bookSettingsToStyle(bs: BookSettings): React.CSSProperties {
+  const SCALE_PX = 96;
+  const contentWidth = bs.trimWidth - bs.marginInner - bs.marginOuter;
+  return {
+    maxWidth: `${Math.round(contentWidth * SCALE_PX)}px`,
+    paddingTop: `${Math.round(bs.marginTop * SCALE_PX * 0.5)}px`,
+    paddingBottom: `${Math.round(bs.marginBottom * SCALE_PX * 0.5)}px`,
+    paddingLeft: `${Math.round(bs.marginInner * SCALE_PX * 0.5)}px`,
+    paddingRight: `${Math.round(bs.marginOuter * SCALE_PX * 0.5)}px`,
+  };
+}
+
+function BookMarkdown({ content, themeId, themeOverrides, bookSettings }: BookMarkdownProps) {
   const theme = resolveTheme(themeId, themeOverrides);
   const cssVars = themeToCssVars(theme);
+  const bs = bookSettings ?? DEFAULT_BOOK_SETTINGS;
+  const trimStyle = bookSettingsToStyle(bs);
 
   return (
     <div
-      style={{ maxWidth: 'var(--book-measure)', ...cssVars } as React.CSSProperties}
-      className={`mx-auto px-8 py-8${theme.dropCaps ? ' book-md-dropcaps' : ''}`}
+      style={{ ...trimStyle, ...cssVars } as React.CSSProperties}
+      className={`mx-auto${theme.dropCaps ? ' book-md-dropcaps' : ''}`}
     >
       {theme.dropCaps && <style>{DROP_CAPS_CSS}</style>}
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>

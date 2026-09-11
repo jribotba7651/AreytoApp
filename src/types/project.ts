@@ -7,6 +7,24 @@ export interface Chapter {
   status: ChapterStatus;
 }
 
+export interface BookSettings {
+  trimWidth: number;
+  trimHeight: number;
+  marginTop: number;
+  marginBottom: number;
+  marginInner: number;
+  marginOuter: number;
+}
+
+export const DEFAULT_BOOK_SETTINGS: BookSettings = {
+  trimWidth: 6,
+  trimHeight: 9,
+  marginTop: 1,
+  marginBottom: 1,
+  marginInner: 1,
+  marginOuter: 1,
+};
+
 export interface Project {
   rootPath: string;
   nombre: string;
@@ -14,6 +32,7 @@ export interface Project {
   capituloActivo: string | null;
   tema?: string;
   temaOverrides?: Record<string, unknown>;
+  bookSettings?: BookSettings;
 }
 
 export type ProjectFsError =

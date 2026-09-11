@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import i18n from '@/i18n/i18n';
-import type { Chapter, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
+import type { BookSettings, Chapter, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
 
 interface ProyectoJson {
   nombre: string;
@@ -8,6 +8,7 @@ interface ProyectoJson {
   capituloActivo: string | null;
   tema?: string;
   temaOverrides?: Record<string, unknown>;
+  bookSettings?: BookSettings;
 }
 
 interface RawDirEntry {
@@ -197,7 +198,7 @@ export async function createChapter(
 
 export async function updateProjectMeta(
   project: Project,
-  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides'>>
+  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings'>>
 ): Promise<ProjectResult<Project>> {
   const updated: Project = { ...project, ...updates };
   const meta: ProyectoJson = {
@@ -207,6 +208,7 @@ export async function updateProjectMeta(
   };
   if (updated.tema !== undefined) meta.tema = updated.tema;
   if (updated.temaOverrides !== undefined) meta.temaOverrides = updated.temaOverrides;
+  if (updated.bookSettings !== undefined) meta.bookSettings = updated.bookSettings;
 
   const jsonPath = `${project.rootPath}/proyecto.json`;
   const write = await writeFile(jsonPath, JSON.stringify(meta, null, 2));

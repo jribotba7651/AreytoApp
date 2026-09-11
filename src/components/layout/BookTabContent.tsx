@@ -21,6 +21,7 @@ import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
 import ThemeGallery from '@/components/book/ThemeGallery';
 import ThemeControls from '@/components/book/ThemeControls';
+import BookSettings from '@/components/book/BookSettings';
 import DeviceFrame from '@/components/book/DeviceFrame';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
@@ -241,6 +242,7 @@ function BookTabContent() {
                   slug={slug}
                   themeId={currentProject?.tema}
                   themeOverrides={currentProject?.temaOverrides}
+                  bookSettings={currentProject?.bookSettings}
                 />
               );
             }
@@ -318,6 +320,7 @@ function BookTabContent() {
               themeId={currentProject.tema}
               themeOverrides={currentProject.temaOverrides}
             />
+            <BookSettings />
           </>
         ) : (
           <DeviceFrame device={deviceFrame}>

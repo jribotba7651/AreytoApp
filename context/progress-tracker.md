@@ -5,10 +5,30 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Ultima feature completada: Epic4-S3 ThemeControls editables + Guardar preset custom
+- Ultima feature completada: Epic4-S4 Book Settings (Trim/Margins) con preview aproximado
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - Epic4-S4 - Book Settings (Trim/Margins) con preview aproximado
+- Que se hizo: Slice 4 del Epic 4 (item 9). Panel Book Settings en modo Formatear con controles para trim size (ancho/alto en pulgadas) y margins (top/bottom/inner/outer en pulgadas). Valores default 6x9 pulgadas, margins 1in todos. Los cambios persisten en proyecto.json via updateProjectMeta. El preview en BookMarkdown refleja los margins aproximados visualmente usando CSS padding y max-width proporcional al trim size (escala 96px/in * 0.5 para caber en pantalla).
+- Archivos creados:
+  - src/components/book/BookSettings.tsx (panel con inputs numericos para trim y margins)
+- Archivos modificados:
+  - src/types/project.ts (interfaz BookSettings, constante DEFAULT_BOOK_SETTINGS, campo opcional bookSettings en Project)
+  - src/lib/project-fs.ts (bookSettings en ProyectoJson, en updateProjectMeta, import del tipo)
+  - src/stores/projectStore.ts (bookSettings agregado al Pick de updateProjectMeta)
+  - src/components/book/BookMarkdown.tsx (funcion bookSettingsToStyle calcula padding/max-width proporcional; prop bookSettings)
+  - src/components/book/BookChapter.tsx (prop bookSettings propagado a BookMarkdown)
+  - src/components/layout/BookTabContent.tsx (import BookSettings, renderizado debajo de ThemeControls en modo Formatear, prop bookSettings a BookChapter)
+  - src/i18n/locales/en.json (book.bookSettings.* - 9 claves nuevas)
+  - src/i18n/locales/es.json (mismas claves en espanol)
+- Decisiones tomadas:
+  - D-200: Los valores de book settings se guardan en proyecto.json (por proyecto, no global). Cada libro puede tener trim/margins distintos.
+  - D-201: El preview usa escala 96px por pulgada reducida al 50% para que quepa en el viewport. Es una aproximacion visual, no pixel-perfect.
+  - D-202: Los defaults (6x9, 1in margins) son los mas comunes para trade paperback en KDP/IngramSpark.
+- Tests: 409 TS -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - Epic4-S3 - ThemeControls editables + Guardar preset custom
 - Que se hizo: Slice 3 del Epic 4 con 2 sub-tareas:
