@@ -1,6 +1,6 @@
 import type { Chapter } from './project';
 import type { TituloData, CopyrightData, DedicatoriaData } from './frontmatter';
-import type { AgradecimientosData } from './backmatter';
+import type { AgradecimientosData, SobreElAutorData, OtrosLibrosData } from './backmatter';
 
 export type BookSection =
   | { kind: 'chapter'; chapter: Chapter; content: string }
@@ -14,6 +14,8 @@ export interface BookFrontmatter {
 
 export interface BookBackmatter {
   agradecimientos: AgradecimientosData | null;
+  sobreElAutor: SobreElAutorData | null;
+  otrosLibros: OtrosLibrosData | null;
 }
 
 export interface BookData {

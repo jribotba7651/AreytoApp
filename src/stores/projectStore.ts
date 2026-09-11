@@ -11,6 +11,8 @@ export type ActiveView =
   | 'frontmatter-dedicatoria'
   | 'frontmatter-metadata'
   | 'backmatter-agradecimientos'
+  | 'backmatter-sobre-el-autor'
+  | 'backmatter-otros-libros'
   | null;
 
 interface ProjectState {

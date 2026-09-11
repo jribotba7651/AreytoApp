@@ -15,17 +15,21 @@ vi.mock('./frontmatter-fs', () => ({
 
 vi.mock('./backmatter-fs', () => ({
   readAgradecimientos: vi.fn(),
+  readSobreElAutor: vi.fn(),
+  readOtrosLibros: vi.fn(),
 }));
 
 import { listChapters, readChapter } from './project-fs';
 import { readTitulo, readCopyright, readDedicatoria } from './frontmatter-fs';
-import { readAgradecimientos } from './backmatter-fs';
+import { readAgradecimientos, readSobreElAutor, readOtrosLibros } from './backmatter-fs';
 const mockListChapters = vi.mocked(listChapters);
 const mockReadChapter = vi.mocked(readChapter);
 const mockReadTitulo = vi.mocked(readTitulo);
 const mockReadCopyright = vi.mocked(readCopyright);
 const mockReadDedicatoria = vi.mocked(readDedicatoria);
 const mockReadAgradecimientos = vi.mocked(readAgradecimientos);
+const mockReadSobreElAutor = vi.mocked(readSobreElAutor);
+const mockReadOtrosLibros = vi.mocked(readOtrosLibros);
 
 const PROJECT: Project = {
   rootPath: '/tmp/mi-libro',
@@ -47,6 +51,8 @@ beforeEach(() => {
   mockReadCopyright.mockResolvedValue(null);
   mockReadDedicatoria.mockResolvedValue(null);
   mockReadAgradecimientos.mockResolvedValue(null);
+  mockReadSobreElAutor.mockResolvedValue(null);
+  mockReadOtrosLibros.mockResolvedValue(null);
 });
 
 describe('loadBook', () => {
@@ -61,7 +67,7 @@ describe('loadBook', () => {
     expect(result.projectName).toBe('Mi Libro');
     expect(result.sections).toHaveLength(0);
     expect(result.frontmatter).toEqual({ titulo: null, copyright: null, dedicatoria: null });
-    expect(result.backmatter).toEqual({ agradecimientos: null });
+    expect(result.backmatter).toEqual({ agradecimientos: null, sobreElAutor: null, otrosLibros: null });
   });
 
   it('incluye frontmatter cuando los archivos existen', async () => {

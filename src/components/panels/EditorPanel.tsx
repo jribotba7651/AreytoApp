@@ -9,6 +9,8 @@ import FrontmatterCopyrightEditor from '@/components/frontmatter/FrontmatterCopy
 import FrontmatterDedicatoriaEditor from '@/components/frontmatter/FrontmatterDedicatoriaEditor';
 import FrontmatterMetadataEditor from '@/components/frontmatter/FrontmatterMetadataEditor';
 import BackmatterAgradecimientosEditor from '@/components/backmatter/BackmatterAgradecimientosEditor';
+import BackmatterSobreElAutorEditor from '@/components/backmatter/BackmatterSobreElAutorEditor';
+import BackmatterOtrosLibrosEditor from '@/components/backmatter/BackmatterOtrosLibrosEditor';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -137,6 +139,14 @@ function EditorPanel() {
 
   if (activeView === 'backmatter-agradecimientos') {
     return <BackmatterAgradecimientosEditor />;
+  }
+
+  if (activeView === 'backmatter-sobre-el-autor') {
+    return <BackmatterSobreElAutorEditor />;
+  }
+
+  if (activeView === 'backmatter-otros-libros') {
+    return <BackmatterOtrosLibrosEditor />;
   }
 
   if (!activeChapterPath) {

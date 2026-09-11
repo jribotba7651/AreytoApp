@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
@@ -16,6 +16,9 @@ import BookFrontmatterCopyright from '@/components/book/BookFrontmatterCopyright
 import BookFrontmatterDedicatoria from '@/components/book/BookFrontmatterDedicatoria';
 import BookIndice from '@/components/book/BookIndice';
 import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgradecimientos';
+import BookBackmatterSobreElAutor from '@/components/book/BookBackmatterSobreElAutor';
+import BookBackmatterOtrosLibros from '@/components/book/BookBackmatterOtrosLibros';
+import PreExportCheckModal from '@/components/book/PreExportCheckModal';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
@@ -25,6 +28,7 @@ import BookSettings from '@/components/book/BookSettings';
 import DeviceFrame from '@/components/book/DeviceFrame';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
+type ExportTarget = 'md' | 'docx' | 'epub';
 import type { ExportScope } from '@/lib/export-service';
 import type { BookViewMode, DeviceFrame as DeviceFrameType } from '@/types/layout';
 
@@ -49,6 +53,50 @@ function BookTabContent() {
   const [docxLoading, setDocxLoading] = useState(false);
   const [showEpubDialog, setShowEpubDialog] = useState(false);
   const [epubLoading, setEpubLoading] = useState(false);
+  const [preExportProblems, setPreExportProblems] = useState<string[]>([]);
+  const [pendingExportTarget, setPendingExportTarget] = useState<ExportTarget | null>(null);
+  const skipPreCheck = useRef(false);
+
+  function computePreExportProblems(): string[] {
+    const problems: string[] = [];
+    const titulo = bookData?.frontmatter.titulo;
+    if (!titulo?.titulo?.trim()) problems.push(t('modal.preExportCheck.noTitle'));
+    if (!titulo?.autor?.trim()) problems.push(t('modal.preExportCheck.noAuthor'));
+    const hasChapterWithContent = bookData?.sections.some(
+      (s) => s.kind === 'chapter' && s.content.trim().length > 0,
+    ) ?? false;
+    if (!hasChapterWithContent) problems.push(t('modal.preExportCheck.noChapters'));
+    return problems;
+  }
+
+  useEffect(() => {
+    if (!showExportDialog) return;
+    if (skipPreCheck.current) {
+      skipPreCheck.current = false;
+      return;
+    }
+    const problems = computePreExportProblems();
+    if (problems.length > 0) {
+      setShowExportDialog(false);
+      setPreExportProblems(problems);
+      setPendingExportTarget('md');
+    }
+  }, [showExportDialog]);
+
+  function handlePreExportContinue() {
+    const target = pendingExportTarget;
+    setPreExportProblems([]);
+    setPendingExportTarget(null);
+    skipPreCheck.current = true;
+    if (target === 'md') setShowExportDialog(true);
+    else if (target === 'docx') setShowDocxDialog(true);
+    else if (target === 'epub') setShowEpubDialog(true);
+  }
+
+  function handlePreExportCancel() {
+    setPreExportProblems([]);
+    setPendingExportTarget(null);
+  }
 
   useEffect(() => {
     if (activeTab !== 'libro' || !currentProject) {
@@ -208,7 +256,7 @@ function BookTabContent() {
 
     const validCount = bookData.sections.filter((s) => s.kind === 'chapter').length;
     const { titulo, copyright, dedicatoria } = bookData.frontmatter;
-    const { agradecimientos } = bookData.backmatter;
+    const { agradecimientos, sobreElAutor, otrosLibros } = bookData.backmatter;
 
     const tocItems = bookData.sections
       .filter((s) => s.kind === 'chapter')
@@ -256,6 +304,8 @@ function BookTabContent() {
           })}
         </div>
         {agradecimientos && <BookBackmatterAgradecimientos agradecimientos={agradecimientos} />}
+        {sobreElAutor && <BookBackmatterSobreElAutor sobreElAutor={sobreElAutor} />}
+        {otrosLibros && <BookBackmatterOtrosLibros otrosLibros={otrosLibros} />}
       </>
     );
   }
@@ -329,6 +379,13 @@ function BookTabContent() {
         )}
       </div>
 
+      {preExportProblems.length > 0 && (
+        <PreExportCheckModal
+          problems={preExportProblems}
+          onContinue={handlePreExportContinue}
+          onCancel={handlePreExportCancel}
+        />
+      )}
       {showExportDialog && (
         <ExportBookDialog
           onClose={() => { if (!exportLoading) setShowExportDialog(false); }}

@@ -145,6 +145,14 @@
   "backmatter": {
     "agradecimientos": {
       "sectionTitle": "Agradecimientos"
+    },
+    "sobreElAutor": {
+      "sectionTitle": "Sobre el autor",
+      "heading": "Sobre el autor"
+    },
+    "otrosLibros": {
+      "sectionTitle": "Otros libros del autor",
+      "heading": "Otros libros del autor"
     }
   },
   "welcome": {
@@ -225,6 +233,15 @@
       "cancel": "Cancelar",
       "export": "Exportar",
       "exporting": "Exportando…"
+    },
+    "preExportCheck": {
+      "title": "Revisar antes de exportar",
+      "description": "Se encontraron los siguientes problemas en tu libro. Puedes continuar de todas formas o volver para corregirlos.",
+      "noTitle": "El libro no tiene titulo",
+      "noAuthor": "El libro no tiene autor",
+      "noChapters": "Ningun capitulo tiene contenido",
+      "cancel": "Cancelar",
+      "continueAnyway": "Continuar de todas formas"
     },
     "exportScope": {
       "both": "Ambos (terminados + en progreso)",
@@ -322,7 +339,9 @@
       "copyright": "Copyright",
       "dedicatoria": "Dedicatoria",
       "metadata": "Detalles",
-      "agradecimientos": "Agradecimientos"
+      "agradecimientos": "Agradecimientos",
+      "sobreElAutor": "Sobre el autor",
+      "otrosLibros": "Otros libros"
     }
   },
   "about": {

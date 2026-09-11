@@ -13,6 +13,8 @@ vi.mock('@/lib/frontmatter-fs', async () => ({
 
 vi.mock('@/lib/backmatter-fs', () => ({
   readAgradecimientos: vi.fn().mockResolvedValue(null),
+  readSobreElAutor: vi.fn().mockResolvedValue(null),
+  readOtrosLibros: vi.fn().mockResolvedValue(null),
 }));
 
 import { invoke } from '@tauri-apps/api/core';

@@ -143,6 +143,16 @@ export function buildAgradecimientosSection(contenido: string | null | undefined
   return `## Agradecimientos\n\n${contenido.trim()}`;
 }
 
+export function buildSobreElAutorSection(contenido: string | null | undefined): string | null {
+  if (!contenido?.trim()) return null;
+  return `## Sobre el autor\n\n${contenido.trim()}`;
+}
+
+export function buildOtrosLibrosSection(contenido: string | null | undefined): string | null {
+  if (!contenido?.trim()) return null;
+  return `## Otros libros del autor\n\n${contenido.trim()}`;
+}
+
 // D-157, D-158, D-159: bloque YAML pandoc-ready al inicio del export.
 // Combina campos de titulo+copyright+metadata con nombres pandoc estándar.
 // Retorna null si no hay contenido real (solo idioma default no califica).

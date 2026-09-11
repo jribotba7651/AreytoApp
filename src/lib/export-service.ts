@@ -1,11 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { readTitulo, readCopyright, readDedicatoria, readMetadata } from '@/lib/frontmatter-fs';
-import { readAgradecimientos } from '@/lib/backmatter-fs';
+import { readAgradecimientos, readSobreElAutor, readOtrosLibros } from '@/lib/backmatter-fs';
 import { resolveTheme, themeToEpubCss } from '@/lib/theme';
 import {
   buildPortadaSection,
   buildDedicatoriaSection,
   buildAgradecimientosSection,
+  buildSobreElAutorSection,
+  buildOtrosLibrosSection,
   buildIndiceSection,
   buildPandocFrontmatterBlock,
   deriveExportChapterInfo,
@@ -62,11 +64,13 @@ export async function buildExportAdditions(
   opts: ExportOptions,
   projectName?: string,
 ): Promise<ExportAdditions> {
-  const [titulo, copyright, dedicatoria, agradecimientos, metadata] = await Promise.all([
+  const [titulo, copyright, dedicatoria, agradecimientos, sobreElAutor, otrosLibros, metadata] = await Promise.all([
     readTitulo(projectPath),
     readCopyright(projectPath),
     readDedicatoria(projectPath),
     readAgradecimientos(projectPath),
+    readSobreElAutor(projectPath),
+    readOtrosLibros(projectPath),
     readMetadata(projectPath),
   ]);
 
@@ -99,6 +103,8 @@ export async function buildExportAdditions(
   const portada = buildPortadaSection(titulo, copyright);
   const dedicatoriaSection = buildDedicatoriaSection(dedicatoria?.contenido);
   const agradecimientosSection = buildAgradecimientosSection(agradecimientos?.contenido);
+  const sobreElAutorSection = buildSobreElAutorSection(sobreElAutor?.contenido);
+  const otrosLibrosSection = buildOtrosLibrosSection(otrosLibros?.contenido);
 
   // EPUB uses pandoc --toc for navigation; don't inject manual ToC
   const indiceContent = opts.format === 'epub' ? null : buildIndiceSection(indiceItems);
@@ -108,11 +114,14 @@ export async function buildExportAdditions(
   const prependParts = [portada, dedicatoriaSection].filter((s): s is string => s !== null);
   const prependContent = prependParts.length > 0 ? prependParts.join(SECTION_SEPARATOR) : null;
 
+  const appendParts = [agradecimientosSection, sobreElAutorSection, otrosLibrosSection].filter((s): s is string => s !== null);
+  const appendContent = appendParts.length > 0 ? appendParts.join(SECTION_SEPARATOR) : null;
+
   // Anchors only serve the manual ToC (docx/md); epub uses pandoc --toc, so anchors
   // would create an empty section before the first chapter.
   const finalSlugs = opts.format === 'epub' ? {} : chapterSlugs;
 
-  return { pandocFrontmatterBlock, prependContent, appendContent: agradecimientosSection, indiceContent, chapterSlugs: finalSlugs, chapterHeadings };
+  return { pandocFrontmatterBlock, prependContent, appendContent, indiceContent, chapterSlugs: finalSlugs, chapterHeadings };
 }
 
 export async function exportBookMarkdown(

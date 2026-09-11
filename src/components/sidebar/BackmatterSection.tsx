@@ -13,6 +13,8 @@ function BackmatterSection() {
       </div>
       <div>
         <FrontmatterItem view="backmatter-agradecimientos" label={t('sidebar.items.agradecimientos')} />
+        <FrontmatterItem view="backmatter-sobre-el-autor" label={t('sidebar.items.sobreElAutor')} />
+        <FrontmatterItem view="backmatter-otros-libros" label={t('sidebar.items.otrosLibros')} />
       </div>
     </div>
   );

@@ -5,10 +5,26 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Ultima feature completada: Epic4-S4 Book Settings (Trim/Margins) con preview aproximado
+- Ultima feature completada: Item 13 - Pre-export check modal
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - Item 13 - Pre-export check modal
+- Que se hizo: Validacion pre-export antes de abrir cualquier dialogo de exportacion. Antes de mostrar ExportBookDialog (md/docx/epub), se verifican 3 condiciones: titulo no vacio, autor no vacio, al menos 1 capitulo con contenido. Si alguna falla, se muestra PreExportCheckModal con la lista de problemas y opciones de "Continuar de todas formas" o "Cancelar". Tambien se corrigieron 2 errores de TypeScript: variables mockReadSobreElAutor y mockReadOtrosLibros declaradas pero no usadas en export-service.test.ts (eliminadas junto con sus imports innecesarios).
+- Archivos creados:
+  - src/components/book/PreExportCheckModal.tsx (modal con lista de problemas y botones continuar/cancelar)
+- Archivos modificados:
+  - src/components/layout/BookTabContent.tsx (logica de validacion pre-export con useEffect interceptor, estado preExportProblems/pendingExportTarget, ref skipPreCheck para bypass tras "continuar", renderizado del PreExportCheckModal)
+  - src/i18n/locales/en.json (modal.preExportCheck.* - 7 claves nuevas)
+  - src/i18n/locales/es.json (mismas claves en espanol)
+  - src/lib/export-service.test.ts (eliminadas variables mockReadSobreElAutor y mockReadOtrosLibros no usadas, y sus imports)
+- Decisiones tomadas:
+  - D-203: La validacion intercepta showExportDialog via useEffect. Un ref skipPreCheck evita re-validar cuando el usuario elige "continuar de todas formas" tras ver los problemas.
+  - D-204: Las 3 validaciones son: titulo no vacio (frontmatter.titulo.titulo), autor no vacio (frontmatter.titulo.autor), al menos 1 seccion kind=chapter con content.trim() no vacio.
+  - D-205: El modal es informativo, no bloqueante. El usuario siempre puede continuar con la exportacion si lo desea.
+- Tests: 415 TS -- todos verdes
+- Bugs encontrados: 2 variables TS no usadas en export-service.test.ts (corregidas como parte de esta tarea)
 
 ### 2026-09-11 - Epic4-S4 - Book Settings (Trim/Margins) con preview aproximado
 - Que se hizo: Slice 4 del Epic 4 (item 9). Panel Book Settings en modo Formatear con controles para trim size (ancho/alto en pulgadas) y margins (top/bottom/inner/outer en pulgadas). Valores default 6x9 pulgadas, margins 1in todos. Los cambios persisten en proyecto.json via updateProjectMeta. El preview en BookMarkdown refleja los margins aproximados visualmente usando CSS padding y max-width proporcional al trim size (escala 96px/in * 0.5 para caber en pantalla).

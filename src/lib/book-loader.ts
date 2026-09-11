@@ -2,19 +2,21 @@ import type { Project } from '@/types/project';
 import type { BookData, BookSection } from '@/types/book';
 import { listChapters, readChapter } from './project-fs';
 import { readTitulo, readCopyright, readDedicatoria } from './frontmatter-fs';
-import { readAgradecimientos } from './backmatter-fs';
+import { readAgradecimientos, readSobreElAutor, readOtrosLibros } from './backmatter-fs';
 
 export async function loadBook(project: Project): Promise<BookData> {
-  const [chaptersResult, titulo, copyright, dedicatoria, agradecimientos] = await Promise.all([
+  const [chaptersResult, titulo, copyright, dedicatoria, agradecimientos, sobreElAutor, otrosLibros] = await Promise.all([
     listChapters(project),
     readTitulo(project.rootPath),
     readCopyright(project.rootPath),
     readDedicatoria(project.rootPath),
     readAgradecimientos(project.rootPath),
+    readSobreElAutor(project.rootPath),
+    readOtrosLibros(project.rootPath),
   ]);
 
   const frontmatter = { titulo, copyright, dedicatoria };
-  const backmatter = { agradecimientos };
+  const backmatter = { agradecimientos, sobreElAutor, otrosLibros };
 
   if (!chaptersResult.ok) {
     return { projectName: project.nombre, frontmatter, backmatter, sections: [] };
