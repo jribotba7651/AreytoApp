@@ -52,8 +52,60 @@ const JELA_SERIF: Theme = {
   measure: { maxWidthCh: 68 },
 };
 
+const MODERN_SANS: Theme = {
+  id: 'modern-sans',
+  name: 'Modern Sans',
+  schemaVersion: 1,
+  typography: {
+    bodyFont: 'Inter, system-ui, sans-serif',
+    headingFont: 'Inter, system-ui, sans-serif',
+    monoFont: '"JetBrains Mono", monospace',
+    baseSizePt: 11,
+    baseSizePx: 17,
+    lineHeight: 1.7,
+    headingScale: { h1: 2.0, h2: 1.5, h3: 1.25, h4: 1.1, h5: 1.0, h6: 1.0 },
+    paragraph: { indentEm: 0, spacingEm: 1, justify: false },
+  },
+  chapterHeading: {
+    align: 'left',
+    numberStyle: 'numeric',
+    showTitle: true,
+    ornament: null,
+  },
+  sectionBreak: { ornament: null },
+  dropCaps: false,
+  measure: { maxWidthCh: 72 },
+};
+
+const CLASSIC_LITERARY: Theme = {
+  id: 'classic-literary',
+  name: 'Classic Literary',
+  schemaVersion: 1,
+  typography: {
+    bodyFont: 'Charter, Georgia, serif',
+    headingFont: 'Charter, Georgia, serif',
+    monoFont: '"Fira Code", monospace',
+    baseSizePt: 12,
+    baseSizePx: 19,
+    lineHeight: 1.75,
+    headingScale: { h1: 1.6, h2: 1.35, h3: 1.15, h4: 1.05, h5: 1.0, h6: 1.0 },
+    paragraph: { indentEm: 2, spacingEm: 0, justify: true },
+  },
+  chapterHeading: {
+    align: 'center',
+    numberStyle: 'word',
+    showTitle: true,
+    ornament: null,
+  },
+  sectionBreak: { ornament: '***' },
+  dropCaps: true,
+  measure: { maxWidthCh: 60 },
+};
+
 const BUILT_IN_THEMES: Record<string, Theme> = {
   'jela-serif': JELA_SERIF,
+  'modern-sans': MODERN_SANS,
+  'classic-literary': CLASSIC_LITERARY,
 };
 
 export const DEFAULT_THEME_ID = 'jela-serif';
@@ -102,6 +154,8 @@ export function themeToCssVars(theme: Theme): Record<string, string> {
     '--book-para-space': `${p.spacingEm}em`,
     '--book-justify': p.justify ? 'justify' : 'start',
     '--book-measure': `${theme.measure.maxWidthCh}ch`,
+    '--book-chapter-align': theme.chapterHeading.align,
+    '--book-drop-caps': theme.dropCaps ? '1' : '0',
   };
 }
 

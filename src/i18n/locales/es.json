@@ -237,6 +237,10 @@
     "emptyBody": "Crea tu primer capítulo desde la vista Capítulo Activo",
     "indice": "Índice",
     "chapterLoadError": "No se pudo cargar {{filename}}",
+    "themeGallery": {
+      "title": "Temas del libro",
+      "activeLabel": "Activo"
+    },
     "export": {
       "successBody": "Libro exportado en:\n{{path}}",
       "successTitle": "Exportación completada",

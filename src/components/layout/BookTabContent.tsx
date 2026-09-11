@@ -20,6 +20,8 @@ import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgrad
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
+import ThemeGallery from '@/components/book/ThemeGallery';
+import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
 
@@ -228,6 +230,8 @@ function BookTabContent() {
                   content={section.content}
                   isLast={isLast}
                   slug={slug}
+                  themeId={currentProject?.tema}
+                  themeOverrides={currentProject?.temaOverrides}
                 />
               );
             }
@@ -278,6 +282,7 @@ function BookTabContent() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
+        <ThemeGallery activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID} />
         {renderContent()}
       </div>
 

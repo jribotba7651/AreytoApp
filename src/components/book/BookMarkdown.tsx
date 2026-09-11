@@ -13,7 +13,11 @@ const MD_COMPONENTS: Components = {
   h1: ({ children }) => (
     <h1
       className="font-semibold text-text-primary mt-12 mb-6 leading-tight"
-      style={{ fontFamily: 'var(--book-heading-font)', fontSize: 'var(--book-h1-size)' }}
+      style={{
+        fontFamily: 'var(--book-heading-font)',
+        fontSize: 'var(--book-h1-size)',
+        textAlign: 'var(--book-chapter-align)' as React.CSSProperties['textAlign'],
+      }}
     >
       {children}
     </h1>
@@ -114,6 +118,14 @@ const MD_COMPONENTS: Components = {
   hr: () => <hr className="border-border-subtle my-8 mx-auto w-16" />,
 };
 
+const DROP_CAPS_CSS = `
+.book-md-dropcaps > p:first-of-type::first-letter {
+  font-size: 3em;
+  float: left;
+  line-height: 1;
+  margin-right: 0.1em;
+}`;
+
 function BookMarkdown({ content, themeId, themeOverrides }: BookMarkdownProps) {
   const theme = resolveTheme(themeId, themeOverrides);
   const cssVars = themeToCssVars(theme);
@@ -121,8 +133,9 @@ function BookMarkdown({ content, themeId, themeOverrides }: BookMarkdownProps) {
   return (
     <div
       style={{ maxWidth: 'var(--book-measure)', ...cssVars } as React.CSSProperties}
-      className="mx-auto px-8 py-8"
+      className={`mx-auto px-8 py-8${theme.dropCaps ? ' book-md-dropcaps' : ''}`}
     >
+      {theme.dropCaps && <style>{DROP_CAPS_CSS}</style>}
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
         {content}
       </ReactMarkdown>

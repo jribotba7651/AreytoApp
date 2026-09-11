@@ -3,14 +3,36 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: Polish
+- Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Última feature completada: F49 Menú File nativo con Open / New / Close Project
-- Fecha de última actualización: 2026-06-05
+- Última feature completada: Epic4-S1 Theme Gallery + preview gap + tests
+- Fecha de última actualización: 2026-09-11
 
 ## Features completadas
 
-### 2026-06-05 - F49 - Menú File nativo con Open / New / Close Project
+### 2026-09-11 - Epic4-S1 - Theme Gallery read-only + preview gap item6 + tests item6/item10
+- Que se hizo: Slice 1 del Epic 4 de Theming con 3 sub-tareas:
+  1. Theme Gallery read-only en tab Libro: componente ThemeGallery con thumbnails de preview para cada tema built-in. Muestra mini-preview con tipografia, alineacion, indent y drop caps representados visualmente. Badge "Activo" en el tema del proyecto. Se agregaron 2 temas built-in nuevos (Modern Sans, Classic Literary) para que la galeria tenga contenido.
+  2. Preview gap de item6 cerrado: BookMarkdown.tsx ahora renderiza correctamente chapterHeading.align en h1 y drop caps via CSS pseudo-element. Se agregaron CSS vars --book-chapter-align y --book-drop-caps a themeToCssVars. BookChapter ahora propaga themeId/themeOverrides a BookMarkdown.
+  3. Tests de cobertura: 15 tests nuevos para resolveTheme (temas nuevos, mutabilidad, overrides cross-theme), themeToCssVars (--book-chapter-align, --book-drop-caps, vars de modern-sans), themeToEpubCss (spacing, h1 align left, ornament null, classic-literary full), listBuiltInThemes, getBuiltInTheme.
+- Archivos creados:
+  - src/components/book/ThemeGallery.tsx (componente de galeria read-only)
+- Archivos modificados:
+  - src/lib/theme.ts (2 temas built-in: MODERN_SANS, CLASSIC_LITERARY; CSS vars --book-chapter-align, --book-drop-caps)
+  - src/lib/theme.test.ts (15 tests nuevos; total 33 tests en el archivo)
+  - src/components/book/BookMarkdown.tsx (h1 usa --book-chapter-align; drop caps via CSS class + style tag)
+  - src/components/book/BookChapter.tsx (props themeId/themeOverrides propagados a BookMarkdown)
+  - src/components/layout/BookTabContent.tsx (ThemeGallery integrado; tema del proyecto propagado a BookChapter)
+  - src/i18n/locales/en.json (book.themeGallery.title, book.themeGallery.activeLabel)
+  - src/i18n/locales/es.json (mismas claves en espanol)
+- Decisiones tomadas:
+  - D-190: ThemeGallery es read-only en Slice 1. Seleccion de tema se implementara en Slice 2.
+  - D-191: Drop caps en preview usan CSS class + style tag inyectado (::first-letter no se puede hacer inline). Clase scoped book-md-dropcaps.
+  - D-192: 2 temas built-in adicionales (modern-sans: sans-serif, sin indent, con spacing; classic-literary: serif, indent 2em, drop caps, ornament ***) para darle contenido visual a la galeria.
+- Tests: 409 TS (antes 348 + 18 theme = 366; ahora 348 + 33 theme + 28 otros = 409) -- todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-06-05 - F49 - Menu File nativo con Open / New / Close Project
 - Qué se hizo: menú de aplicación Tauri 2.x nativo con submenú "File" (Open Project…, New Project…, Close Project). Los ítems del menú emiten eventos Tauri al frontend vía el patrón emit/listen ya existente (igual que terminal.rs/useTerminal.ts). El frontend reutiliza la lógica existente sin duplicar.
 - Archivos modificados:
   - src-tauri/src/lib.rs (menú Areyto + File con 3 ítems y aceleradores; on_menu_event emite menu:open-project / menu:new-project / menu:close-project; imports tauri::menu::* + Emitter)

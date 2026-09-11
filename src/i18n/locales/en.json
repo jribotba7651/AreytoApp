@@ -237,6 +237,10 @@
     "emptyBody": "Create your first chapter from the Active Chapter view",
     "indice": "Table of Contents",
     "chapterLoadError": "Could not load {{filename}}",
+    "themeGallery": {
+      "title": "Book themes",
+      "activeLabel": "Active"
+    },
     "export": {
       "successBody": "Book exported to:\n{{path}}",
       "successTitle": "Export complete",
