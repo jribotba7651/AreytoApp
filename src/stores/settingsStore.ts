@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { readGlobalSettings, writeGlobalSettings } from '@/lib/settings';
 import i18n from '@/i18n/i18n';
+import type { Theme } from '@/lib/theme';
 
 export const AUTOSAVE_DELAY_MS = 500;
 export const THEME_STORAGE_KEY = 'areyto-theme-mode';
@@ -48,6 +49,7 @@ interface SettingsState {
   bookFontSize: number;
   exportFolder: string;
   uiLocale: string;
+  customThemes: Theme[];
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
@@ -60,6 +62,7 @@ interface SettingsState {
   setBookFontSize: (size: number) => Promise<void>;
   setExportFolder: (folder: string) => Promise<void>;
   setUiLocale: (locale: string) => Promise<void>;
+  addCustomTheme: (theme: Theme) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -73,6 +76,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   bookFontSize: 18,
   exportFolder: '',
   uiLocale: 'en',
+  customThemes: [],
   loaded: false,
 
   load: async () => {
@@ -95,6 +99,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         bookFontSize,
         exportFolder: settings.exportFolder ?? '',
         uiLocale,
+        customThemes: (settings.customThemes ?? []) as unknown as Theme[],
         loaded: true,
       });
       applyTheme(themeMode);
@@ -213,6 +218,20 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, uiLocale: locale });
     } catch (err) {
       console.warn('[areyto] Failed to persist uiLocale:', err);
+    }
+  },
+
+  addCustomTheme: async (theme: Theme) => {
+    const updated = [...useSettingsStore.getState().customThemes, theme];
+    set({ customThemes: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({
+        ...current,
+        customThemes: updated as unknown as Array<Record<string, unknown>>,
+      });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist customThemes:', err);
     }
   },
 }));

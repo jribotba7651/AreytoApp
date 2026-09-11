@@ -250,6 +250,24 @@
       "title": "Temas del libro",
       "activeLabel": "Activo"
     },
+    "themeControls": {
+      "title": "Ajustes del tema",
+      "fontFamily": "Familia tipografica",
+      "fontSize": "Tamano de fuente (px)",
+      "lineHeight": "Altura de linea",
+      "textIndent": "Sangria (em)",
+      "paragraphSpacing": "Espacio entre parrafos (em)",
+      "justify": "Justificar texto",
+      "sectionBreakOrnament": "Ornamento de corte de seccion",
+      "sectionBreakPlaceholder": "ej. * * *",
+      "dropCaps": "Capitulares",
+      "savePreset": "Guardar como preset",
+      "presetNamePlaceholder": "Nombre del preset",
+      "presetSaved": "Preset guardado",
+      "presetNameRequired": "Escribe un nombre para el preset",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    },
     "export": {
       "successBody": "Libro exportado en:\n{{path}}",
       "successTitle": "Exportación completada",

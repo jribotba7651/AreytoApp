@@ -250,6 +250,24 @@
       "title": "Book themes",
       "activeLabel": "Active"
     },
+    "themeControls": {
+      "title": "Theme adjustments",
+      "fontFamily": "Font family",
+      "fontSize": "Font size (px)",
+      "lineHeight": "Line height",
+      "textIndent": "Text indent (em)",
+      "paragraphSpacing": "Paragraph spacing (em)",
+      "justify": "Justify text",
+      "sectionBreakOrnament": "Section break ornament",
+      "sectionBreakPlaceholder": "e.g. * * *",
+      "dropCaps": "Drop caps",
+      "savePreset": "Save as preset",
+      "presetNamePlaceholder": "Preset name",
+      "presetSaved": "Preset saved",
+      "presetNameRequired": "Enter a name for the preset",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
     "export": {
       "successBody": "Book exported to:\n{{path}}",
       "successTitle": "Export complete",

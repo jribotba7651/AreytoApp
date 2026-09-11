@@ -5,10 +5,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Epic 4 (Theming)
 - Feature en progreso: ninguna
-- Ultima feature completada: Epic4-S2 Export persistente + Escribir/Formatear + DeviceFrame
+- Ultima feature completada: Epic4-S3 ThemeControls editables + Guardar preset custom
 - Fecha de ultima actualizacion: 2026-09-11
 
 ## Features completadas
+
+### 2026-09-11 - Epic4-S3 - ThemeControls editables + Guardar preset custom
+- Que se hizo: Slice 3 del Epic 4 con 2 sub-tareas:
+  1. Controles editables de Theme (temaOverrides): panel ThemeControls en modo Formatear que permite al usuario cambiar font family, font size, line height, text indent, paragraph spacing, justify on/off, section break ornament, y drop caps on/off. Los cambios se guardan como temaOverrides en proyecto.json via updateProjectMeta en el projectStore. El preview en BookMarkdown se actualiza en tiempo real via resolveTheme+themeToCssVars.
+  2. Guardar preset custom: boton "Guardar como preset" en ThemeControls que guarda el tema actual (resolved) con nombre custom en un array customThemes en GlobalSettings. Los presets custom aparecen en ThemeGallery junto a los built-in. Seleccionar un tema desde ThemeGallery ahora actualiza el tema del proyecto y limpia los overrides.
+- Archivos creados:
+  - src/components/book/ThemeControls.tsx (panel de controles editables del tema con save-as-preset)
+- Archivos modificados:
+  - src/stores/projectStore.ts (nuevo metodo updateProjectMeta que llama a project-fs y actualiza el state local)
+  - src/stores/settingsStore.ts (estado customThemes: Theme[], metodo addCustomTheme, carga en load())
+  - src/lib/settings.ts (customThemes?: Array<Record<string, unknown>> en GlobalSettings)
+  - src/components/book/ThemeGallery.tsx (props onSelectTheme y customThemes; thumbnails clickeables con role=button)
+  - src/components/layout/BookTabContent.tsx (ThemeControls integrado debajo de ThemeGallery en modo format; onSelectTheme wiring; customThemes propagado)
+  - src/i18n/locales/en.json (book.themeControls.* - 15 claves nuevas)
+  - src/i18n/locales/es.json (mismas claves en espanol)
+- Decisiones tomadas:
+  - D-196: Al seleccionar un tema desde ThemeGallery, se limpia temaOverrides (se pasa undefined) para que el tema seleccionado se aplique limpio. Los overrides solo se acumulan mientras el usuario ajusta el tema activo.
+  - D-197: Los custom themes se guardan en GlobalSettings (no por proyecto). Esto permite reutilizar presets entre proyectos distintos.
+  - D-198: El id de un custom theme usa el patron custom-{timestamp} para evitar colisiones con built-in themes.
+  - D-199: ThemeControls construye overrides de forma incremental, preservando overrides previos al agregar nuevos cambios.
+- Tests: 409 TS -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - Epic4-S2 - Export persistente + toggle Escribir/Formatear + marco de dispositivo
 - Que se hizo: Slice 2 del Epic 4 con 3 sub-tareas:

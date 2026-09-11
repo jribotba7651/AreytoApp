@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Chapter, ClosedChapter, Project } from '@/types/project';
 import type { Commit } from '@/types/git';
+import { updateProjectMeta as updateMeta } from '@/lib/project-fs';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export type ActiveView =
@@ -49,6 +50,7 @@ interface ProjectState {
   setTriggerOpenProject: (fn: (() => void) | null) => void;
   setTriggerNewProject: (fn: (() => void) | null) => void;
   setPendingMenuAction: (action: 'open' | 'new' | null) => void;
+  updateProjectMeta: (updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides'>>) => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -133,4 +135,13 @@ export const useProjectStore = create<ProjectState>((set) => ({
   setTriggerNewProject: (fn: (() => void) | null) => set({ triggerNewProject: fn }),
 
   setPendingMenuAction: (action: 'open' | 'new' | null) => set({ pendingMenuAction: action }),
+
+  updateProjectMeta: async (updates) => {
+    const { currentProject } = useProjectStore.getState();
+    if (!currentProject) return;
+    const result = await updateMeta(currentProject, updates);
+    if (result.ok) {
+      set({ currentProject: result.value });
+    }
+  },
 }));

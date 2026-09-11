@@ -4,9 +4,11 @@ import { listBuiltInThemes, type Theme } from '@/lib/theme';
 
 interface ThemeGalleryProps {
   activeThemeId: string;
+  onSelectTheme?: (themeId: string) => void;
+  customThemes?: Theme[];
 }
 
-function ThemeThumbnail({ theme, isActive }: { theme: Theme; isActive: boolean }) {
+function ThemeThumbnail({ theme, isActive, onClick }: { theme: Theme; isActive: boolean; onClick?: () => void }) {
   const { t } = useTranslation();
   const p = theme.typography.paragraph;
   const isSerif = theme.typography.bodyFont.toLowerCase().includes('serif')
@@ -14,7 +16,13 @@ function ThemeThumbnail({ theme, isActive }: { theme: Theme; isActive: boolean }
 
   return (
     <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
       className={`relative flex flex-col rounded border p-3 transition-colors duration-150 ${
+        onClick ? 'cursor-pointer' : ''
+      } ${
         isActive
           ? 'border-accent bg-bg-tertiary'
           : 'border-border-subtle bg-bg-secondary hover:border-border-default'
@@ -78,9 +86,9 @@ function ThemeThumbnail({ theme, isActive }: { theme: Theme; isActive: boolean }
   );
 }
 
-function ThemeGallery({ activeThemeId }: ThemeGalleryProps) {
+function ThemeGallery({ activeThemeId, onSelectTheme, customThemes = [] }: ThemeGalleryProps) {
   const { t } = useTranslation();
-  const themes = listBuiltInThemes();
+  const allThemes = [...listBuiltInThemes(), ...customThemes];
 
   return (
     <div className="px-4 py-3 border-b border-border-subtle">
@@ -88,11 +96,12 @@ function ThemeGallery({ activeThemeId }: ThemeGalleryProps) {
         {t('book.themeGallery.title')}
       </h3>
       <div className="grid grid-cols-3 gap-2">
-        {themes.map((theme) => (
+        {allThemes.map((theme) => (
           <ThemeThumbnail
             key={theme.id}
             theme={theme}
             isActive={theme.id === activeThemeId}
+            onClick={onSelectTheme ? () => onSelectTheme(theme.id) : undefined}
           />
         ))}
       </div>

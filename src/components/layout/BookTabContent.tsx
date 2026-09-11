@@ -20,6 +20,7 @@ import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
 import ThemeGallery from '@/components/book/ThemeGallery';
+import ThemeControls from '@/components/book/ThemeControls';
 import DeviceFrame from '@/components/book/DeviceFrame';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
@@ -29,8 +30,10 @@ import type { BookViewMode, DeviceFrame as DeviceFrameType } from '@/types/layou
 function BookTabContent() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
+  const updateProjectMeta = useProjectStore((s) => s.updateProjectMeta);
   const activeTab = useLayoutStore((s) => s.activeTab);
   const exportFolder = useSettingsStore((s) => s.exportFolder);
+  const customThemes = useSettingsStore((s) => s.customThemes);
   const setExportFolder = useSettingsStore((s) => s.setExportFolder);
   const [bookData, setBookData] = useState<BookData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -305,7 +308,17 @@ function BookTabContent() {
 
       <div className="flex-1 overflow-y-auto">
         {bookViewMode === 'format' ? (
-          <ThemeGallery activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID} />
+          <>
+            <ThemeGallery
+              activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID}
+              onSelectTheme={(id) => void updateProjectMeta({ tema: id, temaOverrides: undefined })}
+              customThemes={customThemes}
+            />
+            <ThemeControls
+              themeId={currentProject.tema}
+              themeOverrides={currentProject.temaOverrides}
+            />
+          </>
         ) : (
           <DeviceFrame device={deviceFrame}>
             {renderContent()}

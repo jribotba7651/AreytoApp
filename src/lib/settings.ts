@@ -22,6 +22,7 @@ export interface GlobalSettings {
   bookFontSize?: number;
   exportFolder?: string;
   uiLocale?: string;
+  customThemes?: Array<Record<string, unknown>>;
 }
 
 export interface ProjectState {
