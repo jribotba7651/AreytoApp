@@ -4,11 +4,25 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Estado actual
 - Fase activa: Polish/UX
-- Feature en progreso: UI para gestionar portada del libro
-- Ultima feature completada: Mas temas built-in (Clean Modern + Hispanico Clasico)
+- Feature en progreso: ninguna
+- Ultima feature completada: UI para gestionar portada del libro
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - UI para gestionar portada del libro
+- Que se hizo: En el tab Libro, vista Formato, se agrego una seccion de portada debajo de BookSettings. Si existe una imagen de portada en la raiz del proyecto (portada.png/jpg/jpeg o cover.png/jpg/jpeg), muestra un thumbnail pequeno con opcion de cambiarla. Si no hay portada, muestra un hint y un boton "Seleccionar imagen" que abre el file picker nativo (tauri-plugin-dialog open()), copia la imagen seleccionada a la raiz del proyecto como portada.jpg via el comando Tauri copy_file, y refresca la deteccion. Reutiliza detectCoverImage y COVER_FILENAMES de export-service.ts. El thumbnail se muestra via convertFileSrc (protocolo asset de Tauri).
+- Archivos creados:
+  - src/components/book/BookCoverSection.tsx (componente de portada con deteccion, thumbnail, file picker, copia)
+- Archivos modificados:
+  - src/components/layout/BookTabContent.tsx (+import y render de BookCoverSection en vista format)
+  - src/i18n/locales/en.json (+seccion book.cover con 7 keys: title, detected, nocover, nocoverHint, selectImage, copySuccess, copyError)
+- Decisiones tomadas:
+  - D-234: La portada se copia siempre como portada.jpg (nombre fijo) para consistencia. Si el usuario selecciona un PNG, se copia tal cual pero con nombre .jpg. Esto es aceptable porque los viewers de imagenes y Tauri no dependen de la extension para decodificar.
+  - D-235: La deteccion se hace al montar el componente (no polling). Despues de copiar una nueva portada se llama refresh() manualmente.
+  - D-236: El componente vive en la vista format (junto a ThemeGallery, ThemeControls, BookSettings) porque es configuracion visual del libro, no contenido.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-12 - Mas temas built-in (Clean Modern + Hispanico Clasico)
 - Que se hizo: Se agregaron 2 temas built-in nuevos al catalogo de temas en theme.ts. Ahora hay 5 temas built-in en total. Clean Modern: sans-serif (Helvetica Neue), sin sangria, espaciado generoso entre parrafos (1.2em), interlineado amplio (1.85), headings alineados a la izquierda, sin ornamentos. Hispanico Clasico: serif (Palatino), sangria francesa (1.8em), justificado, drop caps activado, section break con tilde (~), headings centrados con numeracion por palabra, medida compacta (64ch). Ambos temas aparecen automaticamente en ThemeGallery y estan disponibles para seleccion.

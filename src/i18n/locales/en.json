@@ -298,6 +298,15 @@
       "marginInner": "Inner",
       "marginOuter": "Outer"
     },
+    "cover": {
+      "title": "Cover",
+      "detected": "Cover detected",
+      "nocover": "No cover",
+      "nocoverHint": "Place an image (cover.png/jpg) in the project root, or select one with the button.",
+      "selectImage": "Select image",
+      "copySuccess": "Cover updated",
+      "copyError": "Error copying image"
+    },
     "export": {
       "successBody": "Book exported to:\n{{path}}",
       "successTitle": "Export complete",
