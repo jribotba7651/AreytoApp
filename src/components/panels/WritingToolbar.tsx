@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Type, Search, BookOpen, MessageSquare, Bookmark } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { invoke } from '@tauri-apps/api/core';
+import { useProjectStore } from '@/stores/projectStore';
 
-type ToolPanel = 'editor-settings' | 'find-replace' | null;
+type ToolPanel = 'editor-settings' | 'find-replace' | 'notes' | null;
 
 function EditorSettingsPanel() {
   const { t } = useTranslation();
@@ -154,10 +156,88 @@ function FindReplacePanel() {
   );
 }
 
+function ChapterNotesPanel() {
+  const { t } = useTranslation();
+  const currentProject = useProjectStore((s) => s.currentProject);
+  const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
+  const chapters = useProjectStore((s) => s.chapters);
+  const activeChapter = chapters.find((c) => c.path === activeChapterPath) ?? null;
+  const [noteContent, setNoteContent] = useState('');
+  const [loaded, setLoaded] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const notePath = currentProject && activeChapter
+    ? `${currentProject.rootPath}/.notes/${activeChapter.filename.replace(/\.md$/, '')}.md`
+    : null;
+  const notesDirPath = currentProject ? `${currentProject.rootPath}/.notes` : null;
+
+  useEffect(() => {
+    if (!notePath) {
+      setNoteContent('');
+      setLoaded(true);
+      return;
+    }
+    setLoaded(false);
+    invoke<string>('read_text_file', { path: notePath })
+      .then((content) => {
+        setNoteContent(content);
+        setLoaded(true);
+      })
+      .catch(() => {
+        setNoteContent('');
+        setLoaded(true);
+      });
+  }, [notePath]);
+
+  const saveNote = useCallback(async (content: string) => {
+    if (!notePath || !notesDirPath) return;
+    try {
+      await invoke('ensure_dir', { path: notesDirPath });
+      await invoke('write_text_file', { path: notePath, contents: content });
+    } catch (err) {
+      console.error('Failed to save note:', err);
+    }
+  }, [notePath, notesDirPath]);
+
+  function handleChange(value: string) {
+    setNoteContent(value);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => void saveNote(value), 800);
+  }
+
+  if (!activeChapter) {
+    return (
+      <div className="p-3">
+        <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+          {t('writingToolbar.notes')}
+        </h4>
+        <p className="text-[11px] text-text-tertiary mt-2">{t('writingToolbar.notesNoChapter')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-3 flex flex-col h-full">
+      <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
+        {t('writingToolbar.notes')}
+      </h4>
+      <p className="text-[10px] text-text-tertiary mb-2 truncate">{activeChapter.title}</p>
+      {loaded && (
+        <textarea
+          value={noteContent}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder={t('writingToolbar.notesPlaceholder')}
+          className="flex-1 w-full min-h-[120px] px-2 py-1.5 text-xs bg-bg-tertiary border border-border-subtle rounded focus:border-accent outline-none placeholder:text-text-tertiary resize-none font-sans"
+        />
+      )}
+    </div>
+  );
+}
+
 const TOOL_ICONS = [
   { id: 'editor-settings' as const, Icon: Type, labelKey: 'writingToolbar.editorSettings.title' },
   { id: 'find-replace' as const, Icon: Search, labelKey: 'writingToolbar.findReplace.title' },
-  { id: 'stub-1' as const, Icon: BookOpen, labelKey: 'writingToolbar.notes' },
+  { id: 'notes' as const, Icon: BookOpen, labelKey: 'writingToolbar.notes' },
   { id: 'stub-2' as const, Icon: MessageSquare, labelKey: 'writingToolbar.comments' },
   { id: 'stub-3' as const, Icon: Bookmark, labelKey: 'writingToolbar.bookmarks' },
 ] as const;
@@ -169,7 +249,7 @@ function WritingToolbar() {
   const [activePanel, setActivePanel] = useState<ToolPanel>(null);
 
   function handleIconClick(id: ToolId) {
-    if (id === 'editor-settings' || id === 'find-replace') {
+    if (id === 'editor-settings' || id === 'find-replace' || id === 'notes') {
       setActivePanel((prev) => (prev === id ? null : id));
     }
   }
@@ -180,6 +260,7 @@ function WritingToolbar() {
         <div className="w-56 border-l border-border-subtle bg-bg-secondary overflow-y-auto">
           {activePanel === 'editor-settings' && <EditorSettingsPanel />}
           {activePanel === 'find-replace' && <FindReplacePanel />}
+          {activePanel === 'notes' && <ChapterNotesPanel />}
         </div>
       )}
       <div className="flex flex-col items-center gap-1 py-2 px-1 border-l border-border-subtle bg-bg-secondary">

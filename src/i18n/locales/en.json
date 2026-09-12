@@ -3,7 +3,8 @@
     "capitulo": "Active Chapter",
     "libro": "Book",
     "terminados": "Finished",
-    "ajustes": "Settings"
+    "ajustes": "Settings",
+    "stats": "Stats"
   },
   "common": {
     "saving": "Saving…",
@@ -283,6 +284,7 @@
       "nextChapter": "Next Chapter",
       "chapterOf": "Chapter {{current}} of {{total}}"
     },
+    "readingTime": "Estimated reading time: {{minutes}} min",
     "themeGallery": {
       "title": "Book themes",
       "activeLabel": "Active"
@@ -435,7 +437,20 @@
       "replaceOne": "Replace"
     },
     "notes": "Notes",
+    "notesNoChapter": "Select a chapter to see its notes.",
+    "notesPlaceholder": "Write notes for this chapter...",
     "comments": "Comments",
     "bookmarks": "Bookmarks"
+  },
+  "stats": {
+    "title": "Statistics",
+    "totalWords": "Total words",
+    "estimatedPages": "Estimated pages",
+    "longestChapter": "Longest chapter",
+    "shortestChapter": "Shortest chapter",
+    "words": "words",
+    "last7Days": "Activity (last 7 days)",
+    "projectStarted": "Project started",
+    "chapterBreakdown": "Words by chapter"
   }
 }

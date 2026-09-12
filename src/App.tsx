@@ -6,6 +6,7 @@ import ChapterTabContent from '@/components/layout/ChapterTabContent';
 import BookTabContent from '@/components/layout/BookTabContent';
 import FinishedTabContent from '@/components/layout/FinishedTabContent';
 import SettingsTabContent from '@/components/settings/SettingsTabContent';
+import StatsTabContent from '@/components/layout/StatsTabContent';
 import EditorPanel from '@/components/panels/EditorPanel';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import { useLayoutStore } from '@/stores/layoutStore';
@@ -124,6 +125,7 @@ function App() {
         {activeTab === 'libro' && <BookTabContent />}
         {activeTab === 'terminados' && <FinishedTabContent />}
         {activeTab === 'ajustes' && <SettingsTabContent />}
+        {activeTab === 'stats' && <StatsTabContent />}
       </main>
     </div>
   );

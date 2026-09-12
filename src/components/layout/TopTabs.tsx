@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Info, Upload, Keyboard, Settings, Archive, Check } from 'lucide-react';
+import { X, Info, Upload, Keyboard, Settings, Archive, Check, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
@@ -87,6 +87,15 @@ function TopTabs() {
           }`}
         >
           <Archive size={15} />
+        </button>
+        <button
+          onClick={() => setActiveTab('stats')}
+          title={t('tabs.stats')}
+          className={`flex items-center justify-center w-7 h-7 rounded transition-colors duration-150 ${
+            activeTab === 'stats' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary'
+          }`}
+        >
+          <BarChart3 size={15} />
         </button>
         <button
           onClick={() => setActiveTab('ajustes')}

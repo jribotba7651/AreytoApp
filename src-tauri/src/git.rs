@@ -188,6 +188,32 @@ pub fn git_list_tags_matching(repo_path: String, pattern: String) -> Result<Vec<
     Ok(names)
 }
 
+#[tauri::command]
+pub fn git_first_commit_date(repo_path: String) -> Result<String, String> {
+    let out = git(&repo_path, &["log", "--reverse", "--format=%aI", "--max-count=1"])?;
+    Ok(out.trim().to_owned())
+}
+
+#[tauri::command]
+pub fn git_daily_file_changes(repo_path: String, since: String) -> Result<Vec<String>, String> {
+    let out = git(
+        &repo_path,
+        &[
+            "log",
+            "--since",
+            &since,
+            "--format=%aI",
+            "--diff-filter=AM",
+            "--name-only",
+            "--",
+            "capitulos/*.md",
+            "capitulos-terminados/*.md",
+        ],
+    )?;
+    let lines = out.lines().map(str::to_owned).collect();
+    Ok(lines)
+}
+
 fn parse_tag_line(line: &str) -> Option<TagInfo> {
     let mut parts = line.splitn(3, '|');
     Some(TagInfo {

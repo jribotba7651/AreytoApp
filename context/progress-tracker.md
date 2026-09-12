@@ -5,10 +5,38 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Polish - Recent Projects, Chapter Templates, Export Filename, Version History Diff (4 sub-tareas)
+- Ultima feature completada: Stats Page + Reading Time + Chapter Notes + Auto Backup (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Stats Page + Reading Time + Chapter Notes + Auto Backup (4 sub-tareas)
+- Que se hizo:
+  1. Statistics Page: nuevo tab 'Stats' (icono BarChart3) en la barra superior, entre Terminados y Ajustes. Muestra: total de palabras del libro, paginas estimadas (250 palabras/pagina), capitulo mas largo, capitulo mas corto, mini bar chart CSS puro con actividad de los ultimos 7 dias (commits con cambios en capitulos), fecha de inicio del proyecto (primer commit git), y desglose de palabras por capitulo con barras proporcionales. Se agregaron dos comandos Tauri nuevos en Rust (git_first_commit_date, git_daily_file_changes).
+  2. Reading Time Estimate: en la barra de navegacion inferior del tab Libro, debajo del indicador "Capitulo X de Y", se muestra "Tiempo de lectura estimado: X min" basado en 200 palabras/min. Se actualiza al navegar entre capitulos.
+  3. Chapter Notes: el stub "Notes" (BookOpen icon) del sidebar derecho (WritingToolbar) ahora es funcional. Textarea simple que guarda notas por capitulo en .notes/{nombre-capitulo}.md dentro del proyecto. Autosave con debounce de 800ms. Se crea la carpeta .notes automaticamente. Las notas NO se incluyen en el export.
+  4. Backup Automatico: al completar un export exitoso (md, docx o epub), el archivo exportado se copia automaticamente a backups/ dentro del proyecto con timestamp en el nombre (formato: nombre-2026-09-12T14-30-00.ext). Se crea la carpeta backups/ automaticamente. Sin configuracion extra.
+- Archivos creados:
+  - src/components/layout/StatsTabContent.tsx (pagina de estadisticas completa)
+- Archivos modificados:
+  - src/types/layout.ts (+stats en union Tab)
+  - src/stores/layoutStore.ts (no cambios directos, Tab type update propagado)
+  - src/components/layout/TopTabs.tsx (+boton Stats con BarChart3 icon)
+  - src/App.tsx (+import StatsTabContent, +renderizado del tab stats)
+  - src/components/layout/BookTabContent.tsx (+countWordsSimple, +readingTime en nav bar, +backupExportedFile, +invoke import, +void backupExportedFile en los 3 handlers de export)
+  - src/components/panels/WritingToolbar.tsx (ChapterNotesPanel funcional reemplaza stub-1, +notes en ToolPanel type, +useProjectStore/invoke imports)
+  - src-tauri/src/git.rs (+git_first_commit_date, +git_daily_file_changes comandos)
+  - src-tauri/src/lib.rs (+registro de los 2 comandos nuevos)
+  - src/i18n/locales/en.json (+tabs.stats, +stats.*, +book.readingTime, +writingToolbar.notesNoChapter/notesPlaceholder)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-265: El bar chart de actividad cuenta archivos .md cambiados por dia (no palabras), porque contar palabras por commit requeriria diffs costosos. Es una aproximacion util de actividad.
+  - D-266: git_daily_file_changes y git_first_commit_date son comandos Tauri dedicados (no un shell generico) para mantener la seguridad del sandbox.
+  - D-267: Las notas se guardan en .notes/{nombre-sin-extension}.md. Se usa el nombre del archivo (no el titulo) como clave para evitar problemas si el titulo cambia.
+  - D-268: El backup usa void (fire-and-forget) para no bloquear el flujo de export ni mostrar errores de backup al usuario.
+  - D-269: El reading time se calcula sobre el contenido del capitulo visible (no del libro completo) porque la navegacion es por capitulo individual.
+- Tests: tsc --noEmit limpio, cargo check limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-12 - Polish: Recent Projects + Chapter Templates + Export Filename + Version History Diff (4 sub-tareas)
 - Que se hizo:

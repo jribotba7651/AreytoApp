@@ -3,7 +3,8 @@
     "capitulo": "Capítulo Activo",
     "libro": "Libro",
     "terminados": "Terminados",
-    "ajustes": "Ajustes"
+    "ajustes": "Ajustes",
+    "stats": "Estadisticas"
   },
   "common": {
     "saving": "Guardando…",
@@ -283,6 +284,7 @@
       "nextChapter": "Capitulo siguiente",
       "chapterOf": "Capitulo {{current}} de {{total}}"
     },
+    "readingTime": "Tiempo de lectura estimado: {{minutes}} min",
     "themeGallery": {
       "title": "Temas del libro",
       "activeLabel": "Activo"
@@ -435,7 +437,20 @@
       "replaceOne": "Reemplazar"
     },
     "notes": "Notas",
+    "notesNoChapter": "Selecciona un capitulo para ver sus notas.",
+    "notesPlaceholder": "Escribe notas para este capitulo...",
     "comments": "Comentarios",
     "bookmarks": "Marcadores"
+  },
+  "stats": {
+    "title": "Estadisticas",
+    "totalWords": "Total de palabras",
+    "estimatedPages": "Paginas estimadas",
+    "longestChapter": "Capitulo mas largo",
+    "shortestChapter": "Capitulo mas corto",
+    "words": "palabras",
+    "last7Days": "Actividad (ultimos 7 dias)",
+    "projectStarted": "Inicio del proyecto",
+    "chapterBreakdown": "Palabras por capitulo"
   }
 }

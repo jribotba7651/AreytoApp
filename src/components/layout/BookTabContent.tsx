@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { save, message } from '@tauri-apps/plugin-dialog';
+import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
@@ -22,6 +23,14 @@ import BookCoverSection from '@/components/book/BookCoverSection';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
 type ExportTarget = 'md' | 'docx' | 'epub';
+
+const WORDS_PER_MINUTE = 200;
+
+function countWordsSimple(text: string): number {
+  const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
+  const words = stripped.match(/\S+/g);
+  return words ? words.length : 0;
+}
 import type { ExportScope } from '@/lib/export-service';
 import type { BookViewMode, PreviewMode } from '@/types/layout';
 
@@ -116,6 +125,22 @@ function BookTabContent() {
     return `${base}-${today}.${ext}`;
   }
 
+  async function backupExportedFile(exportedPath: string) {
+    if (!currentProject) return;
+    try {
+      const backupsDir = `${currentProject.rootPath}/backups`;
+      await invoke('ensure_dir', { path: backupsDir });
+      const filename = exportedPath.slice(exportedPath.lastIndexOf('/') + 1);
+      const ext = filename.slice(filename.lastIndexOf('.'));
+      const base = filename.slice(0, filename.lastIndexOf('.'));
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const backupName = `${base}-${ts}${ext}`;
+      await invoke('copy_file', { from: exportedPath, to: `${backupsDir}/${backupName}` });
+    } catch (err) {
+      console.error('Backup failed:', err);
+    }
+  }
+
   async function handleExport(scope: ExportScope) {
     if (!currentProject) return;
     setExportLoading(true);
@@ -135,6 +160,7 @@ function BookTabContent() {
       }
 
       await exportBookMarkdown(currentProject.rootPath, { scope }, outputPath, currentProject.nombre);
+      void backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
       if (chosenDir) void setExportFolder(chosenDir);
@@ -174,6 +200,7 @@ function BookTabContent() {
       }
 
       await exportBookDocx(currentProject.rootPath, { scope }, outputPath, currentProject.nombre);
+      void backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
       if (chosenDir) void setExportFolder(chosenDir);
@@ -220,6 +247,7 @@ function BookTabContent() {
         currentProject.temaOverrides,
         currentProject.nombre,
       );
+      void backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
       if (chosenDir) void setExportFolder(chosenDir);
@@ -400,9 +428,18 @@ function BookTabContent() {
             <ChevronLeft size={14} />
             <span>{t('book.previewNav.prevChapter')}</span>
           </button>
-          <span className="text-xs text-text-tertiary">
-            {t('book.previewNav.chapterOf', { current: clampedIdx + 1, total: totalChapters })}
-          </span>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-text-tertiary">
+              {t('book.previewNav.chapterOf', { current: clampedIdx + 1, total: totalChapters })}
+            </span>
+            {chapterSections[clampedIdx]?.kind === 'chapter' && (
+              <span className="text-[10px] text-text-tertiary">
+                {t('book.readingTime', {
+                  minutes: Math.max(1, Math.ceil(countWordsSimple(chapterSections[clampedIdx].content) / WORDS_PER_MINUTE)),
+                })}
+              </span>
+            )}
+          </div>
           <button
             onClick={() => goToChapter(clampedIdx + 1)}
             disabled={clampedIdx >= totalChapters - 1}

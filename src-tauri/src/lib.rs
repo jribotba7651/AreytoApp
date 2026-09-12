@@ -112,6 +112,8 @@ pub fn run() {
             git::git_tag_info,
             git::git_list_chapter_tags,
             git::git_commit_all,
+            git::git_first_commit_date,
+            git::git_daily_file_changes,
             export::export_book_markdown,
             export::export_book_docx,
             export::export_book_epub,

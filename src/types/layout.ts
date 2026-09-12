@@ -1,4 +1,4 @@
-export type Tab = 'capitulo' | 'libro' | 'terminados' | 'ajustes';
+export type Tab = 'capitulo' | 'libro' | 'terminados' | 'ajustes' | 'stats';
 export type EditorViewMode = 'edit' | 'preview';
 
 export interface PanelSizes {
