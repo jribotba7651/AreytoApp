@@ -59,10 +59,11 @@ function ChapterList() {
 
   return (
     <div className="flex flex-col">
-      {chapters.map((chapter) => (
+      {chapters.map((chapter, i) => (
         <ChapterListItem
           key={chapter.path}
           chapter={chapter}
+          index={i}
           isActive={chapter.path === activeChapterPath}
           onClick={() => handleSelect(chapter.path, chapter.filename)}
           onRename={(newTitle) => handleRename(chapter, newTitle)}

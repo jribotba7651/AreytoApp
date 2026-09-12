@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
@@ -11,10 +11,18 @@ interface ChapterEditorProps {
   onChange?: (content: string) => void;
 }
 
-function ChapterEditor({ initialContent, onChange }: ChapterEditorProps) {
+export interface ChapterEditorHandle {
+  getView: () => EditorView | null;
+}
+
+const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
+
+  useImperativeHandle(ref, () => ({
+    getView: () => viewRef.current,
+  }));
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -50,6 +58,6 @@ function ChapterEditor({ initialContent, onChange }: ChapterEditorProps) {
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div ref={containerRef} className="h-full w-full overflow-auto" />;
-}
+});
 
 export default ChapterEditor;

@@ -1,22 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import FrontmatterItem from './FrontmatterItem';
+import CollapsibleSection from './CollapsibleSection';
 
 function BackmatterSection() {
   const { t } = useTranslation();
 
   return (
-    <div className="shrink-0">
-      <div className="px-3 pt-4 pb-2">
-        <p className="text-xs text-text-tertiary uppercase tracking-wider font-sans">
-          {t('sidebar.backmatter')}
-        </p>
-      </div>
-      <div>
-        <FrontmatterItem view="backmatter-agradecimientos" label={t('sidebar.items.agradecimientos')} />
-        <FrontmatterItem view="backmatter-sobre-el-autor" label={t('sidebar.items.sobreElAutor')} />
-        <FrontmatterItem view="backmatter-otros-libros" label={t('sidebar.items.otrosLibros')} />
-      </div>
-    </div>
+    <CollapsibleSection title={t('sidebar.backmatter')}>
+      <FrontmatterItem view="backmatter-agradecimientos" label={t('sidebar.items.agradecimientos')} />
+      <FrontmatterItem view="backmatter-sobre-el-autor" label={t('sidebar.items.sobreElAutor')} />
+      <FrontmatterItem view="backmatter-otros-libros" label={t('sidebar.items.otrosLibros')} />
+    </CollapsibleSection>
   );
 }
 

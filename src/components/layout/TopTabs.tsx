@@ -60,7 +60,7 @@ function TopTabs() {
             className={[
               'px-4 py-1 text-xs font-medium rounded transition-colors duration-150',
               isWriting
-                ? 'bg-white text-text-primary shadow-sm'
+                ? 'bg-bg-editor text-text-primary shadow-sm'
                 : 'text-text-secondary hover:text-text-primary',
             ].join(' ')}
           >
@@ -72,7 +72,7 @@ function TopTabs() {
             className={[
               'px-4 py-1 text-xs font-medium rounded transition-colors duration-150',
               isFormatting
-                ? 'bg-white text-text-primary shadow-sm'
+                ? 'bg-bg-editor text-text-primary shadow-sm'
                 : 'text-text-secondary hover:text-text-primary',
             ].join(' ')}
           >

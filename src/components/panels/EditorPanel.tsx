@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Eye, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
+import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
+import FormatToolbar from '@/components/editor/FormatToolbar';
 import BookMarkdown from '@/components/book/BookMarkdown';
 import ShortcutHint from '@/components/shared/ShortcutHint';
 import FrontmatterTituloEditor from '@/components/frontmatter/FrontmatterTituloEditor';
@@ -34,6 +36,7 @@ function ChapterView() {
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
 
+  const editorRef = useRef<ChapterEditorHandle>(null);
   const previewScrollRef = useRef<HTMLDivElement>(null);
 
   const { flush, syncSaved } = useAutosave({
@@ -69,7 +72,12 @@ function ChapterView() {
   return (
     <div className="h-full flex flex-col bg-bg-editor">
       <ExternalChangeBanner />
-      <div className="flex items-center justify-end px-3 py-1.5 border-b border-border-subtle shrink-0">
+      <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle shrink-0">
+        {!isPreview ? (
+          <FormatToolbar editorRef={editorRef} />
+        ) : (
+          <div />
+        )}
         <div className="relative flex items-center">
           <button
             onClick={handleToggle}
@@ -92,6 +100,7 @@ function ChapterView() {
       <div className="flex-1 min-h-0 relative">
         <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
           <ChapterEditor
+            ref={editorRef}
             key={`${activeChapterPath}:${editorVersion}`}
             initialContent={activeChapterContent}
             onChange={updateContent}

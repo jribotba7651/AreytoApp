@@ -6,6 +6,7 @@ import CloseChapterButton from '@/components/sidebar/CloseChapterButton';
 import RefreshChaptersButton from '@/components/sidebar/RefreshChaptersButton';
 import FrontmatterSection from '@/components/sidebar/FrontmatterSection';
 import BackmatterSection from '@/components/sidebar/BackmatterSection';
+import CollapsibleSection from '@/components/sidebar/CollapsibleSection';
 
 function SidebarPanel() {
   const { t } = useTranslation();
@@ -20,27 +21,24 @@ function SidebarPanel() {
   }
 
   return (
-    <div className="h-full bg-bg-secondary border-r border-border-subtle flex flex-col">
+    <div className="h-full bg-bg-secondary border-r border-border-subtle flex flex-col overflow-y-auto">
       <FrontmatterSection />
 
-      <div className="px-3 pt-4 pb-2 shrink-0 flex items-center justify-between border-t border-border-subtle">
-        <p className="text-xs text-text-tertiary uppercase tracking-wider font-sans">
-          {t('sidebar.chapters')}
-        </p>
-        <RefreshChaptersButton />
+      <div className="border-t border-border-subtle">
+        <CollapsibleSection
+          title={t('sidebar.chapters')}
+          actions={<RefreshChaptersButton />}
+        >
+          <ChapterList />
+          <div className="px-2 pb-1">
+            <NewChapterButton />
+            <CloseChapterButton />
+          </div>
+        </CollapsibleSection>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <ChapterList />
-      </div>
-
-      <div className="shrink-0 border-t border-border-subtle">
+      <div className="border-t border-border-subtle">
         <BackmatterSection />
-      </div>
-
-      <div className="shrink-0 border-t border-border-subtle">
-        <NewChapterButton />
-        <CloseChapterButton />
       </div>
     </div>
   );

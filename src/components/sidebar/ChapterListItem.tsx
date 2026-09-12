@@ -3,12 +3,13 @@ import type { Chapter } from '@/types/project';
 
 interface ChapterListItemProps {
   chapter: Chapter;
+  index: number;
   isActive: boolean;
   onClick: () => void;
   onRename: (newTitle: string) => void;
 }
 
-function ChapterListItem({ chapter, isActive, onClick, onRename }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename }: ChapterListItemProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,12 +60,14 @@ function ChapterListItem({ chapter, isActive, onClick, onRename }: ChapterListIt
     );
   }
 
+  const chapterNum = index + 1;
+
   return (
     <button
       onClick={onClick}
       onDoubleClick={handleDoubleClick}
       className={[
-        'w-full text-left px-3 py-2 text-sm font-sans truncate cursor-pointer',
+        'w-full text-left px-3 py-1.5 text-sm font-sans cursor-pointer flex items-center gap-2',
         'border-l-2 transition-colors duration-150',
         isActive
           ? 'text-text-primary bg-bg-tertiary border-accent'
@@ -72,7 +75,13 @@ function ChapterListItem({ chapter, isActive, onClick, onRename }: ChapterListIt
       ].join(' ')}
       title={chapter.title}
     >
-      {chapter.title}
+      <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
+        {chapterNum}
+      </span>
+      <span className="truncate">{chapter.title}</span>
+      {chapter.status === 'finished' && (
+        <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
+      )}
     </button>
   );
 }

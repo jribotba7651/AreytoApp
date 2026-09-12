@@ -292,6 +292,7 @@ function BookTabContent() {
   }
 
   const isDraft = previewMode === 'draft';
+  const isProof = previewMode === 'proof';
 
   return (
     <div className="h-full flex flex-col bg-bg-primary">
@@ -354,19 +355,27 @@ function BookTabContent() {
           </>
         ) : (
           <div className="flex justify-center py-8 px-4">
-            <div
-              className={isDraft ? 'w-full max-w-3xl' : ''}
-              style={isDraft ? undefined : {
-                width: '580px',
-                minHeight: '780px',
-                padding: '48px 56px',
-                backgroundColor: '#ffffff',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
-                borderRadius: '2px',
-              }}
-            >
-              {renderChapterPreview()}
-            </div>
+            {isDraft ? (
+              <div className="w-full max-w-3xl">
+                {renderChapterPreview()}
+              </div>
+            ) : (
+              <div
+                style={{
+                  width: '580px',
+                  minHeight: '780px',
+                  padding: '48px 56px',
+                  backgroundColor: isProof ? '#f0f0f0' : 'var(--bg-editor)',
+                  boxShadow: isProof
+                    ? 'inset 0 0 0 1px #d0d0d0'
+                    : '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
+                  borderRadius: '2px',
+                  border: isProof ? '12px solid #e0e0e0' : undefined,
+                }}
+              >
+                {renderChapterPreview()}
+              </div>
+            )}
           </div>
         )}
       </div>

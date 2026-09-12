@@ -5,10 +5,39 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Rediseno visual estilo Atticus (4 sub-tareas)
+- Ultima feature completada: Polish visual Atticus (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Polish visual Atticus (4 sub-tareas)
+- Que se hizo:
+  1. FormatToolbar: toolbar de formato encima del editor con botones Bold (Cmd+B), Italic (Cmd+I), Underline (Cmd+U), separadores verticales, Align Left/Center/Right, Insert Link (Cmd+K), Insert Image. Usa iconos de lucide-react. Se expuso EditorView de ChapterEditor via forwardRef + useImperativeHandle. toggleWrap actualizado para soportar marcadores asimetricos (<u></u>). setAlignment usa div con text-align inline. insertImage genera sintaxis ![alt](url).
+  2. Sidebar izquierdo con secciones colapsables: CollapsibleSection reutilizable con chevron y animacion. FrontmatterSection (Title Page, Copyright, Dedication, Details), Chapters (con numero, titulo, checkmark para terminados, refresh button como accion del header), BackmatterSection (Acknowledgements, About Author, Other Books). NewChapterButton y CloseChapterButton dentro de la seccion Chapters.
+  3. Polish general: bg-white hardcodeado en TopTabs reemplazado por bg-bg-editor (compatible dark mode). Verificacion de tokens en todos los componentes nuevos y existentes. Sin colores hardcodeados fuera de contextos decorativos.
+  4. Preview modes: Draft = sin margenes ni sombra (ancho completo max-w-3xl). Print = hoja con sombra, padding generoso, fondo bg-editor. Print Proof = hoja con borde gris grueso (12px #e0e0e0) simulando margenes de impresora, fondo ligeramente gris (#f0f0f0), sin sombra externa.
+- Archivos creados:
+  - src/components/editor/FormatToolbar.tsx (toolbar de formato con botones, separadores, acciones via ref al editor)
+  - src/components/sidebar/CollapsibleSection.tsx (componente colapsable reutilizable con chevron)
+- Archivos modificados:
+  - src/components/editor/ChapterEditor.tsx (forwardRef + useImperativeHandle para exponer getView)
+  - src/components/editor/markdown-format.ts (toggleWrap con marcadores asimetricos, insertImage, setAlignment, export de funciones)
+  - src/components/panels/EditorPanel.tsx (FormatToolbar integrado encima del editor, ref al ChapterEditor)
+  - src/components/sidebar/FrontmatterSection.tsx (usa CollapsibleSection)
+  - src/components/sidebar/BackmatterSection.tsx (usa CollapsibleSection)
+  - src/components/panels/SidebarPanel.tsx (Chapters como CollapsibleSection con actions, botones dentro)
+  - src/components/sidebar/ChapterListItem.tsx (prop index, numero de capitulo, checkmark para terminados)
+  - src/components/sidebar/ChapterList.tsx (pasa index a ChapterListItem)
+  - src/components/layout/TopTabs.tsx (bg-white -> bg-bg-editor para dark mode)
+  - src/components/layout/BookTabContent.tsx (3 modos de preview: draft, print, proof con estilos distintos)
+- Decisiones tomadas:
+  - D-243: FormatToolbar accede al EditorView via ref expuesto por ChapterEditor. No usa estado global. Cada boton ejecuta la accion y devuelve foco al editor.
+  - D-244: Underline usa marcadores HTML (<u></u>) porque markdown no tiene sintaxis nativa para subrayado.
+  - D-245: Alineacion usa <div style="text-align: X"> wrapping la linea seleccionada. Es la convencion estandar para markdown extendido.
+  - D-246: CollapsibleSection es generico (title, children, actions, defaultOpen). Estado local con useState, no persistido.
+  - D-247: Print Proof usa borde gris grueso (12px) para simular los margenes de impresora. Es una aproximacion visual, no medidas reales.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-12 - Rediseno visual estilo Atticus (4 sub-tareas)
 - Que se hizo:
