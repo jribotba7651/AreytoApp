@@ -207,7 +207,8 @@ export async function renameChapterTitle(
 
 export async function createChapter(
   project: Project,
-  title?: string
+  title?: string,
+  initialContent?: string
 ): Promise<ProjectResult<Chapter>> {
   const existing = await listChapters(project);
   if (!existing.ok) return existing;
@@ -215,10 +216,11 @@ export async function createChapter(
   const filename = generateNextChapterFilename(existing.value);
   const chapterPath = `${project.rootPath}/capitulos/${filename}`;
 
-  // Número humano sin padding: cap-02.md → 2
   const num = parseInt(filename.replace(/^cap-(\d+)\.md$/, '$1'), 10);
   const chapterTitle = title ?? i18n.t('common.defaultChapterTitle', { num });
-  const content = `# ${chapterTitle}\n\n`;
+  const content = initialContent
+    ? initialContent.replace('{{title}}', chapterTitle)
+    : `# ${chapterTitle}\n\n`;
 
   const write = await writeFile(chapterPath, content);
   if (!write.ok) return write;

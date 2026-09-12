@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { restoreFile } from '@/lib/versioning';
 import CommitListItem from './CommitListItem';
+import CommitDiffView from './CommitDiffView';
 import RestoreConfirmModal from './RestoreConfirmModal';
 import type { Commit } from '@/types/git';
 
@@ -11,6 +12,7 @@ function CommitList() {
   const commits = useProjectStore((s) => s.commits);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const currentProject = useProjectStore((s) => s.currentProject);
+  const [diffCommit, setDiffCommit] = useState<Commit | null>(null);
   const [modalCommit, setModalCommit] = useState<Commit | null>(null);
   const [restoring, setRestoring] = useState(false);
 
@@ -20,10 +22,8 @@ function CommitList() {
 
     const store = useProjectStore.getState();
 
-    // 1. Flush pending autosave
     await store.flushAutosave?.();
 
-    // 2. Restore file content at commit
     const result = await restoreFile(currentProject.rootPath, activeChapterPath, modalCommit.hash);
 
     if (!result.ok) {
@@ -35,7 +35,6 @@ function CommitList() {
 
     const { commit: newCommit, content: restoredContent } = result.value;
 
-    // 3. Update store: content + sync autosave ref + remount editor
     store.updateContent(restoredContent);
     store.syncAutosaveSaved?.(restoredContent);
     store.prependCommit(newCommit);
@@ -43,6 +42,7 @@ function CommitList() {
 
     setRestoring(false);
     setModalCommit(null);
+    setDiffCommit(null);
   }
 
   if (!activeChapterPath) {
@@ -61,6 +61,26 @@ function CommitList() {
     );
   }
 
+  if (diffCommit) {
+    return (
+      <>
+        <CommitDiffView
+          commit={diffCommit}
+          onClose={() => setDiffCommit(null)}
+          onRestore={() => { setModalCommit(diffCommit); }}
+        />
+        {modalCommit && (
+          <RestoreConfirmModal
+            commit={modalCommit}
+            loading={restoring}
+            onConfirm={handleRestore}
+            onClose={() => setModalCommit(null)}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       <div className="flex-1 overflow-y-auto">
@@ -69,7 +89,7 @@ function CommitList() {
             key={commit.hash}
             commit={commit}
             isCurrent={i === 0}
-            onClick={() => setModalCommit(commit)}
+            onClick={() => setDiffCommit(commit)}
           />
         ))}
       </div>

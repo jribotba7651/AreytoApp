@@ -24,6 +24,14 @@ export interface GlobalSettings {
   uiLocale?: string;
   customThemes?: Array<Record<string, unknown>>;
   chapterWordGoal?: number;
+  recentProjects?: RecentProject[];
+}
+
+export interface RecentProject {
+  path: string;
+  name: string;
+  lastOpened: string;
+  chapterCount: number;
 }
 
 export interface ProjectState {

@@ -170,7 +170,10 @@
     "opening": "Abriendo…",
     "restoreMessageSuffix": ". Selecciona uno nuevo abajo.",
     "errorOpen": "No se pudo abrir el proyecto. Intenta de nuevo.",
-    "errorLoad": "No se pudo cargar el capítulo activo."
+    "errorLoad": "No se pudo cargar el capítulo activo.",
+    "recentProjects": "Proyectos recientes",
+    "noRecent": "Sin proyectos recientes",
+    "lastEdited": "Editado {{date}}"
   },
   "modal": {
     "createProject": {
@@ -347,7 +350,8 @@
     "noActiveChapter": "Sin capítulo activo",
     "noHistory": "Sin historial todavía",
     "expandPanel": "Expandir panel de versiones",
-    "collapsePanel": "Colapsar panel de versiones"
+    "collapsePanel": "Colapsar panel de versiones",
+    "diffError": "No se pudo cargar el diff"
   },
   "finished": {
     "title": "Capítulos terminados",
@@ -363,7 +367,10 @@
     "newChapter": "Nuevo capítulo",
     "closeChapter": "Cerrar capítulo activo",
     "refreshList": "Recargar lista",
-    "refreshListAria": "Recargar lista de capítulos",
+    "refreshListAria": "Recargar lista de capitulos",
+    "templateBlank": "Capitulo en blanco",
+    "templateScene": "Capitulo con escenas",
+    "templateDialogue": "Capitulo con dialogo",
     "items": {
       "titulo": "Título y autor",
       "copyright": "Copyright",

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { readGlobalSettings, writeGlobalSettings } from '@/lib/settings';
+import type { RecentProject } from '@/lib/settings';
 import i18n from '@/i18n/i18n';
 import type { Theme } from '@/lib/theme';
 
@@ -51,8 +52,10 @@ interface SettingsState {
   uiLocale: string;
   customThemes: Theme[];
   chapterWordGoal: number;
+  recentProjects: RecentProject[];
   loaded: boolean;
   load: () => Promise<void>;
+  addRecentProject: (project: RecentProject) => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
   setAutosaveIntervalMs: (ms: number) => Promise<void>;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
@@ -80,6 +83,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   uiLocale: 'en',
   customThemes: [],
   chapterWordGoal: 1500,
+  recentProjects: [],
   loaded: false,
 
   load: async () => {
@@ -104,6 +108,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         uiLocale,
         customThemes: (settings.customThemes ?? []) as unknown as Theme[],
         chapterWordGoal: settings.chapterWordGoal ?? 1500,
+        recentProjects: (settings.recentProjects ?? []) as RecentProject[],
         loaded: true,
       });
       applyTheme(themeMode);
@@ -246,6 +251,20 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, chapterWordGoal: goal });
     } catch (err) {
       console.warn('[areyto] Failed to persist chapterWordGoal:', err);
+    }
+  },
+
+  addRecentProject: async (project: RecentProject) => {
+    const MAX_RECENT = 5;
+    const prev = useSettingsStore.getState().recentProjects;
+    const filtered = prev.filter((p) => p.path !== project.path);
+    const updated = [project, ...filtered].slice(0, MAX_RECENT);
+    set({ recentProjects: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, recentProjects: updated });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist recentProjects:', err);
     }
   },
 }));

@@ -5,10 +5,40 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Polish - Shortcuts Panel, Focus Mode, Chapter Progress, Language Indicator (4 sub-tareas)
+- Ultima feature completada: Polish - Recent Projects, Chapter Templates, Export Filename, Version History Diff (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Polish: Recent Projects + Chapter Templates + Export Filename + Version History Diff (4 sub-tareas)
+- Que se hizo:
+  1. Recent Projects: WelcomeScreen muestra lista de hasta 5 proyectos recientes con nombre, fecha relativa de ultima edicion, y conteo de capitulos. Los recientes se persisten en GlobalSettings (campo recentProjects). Click en un reciente abre el proyecto directamente via openProjectByPath. Cada vez que se abre un proyecto, se guarda como reciente en open-project-flow.ts. Iconos FolderOpen de lucide-react.
+  2. Chapter Templates: el boton + (NewChapterButton) ahora muestra un dropdown con 3 opciones: Capitulo en blanco, Capitulo con escenas (estructura con 2 escenas, lugar/hora), Capitulo con dialogo (estructura con personajes A/B). Cada template es un string con placeholder {{title}} que se reemplaza con el titulo generado. Menu con click-outside para cerrar. Shortcut Cmd+N sigue creando capitulo en blanco (comportamiento rapido).
+  3. Export Filename: al exportar (md/docx/epub), el nombre por defecto ahora usa el titulo del frontmatter del libro en vez del nombre del proyecto. Formato: '{titulo}-{fecha}.{ext}'. Si no hay titulo en frontmatter, usa el nombre del proyecto como fallback. Caracteres invalidos para filename se eliminan. Tambien se corrigio el epub export para usar i18n y guardar exportFolder.
+  4. Version History Diff: al hacer click en un commit del panel de versiones (que no sea el actual), se muestra un diff simplificado de lineas. Lineas agregadas en verde (bg-green-100), eliminadas en rojo (bg-red-100), sin cambio en gris. Algoritmo LCS (Longest Common Subsequence) implementado en TypeScript puro (line-diff.ts). Desde la vista de diff se puede restaurar (boton RotateCcw) o cerrar (boton X). Soporte dark mode con clases dark:.
+- Archivos creados:
+  - src/lib/line-diff.ts (algoritmo LCS para diff de lineas)
+  - src/components/versions/CommitDiffView.tsx (vista de diff con CSS verde/rojo)
+- Archivos modificados:
+  - src/lib/settings.ts (+RecentProject interface, +recentProjects en GlobalSettings)
+  - src/stores/settingsStore.ts (+recentProjects state, +addRecentProject method)
+  - src/lib/open-project-flow.ts (+guardado de proyecto reciente al abrir)
+  - src/components/welcome/WelcomeScreen.tsx (+lista de recientes, +handleOpenRecent, +formatRelativeDate)
+  - src/components/sidebar/NewChapterButton.tsx (reescrito con dropdown de templates)
+  - src/lib/project-fs.ts (+initialContent param en createChapter)
+  - src/components/layout/BookTabContent.tsx (+exportBaseName helper, nombres de archivo con titulo frontmatter, epub i18n fix)
+  - src/components/versions/CommitList.tsx (+diffCommit state, +CommitDiffView integration)
+  - src/i18n/locales/en.json (+welcome.recentProjects/noRecent/lastEdited, +sidebar.templateBlank/templateScene/templateDialogue, +versions.diffError)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-259: recentProjects se guarda en GlobalSettings (no en projectStore) porque es estado global de la app, no de un proyecto especifico.
+  - D-260: El shortcut Cmd+N crea capitulo en blanco (rapido, sin menu). El dropdown con templates es solo via click en el boton +.
+  - D-261: El nombre de export usa el titulo del frontmatter (bookData.frontmatter.titulo.titulo). Si esta vacio, usa currentProject.nombre como fallback. Caracteres invalidos para filenames se limpian con regex.
+  - D-262: El diff usa LCS puro en TypeScript (sin libreria externa). Para archivos grandes podria ser lento, pero los capitulos tipicos son <5000 lineas.
+  - D-263: El diff compara contenido actual en memoria vs contenido en el commit seleccionado. No compara commit vs commit anterior.
+  - D-264: Los colores del diff usan clases de Tailwind (bg-green-100, bg-red-100) con variantes dark: para compatibilidad con dark mode.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: epub export tenia strings hardcodeadas en espanol en vez de usar i18n, corregido.
 
 ### 2026-09-12 - Polish: Shortcuts Panel + Focus Mode + Chapter Progress + Language Indicator (4 sub-tareas)
 - Que se hizo:

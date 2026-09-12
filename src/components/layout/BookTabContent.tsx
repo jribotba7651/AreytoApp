@@ -107,14 +107,22 @@ function BookTabContent() {
     });
   }, [activeTab, currentProject, sectionVersion]);
 
+  function exportBaseName(ext: string): string {
+    const title = bookData?.frontmatter.titulo?.titulo?.trim();
+    const base = title
+      ? title.replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '-')
+      : currentProject!.nombre;
+    const today = new Date().toISOString().slice(0, 10);
+    return `${base}-${today}.${ext}`;
+  }
+
   async function handleExport(scope: ExportScope) {
     if (!currentProject) return;
     setExportLoading(true);
 
     try {
-      const today = new Date().toISOString().slice(0, 10);
       const baseDir = exportFolder || currentProject.rootPath;
-      const defaultPath = `${baseDir}/${currentProject.nombre}-${today}.md`;
+      const defaultPath = `${baseDir}/${exportBaseName('md')}`;
 
       const outputPath = await save({
         defaultPath,
@@ -152,9 +160,8 @@ function BookTabContent() {
     setDocxLoading(true);
 
     try {
-      const today = new Date().toISOString().slice(0, 10);
       const baseDir = exportFolder || currentProject.rootPath;
-      const defaultPath = `${baseDir}/${currentProject.nombre}-${today}.docx`;
+      const defaultPath = `${baseDir}/${exportBaseName('docx')}`;
 
       const outputPath = await save({
         defaultPath,
@@ -192,8 +199,8 @@ function BookTabContent() {
     setEpubLoading(true);
 
     try {
-      const today = new Date().toISOString().slice(0, 10);
-      const defaultPath = `${currentProject.rootPath}/${currentProject.nombre}-${today}.epub`;
+      const baseDir = exportFolder || currentProject.rootPath;
+      const defaultPath = `${baseDir}/${exportBaseName('epub')}`;
 
       const outputPath = await save({
         defaultPath,
@@ -214,17 +221,20 @@ function BookTabContent() {
         currentProject.nombre,
       );
 
+      const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
+      if (chosenDir) void setExportFolder(chosenDir);
+
       setShowEpubDialog(false);
       setEpubLoading(false);
 
-      await message(`Libro exportado en:\n${outputPath}`, {
-        title: 'Exportación completada',
+      await message(t('book.export.successBody', { path: outputPath }), {
+        title: t('book.export.successTitle'),
         kind: 'info',
       });
     } catch (err) {
       setEpubLoading(false);
-      await message(`Error al exportar: ${String(err)}`, {
-        title: 'Error de exportación',
+      await message(t('book.export.errorBody', { error: String(err) }), {
+        title: t('book.export.errorTitle'),
         kind: 'error',
       });
     }

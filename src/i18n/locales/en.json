@@ -170,7 +170,10 @@
     "opening": "Opening…",
     "restoreMessageSuffix": ". Select a new one below.",
     "errorOpen": "Could not open the project. Try again.",
-    "errorLoad": "Could not load the active chapter."
+    "errorLoad": "Could not load the active chapter.",
+    "recentProjects": "Recent projects",
+    "noRecent": "No recent projects",
+    "lastEdited": "Edited {{date}}"
   },
   "modal": {
     "createProject": {
@@ -347,7 +350,8 @@
     "noActiveChapter": "No active chapter",
     "noHistory": "No history yet",
     "expandPanel": "Expand versions panel",
-    "collapsePanel": "Collapse versions panel"
+    "collapsePanel": "Collapse versions panel",
+    "diffError": "Could not load the diff"
   },
   "finished": {
     "title": "Finished chapters",
@@ -364,6 +368,9 @@
     "closeChapter": "Close active chapter",
     "refreshList": "Reload list",
     "refreshListAria": "Reload chapter list",
+    "templateBlank": "Blank chapter",
+    "templateScene": "Chapter with scenes",
+    "templateDialogue": "Chapter with dialogue",
     "items": {
       "titulo": "Title and author",
       "copyright": "Copyright",

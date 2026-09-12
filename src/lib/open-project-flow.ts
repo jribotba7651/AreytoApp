@@ -40,6 +40,14 @@ export async function setupProjectInStores(project: Project): Promise<void> {
   );
   if (commitsResult.ok) store.setCommits(commitsResult.value);
 
+  // Save to recent projects
+  useSettingsStore.getState().addRecentProject({
+    path: project.rootPath,
+    name: project.nombre,
+    lastOpened: new Date().toISOString(),
+    chapterCount: chapter.value.allChapters.length,
+  });
+
   // Restore the last active chapter from per-project state if it still exists
   const projectState = await readProjectState(project.rootPath).catch(() => null);
   if (projectState?.lastActiveChapterPath) {

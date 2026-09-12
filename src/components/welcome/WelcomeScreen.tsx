@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { open } from '@tauri-apps/plugin-dialog';
-import { FileText } from 'lucide-react';
+import { FileText, FolderOpen } from 'lucide-react';
 import { openProject } from '@/lib/project-fs';
-import { setupProjectInStores } from '@/lib/open-project-flow';
+import { setupProjectInStores, openProjectByPath } from '@/lib/open-project-flow';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import CreateProjectModal from './CreateProjectModal';
 import ImportDocxModal from './ImportDocxModal';
 import ShortcutHint from '@/components/shared/ShortcutHint';
@@ -19,11 +20,30 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
   const setCurrentProject = useProjectStore((s) => s.setCurrentProject);
   const setTriggerOpenProject = useProjectStore((s) => s.setTriggerOpenProject);
   const setTriggerNewProject = useProjectStore((s) => s.setTriggerNewProject);
+  const recentProjects = useSettingsStore((s) => s.recentProjects);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
   const [importDocxPath, setImportDocxPath] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  async function handleOpenRecent(path: string) {
+    setError('');
+    setLoading(true);
+    const result = await openProjectByPath(path);
+    if (!result.ok) {
+      setError(t('welcome.errorOpen'));
+    }
+    setLoading(false);
+  }
+
+  function formatRelativeDate(iso: string): string {
+    const diff = Date.now() - new Date(iso).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return t('welcome.lastEdited', { date: 'today' });
+    if (days === 1) return t('welcome.lastEdited', { date: 'yesterday' });
+    return t('welcome.lastEdited', { date: `${days}d ago` });
+  }
 
   const handleOpen = useCallback(async () => {
     setError('');
@@ -158,6 +178,35 @@ function WelcomeScreen({ restoreMessage }: WelcomeScreenProps) {
         <FileText size={14} />
         Importar de Word (.docx)
       </button>
+
+      {recentProjects.length > 0 && (
+        <div className="mt-6 w-full max-w-sm">
+          <p className="text-xs text-text-tertiary uppercase tracking-wide mb-2 px-1">
+            {t('welcome.recentProjects')}
+          </p>
+          <ul className="flex flex-col gap-1">
+            {recentProjects.map((rp) => (
+              <li key={rp.path}>
+                <button
+                  onClick={() => handleOpenRecent(rp.path)}
+                  disabled={loading}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded text-left hover:bg-bg-secondary transition-colors duration-150 disabled:opacity-40"
+                >
+                  <FolderOpen size={16} className="text-text-tertiary shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-text-primary truncate">{rp.name}</p>
+                    <p className="text-xs text-text-tertiary">
+                      {formatRelativeDate(rp.lastOpened)}
+                      {' · '}
+                      {t('common.chapterCount', { count: rp.chapterCount })}
+                    </p>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {error && (
         <p className="text-xs text-error mt-2">{error}</p>
