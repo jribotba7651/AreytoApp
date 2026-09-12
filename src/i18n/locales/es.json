@@ -48,6 +48,10 @@
       "fontSize": {
         "label": "Tamaño de fuente",
         "description": "Tamaño del texto en el área de escritura."
+      },
+      "wordGoal": {
+        "label": "Objetivo de palabras por capitulo",
+        "description": "Meta de palabras por capitulo. Muestra una barra de progreso en el sidebar. Pon 0 para ocultar."
       }
     },
     "appearance": {
@@ -335,7 +339,8 @@
     "preview": "Previsualizar",
     "noActiveChapter": "No hay capítulo activo",
     "wordCount": "{{count}} palabras",
-    "bookWordCount": "Libro: {{count}} palabras"
+    "bookWordCount": "Libro: {{count}} palabras",
+    "projectLanguage": "Idioma del proyecto"
   },
   "versions": {
     "title": "Versiones",
@@ -377,6 +382,12 @@
   },
   "shortcuts": {
     "title": "Atajos de teclado",
+    "categories": {
+      "navigation": "Navegacion",
+      "editor": "Editor",
+      "export": "Exportar",
+      "view": "Vista"
+    },
     "save": "Guardar",
     "newChapter": "Nuevo capitulo",
     "closeChapter": "Cerrar capitulo",
@@ -384,6 +395,7 @@
     "toggleEditor": "Editar / Previsualizar",
     "bold": "Negrita",
     "italic": "Cursiva",
+    "underline": "Subrayado",
     "link": "Insertar enlace",
     "tabChapter": "Tab Capitulo Activo",
     "tabBook": "Tab Libro",
@@ -391,7 +403,9 @@
     "tabSettings": "Tab Ajustes",
     "openProject": "Abrir proyecto",
     "closeProject": "Cerrar proyecto",
-    "showShortcuts": "Mostrar atajos"
+    "showShortcuts": "Mostrar atajos",
+    "exportBook": "Exportar libro",
+    "focusMode": "Modo enfoque"
   },
   "writingToolbar": {
     "editorSettings": {

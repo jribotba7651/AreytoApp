@@ -48,6 +48,10 @@
       "fontSize": {
         "label": "Font size",
         "description": "Text size in the writing area."
+      },
+      "wordGoal": {
+        "label": "Chapter word goal",
+        "description": "Target word count per chapter. Shows a progress bar in the sidebar. Set to 0 to hide."
       }
     },
     "appearance": {
@@ -335,7 +339,8 @@
     "preview": "Preview",
     "noActiveChapter": "No active chapter",
     "wordCount": "{{count}} words",
-    "bookWordCount": "Book: {{count}} words"
+    "bookWordCount": "Book: {{count}} words",
+    "projectLanguage": "Project language"
   },
   "versions": {
     "title": "Versions",
@@ -377,6 +382,12 @@
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
+    "categories": {
+      "navigation": "Navigation",
+      "editor": "Editor",
+      "export": "Export",
+      "view": "View"
+    },
     "save": "Save",
     "newChapter": "New chapter",
     "closeChapter": "Close chapter",
@@ -384,6 +395,7 @@
     "toggleEditor": "Edit / Preview",
     "bold": "Bold",
     "italic": "Italic",
+    "underline": "Underline",
     "link": "Insert link",
     "tabChapter": "Chapter tab",
     "tabBook": "Book tab",
@@ -391,7 +403,9 @@
     "tabSettings": "Settings tab",
     "openProject": "Open project",
     "closeProject": "Close project",
-    "showShortcuts": "Show shortcuts"
+    "showShortcuts": "Show shortcuts",
+    "exportBook": "Export book",
+    "focusMode": "Focus mode"
   },
   "writingToolbar": {
     "editorSettings": {

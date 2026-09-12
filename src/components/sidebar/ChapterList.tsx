@@ -1,21 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { readChapter, updateProjectMeta, renameChapterTitle, reorderChapters } from '@/lib/project-fs';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
+
+function countWords(text: string): number {
+  const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
+  const words = stripped.match(/\S+/g);
+  return words ? words.length : 0;
+}
 
 function ChapterList() {
   const { t } = useTranslation();
   const chapters = useProjectStore((s) => s.chapters);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
+  const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
   const currentProject = useProjectStore((s) => s.currentProject);
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const setCommits = useProjectStore((s) => s.setCommits);
   const setChapters = useProjectStore((s) => s.setChapters);
+  const chapterWordGoal = useSettingsStore((s) => s.chapterWordGoal);
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [wordCounts, setWordCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!currentProject || chapters.length === 0) return;
+    let cancelled = false;
+    async function load() {
+      const counts: Record<string, number> = {};
+      for (const ch of chapters) {
+        if (ch.path === activeChapterPath) {
+          counts[ch.path] = countWords(activeChapterContent);
+        } else {
+          const result = await readChapter(ch.path);
+          if (result.ok) counts[ch.path] = countWords(result.value);
+        }
+      }
+      if (!cancelled) setWordCounts(counts);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [currentProject, chapters, activeChapterPath, activeChapterContent]);
 
   // Only in-progress chapters are draggable
   const inProgressChapters = chapters.filter((c) => c.status === 'in-progress');
@@ -138,6 +167,8 @@ function ChapterList() {
           onDragEnd={handleDragEnd}
           isDragOver={dragOverIndex === i && dragIndex !== i}
           draggable
+          wordCount={wordCounts[chapter.path] ?? 0}
+          wordGoal={chapterWordGoal}
         />
       ))}
       {finishedChapters.map((chapter, i) => (
@@ -154,6 +185,8 @@ function ChapterList() {
           onDragEnd={() => {}}
           isDragOver={false}
           draggable={false}
+          wordCount={wordCounts[chapter.path] ?? 0}
+          wordGoal={chapterWordGoal}
         />
       ))}
     </div>

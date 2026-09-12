@@ -13,9 +13,11 @@ interface ChapterListItemProps {
   onDragEnd: () => void;
   isDragOver: boolean;
   draggable: boolean;
+  wordCount: number;
+  wordGoal: number;
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal }: ChapterListItemProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +70,7 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
 
   const chapterNum = index + 1;
   const isFinished = chapter.status === 'finished';
+  const progress = wordGoal > 0 ? Math.min(100, Math.round((wordCount / wordGoal) * 100)) : 0;
 
   return (
     <button
@@ -82,21 +85,31 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
       onDrop={() => onDrop(index)}
       onDragEnd={onDragEnd}
       className={[
-        'w-full text-left px-3 py-1.5 text-sm font-sans cursor-pointer flex items-center gap-2',
+        'w-full text-left px-3 py-1.5 text-sm font-sans cursor-pointer',
         'border-l-2 transition-colors duration-150',
         isActive
           ? 'text-text-primary bg-bg-tertiary border-accent'
           : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-bg-tertiary',
         isDragOver ? 'border-t-2 border-t-accent' : '',
       ].join(' ')}
-      title={chapter.title}
+      title={`${chapter.title} (${wordCount}/${wordGoal})`}
     >
-      <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
-        {chapterNum}
-      </span>
-      <span className="truncate">{chapter.title}</span>
-      {isFinished && (
-        <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
+          {chapterNum}
+        </span>
+        <span className="truncate">{chapter.title}</span>
+        {isFinished && (
+          <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
+        )}
+      </div>
+      {wordGoal > 0 && !isFinished && (
+        <div className="mt-1 ml-6 h-1 rounded-full bg-border-subtle overflow-hidden">
+          <div
+            className="h-full rounded-full bg-accent transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       )}
     </button>
   );

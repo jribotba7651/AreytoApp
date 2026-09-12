@@ -23,4 +23,5 @@ export interface LayoutState {
   bookViewMode: BookViewMode;
   deviceFrame: DeviceFrame;
   previewMode: PreviewMode;
+  focusMode: boolean;
 }

@@ -23,6 +23,7 @@ export interface GlobalSettings {
   exportFolder?: string;
   uiLocale?: string;
   customThemes?: Array<Record<string, unknown>>;
+  chapterWordGoal?: number;
 }
 
 export interface ProjectState {

@@ -50,6 +50,7 @@ interface SettingsState {
   exportFolder: string;
   uiLocale: string;
   customThemes: Theme[];
+  chapterWordGoal: number;
   loaded: boolean;
   load: () => Promise<void>;
   setAutoCommit: (value: boolean) => Promise<void>;
@@ -63,6 +64,7 @@ interface SettingsState {
   setExportFolder: (folder: string) => Promise<void>;
   setUiLocale: (locale: string) => Promise<void>;
   addCustomTheme: (theme: Theme) => Promise<void>;
+  setChapterWordGoal: (goal: number) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -77,6 +79,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   exportFolder: '',
   uiLocale: 'en',
   customThemes: [],
+  chapterWordGoal: 1500,
   loaded: false,
 
   load: async () => {
@@ -100,6 +103,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         exportFolder: settings.exportFolder ?? '',
         uiLocale,
         customThemes: (settings.customThemes ?? []) as unknown as Theme[],
+        chapterWordGoal: settings.chapterWordGoal ?? 1500,
         loaded: true,
       });
       applyTheme(themeMode);
@@ -232,6 +236,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       });
     } catch (err) {
       console.warn('[areyto] Failed to persist customThemes:', err);
+    }
+  },
+
+  setChapterWordGoal: async (goal: number) => {
+    set({ chapterWordGoal: goal });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, chapterWordGoal: goal });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist chapterWordGoal:', err);
     }
   },
 }));

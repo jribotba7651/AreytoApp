@@ -5,10 +5,42 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Polish Atticus - Word Count, Autosave Indicator, Drag Reorder (4 sub-tareas)
+- Ultima feature completada: Polish - Shortcuts Panel, Focus Mode, Chapter Progress, Language Indicator (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Polish: Shortcuts Panel + Focus Mode + Chapter Progress + Language Indicator (4 sub-tareas)
+- Que se hizo:
+  1. Keyboard Shortcuts Panel: ShortcutsDialog reestructurado con atajos agrupados por 4 categorias (Navegacion, Editor, Exportar, Vista) con headers uppercase. Se agregaron shortcuts nuevos: Underline, Export Book, Focus Mode. Modal max-w-lg con scroll si necesario.
+  2. Focus Mode: Cmd+Shift+F activa modo escritura sin distracciones. Oculta sidebar, top bar, terminal, panel versiones, writing toolbar. Solo queda EditorPanel a pantalla completa con un boton Minimize2 semi-transparente (top-right) para salir. focusMode como boolean en layoutStore. Shortcut FOCUS_MODE registrado en keyboard-shortcuts.ts como always-on.
+  3. Chapter Progress: cada capitulo in-progress muestra una barra de progreso CSS pura debajo del titulo en el sidebar. La barra usa bg-accent sobre bg-border-subtle, ancho proporcional a wordCount/wordGoal (0-100%, cap a 100%). Objetivo de palabras configurable en Settings (default 1500). Si wordGoal=0, la barra se oculta. Word counts calculados en ChapterList via useEffect (capitulo activo usa contenido en memoria, otros leen de disco). chapterWordGoal persistido en GlobalSettings.
+  4. Language Indicator: en la barra inferior del editor, junto al word count, se muestra un icono Languages (lucide) con un select nativo del idioma del proyecto (ES/EN/PT/FR/DE/IT). Lee MetadataData.idioma al montar. Al cambiar, actualiza metadata.yaml en disco via writeMetadata. Sin spell-checker externo, solo indicador visual.
+- Archivos creados: ninguno
+- Archivos modificados:
+  - src/components/shortcuts/ShortcutsDialog.tsx (reestructurado con categorias SHORTCUT_CATEGORIES)
+  - src/lib/keyboard-shortcuts.ts (+FOCUS_MODE shortcut)
+  - src/types/layout.ts (+focusMode: boolean)
+  - src/stores/layoutStore.ts (+focusMode, +toggleFocusMode)
+  - src/hooks/useKeyboardShortcuts.ts (+handler FOCUS_MODE)
+  - src/App.tsx (+import EditorPanel/Minimize2, +focusMode render branch)
+  - src/components/sidebar/ChapterListItem.tsx (+wordCount/wordGoal props, +barra de progreso CSS)
+  - src/components/sidebar/ChapterList.tsx (+useEffect wordCounts, +countWords, +chapterWordGoal from settingsStore)
+  - src/stores/settingsStore.ts (+chapterWordGoal: number, +setChapterWordGoal)
+  - src/lib/settings.ts (+chapterWordGoal en GlobalSettings)
+  - src/components/settings/SettingsTabContent.tsx (+input numerico para chapterWordGoal en seccion Editor)
+  - src/components/panels/EditorPanel.tsx (+Languages icon, +select idioma, +readMetadata/writeMetadata)
+  - src/i18n/locales/en.json (+shortcuts.categories.*, +shortcuts.underline/exportBook/focusMode, +settings.editor.wordGoal.*, +editor.projectLanguage)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-253: Focus mode renderiza solo EditorPanel (sin MiddlePanels/SidebarPanel) directamente en App.tsx. No necesita guardar/restaurar panel sizes porque el layout normal se preserva en el store, simplemente no se renderiza.
+  - D-254: El shortcut FOCUS_MODE (Cmd+Shift+F) se maneja como always-on (antes de verificar modales), igual que SAVE y SHOW_SHORTCUTS.
+  - D-255: Chapter progress usa countWords duplicado de EditorPanel. No se extrae a un modulo compartido para evitar refactor innecesario; ambas copias son identicas y cortas.
+  - D-256: La barra de progreso es CSS puro: div con h-1 bg-border-subtle como fondo, div hijo con bg-accent y width dinamico. Solo se muestra en capitulos in-progress (no finished).
+  - D-257: El idioma del proyecto se lee de metadata.yaml al montar ChapterView, no se guarda en projectStore. Simplicidad sobre compartir estado; el unico consumidor es la barra inferior del editor.
+  - D-258: El select de idioma es nativo (sin custom dropdown) para mantenerse ligero y consistente con los demas selects de la app.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-12 - Polish Atticus: Word Count + Autosave Indicator + Drag Reorder (4 sub-tareas)
 - Que se hizo:

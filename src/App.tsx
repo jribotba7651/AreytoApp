@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Minimize2 } from 'lucide-react';
 import TopTabs from '@/components/layout/TopTabs';
 import ChapterTabContent from '@/components/layout/ChapterTabContent';
 import BookTabContent from '@/components/layout/BookTabContent';
 import FinishedTabContent from '@/components/layout/FinishedTabContent';
 import SettingsTabContent from '@/components/settings/SettingsTabContent';
+import EditorPanel from '@/components/panels/EditorPanel';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
@@ -19,6 +21,8 @@ import { openProjectByPath } from '@/lib/open-project-flow';
 function App() {
   const { t } = useTranslation();
   const activeTab = useLayoutStore((s) => s.activeTab);
+  const focusMode = useLayoutStore((s) => s.focusMode);
+  const toggleFocusMode = useLayoutStore((s) => s.toggleFocusMode);
   const currentProject = useProjectStore((s) => s.currentProject);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -93,6 +97,23 @@ function App() {
 
   if (!currentProject) {
     return <WelcomeScreen restoreMessage={restoreMessage} />;
+  }
+
+  if (focusMode) {
+    return (
+      <div className="flex flex-col h-screen overflow-hidden bg-bg-primary">
+        <div className="relative flex-1 min-h-0">
+          <EditorPanel />
+          <button
+            onClick={toggleFocusMode}
+            title={`${t('shortcuts.focusMode')} (\u2318\u21e7F)`}
+            className="absolute top-2 right-2 z-10 flex items-center justify-center w-7 h-7 rounded bg-bg-secondary/80 border border-border-subtle text-text-tertiary hover:text-text-primary transition-colors duration-150"
+          >
+            <Minimize2 size={14} />
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

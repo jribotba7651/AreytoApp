@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Eye, Pencil } from 'lucide-react';
+import { Eye, Pencil, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
@@ -18,6 +18,7 @@ import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAutosave } from '@/hooks/useAutosave';
 import { readChapter } from '@/lib/project-fs';
+import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';
 import ExternalChangeBanner from '@/components/editor/ExternalChangeBanner';
 
 function countWords(text: string): number {
@@ -108,6 +109,26 @@ function ChapterView() {
     toggleEditorViewMode();
   }
 
+  const [projectLang, setProjectLang] = useState('en');
+
+  useEffect(() => {
+    if (!currentProject) return;
+    let cancelled = false;
+    readMetadata(currentProject.rootPath).then((meta) => {
+      if (!cancelled && meta) setProjectLang(meta.idioma);
+    });
+    return () => { cancelled = true; };
+  }, [currentProject?.rootPath]);
+
+  async function handleLanguageChange(newLang: string) {
+    if (!currentProject) return;
+    setProjectLang(newLang);
+    const meta = await readMetadata(currentProject.rootPath);
+    if (meta) {
+      await writeMetadata(currentProject.rootPath, { ...meta, idioma: newLang });
+    }
+  }
+
   const isPreview = editorViewMode === 'preview';
   const chapterWords = countWords(activeChapterContent);
   const bookWords = useBookWordCount();
@@ -167,9 +188,27 @@ function ChapterView() {
       </div>
 
       <div className="flex items-center justify-between px-3 py-1 border-t border-border-subtle shrink-0">
-        <span className="text-[11px] text-text-tertiary">
-          {t('editor.wordCount', { count: chapterWords })}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] text-text-tertiary">
+            {t('editor.wordCount', { count: chapterWords })}
+          </span>
+          <div className="flex items-center gap-1">
+            <Languages size={12} className="text-text-tertiary" />
+            <select
+              value={projectLang}
+              onChange={(e) => void handleLanguageChange(e.target.value)}
+              title={t('editor.projectLanguage')}
+              className="text-[11px] text-text-tertiary bg-transparent border-none outline-none cursor-pointer hover:text-text-primary transition-colors duration-150 py-0 px-0.5"
+            >
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+              <option value="pt">PT</option>
+              <option value="fr">FR</option>
+              <option value="de">DE</option>
+              <option value="it">IT</option>
+            </select>
+          </div>
+        </div>
         <span className="text-[11px] text-text-tertiary">
           {t('editor.bookWordCount', { count: bookWords })}
         </span>

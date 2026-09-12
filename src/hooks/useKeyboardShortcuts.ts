@@ -25,6 +25,13 @@ export function useKeyboardShortcuts() {
         return;
       }
 
+      // Cmd+Shift+F: toggle focus mode (always-on)
+      if (matchShortcut(e, SHORTCUTS.FOCUS_MODE)) {
+        e.preventDefault();
+        layout.toggleFocusMode();
+        return;
+      }
+
       // All other shortcuts blocked when modal is open
       if (layout.showCloseChapterModal) return;
 

@@ -18,6 +18,7 @@ export const SHORTCUTS = {
   CLOSE_PROJECT:       { key: 'w', mod: true, shift: true },
   TOGGLE_EDITOR_VIEW:  { key: 'e', mod: true },
   SHOW_SHORTCUTS:      { key: '/', mod: true, shift: true },
+  FOCUS_MODE:          { key: 'f', mod: true, shift: true },
 } as const satisfies Record<string, ShortcutDef>;
 
 export type ShortcutId = keyof typeof SHORTCUTS;

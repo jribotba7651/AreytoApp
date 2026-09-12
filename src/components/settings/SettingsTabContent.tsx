@@ -71,6 +71,8 @@ function SettingsTabContent() {
   const setExportFolder = useSettingsStore((s) => s.setExportFolder);
   const uiLocale = useSettingsStore((s) => s.uiLocale);
   const setUiLocale = useSettingsStore((s) => s.setUiLocale);
+  const chapterWordGoal = useSettingsStore((s) => s.chapterWordGoal);
+  const setChapterWordGoal = useSettingsStore((s) => s.setChapterWordGoal);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -187,6 +189,28 @@ function SettingsTabContent() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  {t('settings.editor.wordGoal.label')}
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  {t('settings.editor.wordGoal.description')}
+                </span>
+              </div>
+              <input
+                type="number"
+                min={0}
+                step={100}
+                value={chapterWordGoal}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val) && val >= 0) void setChapterWordGoal(val);
+                }}
+                className="shrink-0 w-24 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              />
             </div>
           </div>
         </section>
