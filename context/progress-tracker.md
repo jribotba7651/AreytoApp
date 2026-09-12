@@ -4,11 +4,46 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Estado actual
 - Fase activa: Polish/UX
-- Feature en progreso: ninguna
-- Ultima feature completada: Polish - Renombrar capitulo desde sidebar
-- Fecha de ultima actualizacion: 2026-09-11
+- Feature en progreso: UI para gestionar portada del libro
+- Ultima feature completada: Mas temas built-in (Clean Modern + Hispanico Clasico)
+- Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Mas temas built-in (Clean Modern + Hispanico Clasico)
+- Que se hizo: Se agregaron 2 temas built-in nuevos al catalogo de temas en theme.ts. Ahora hay 5 temas built-in en total. Clean Modern: sans-serif (Helvetica Neue), sin sangria, espaciado generoso entre parrafos (1.2em), interlineado amplio (1.85), headings alineados a la izquierda, sin ornamentos. Hispanico Clasico: serif (Palatino), sangria francesa (1.8em), justificado, drop caps activado, section break con tilde (~), headings centrados con numeracion por palabra, medida compacta (64ch). Ambos temas aparecen automaticamente en ThemeGallery y estan disponibles para seleccion.
+- Archivos modificados:
+  - src/lib/theme.ts (CLEAN_MODERN y HISPANICO_CLASICO como nuevas constantes, registradas en BUILT_IN_THEMES)
+- Decisiones tomadas:
+  - D-232: Clean Modern usa Helvetica Neue como fuente primaria (disponible en macOS nativamente) con fallbacks a Segoe UI y system-ui.
+  - D-233: Hispanico Clasico usa Palatino como fuente primaria (fuente clasica hispanica disponible en macOS y Windows) con fallback a Book Antiqua. Drop caps y ornamento ~ para section breaks dan un toque de libro espanol tradicional.
+- Tests: 425 TS -- todos verdes
+- Bugs encontrados: ninguno
+
+### 2026-09-12 - i18n del menu nativo de Tauri
+- Que se hizo: Los items del menu nativo de Tauri (File/Open Project/New Project/Close Project) ahora se traducen segun el idioma del sistema operativo. Se detecta el locale del sistema via las variables de entorno LANG/LC_ALL/LC_MESSAGES. Si el locale empieza con "es", se usan labels en espanol (Archivo/Abrir proyecto/Nuevo proyecto/Cerrar proyecto). De lo contrario, se muestran en ingles. Los PredefinedMenuItems (About, Quit) siguen usando la traduccion nativa de macOS.
+- Archivos modificados:
+  - src-tauri/src/lib.rs (funciones detect_system_lang y menu_labels, struct MenuLabels; menu builder usa labels dinamicos)
+- Decisiones tomadas:
+  - D-229: Deteccion de idioma via env vars del sistema (LANG, LC_ALL, LC_MESSAGES). No requiere crate adicional. En macOS, estas variables se setean automaticamente segun las preferencias del sistema al lanzar una .app.
+  - D-230: Solo 2 idiomas soportados (en/es), consistente con la configuracion i18n existente del frontend (react-i18next con en.json/es.json).
+  - D-231: PredefinedMenuItems (About, Quit, separadores) no se traducen manualmente; macOS los localiza automaticamente segun las preferencias del sistema.
+- Tests: cargo check OK, tsc --noEmit limpio
+- Bugs encontrados: ninguno
+
+### 2026-09-12 - Watch de frontmatter/ y backmatter/
+- Que se hizo: El file watcher en Rust ahora monitorea las carpetas frontmatter/ y backmatter/ ademas de capitulos/ y capitulos-terminados/. Cuando un archivo de frontmatter o backmatter cambia externamente (ej. Claude Code edita dedicatoria.md), el tab Libro recarga automaticamente los datos del libro. Se agrego un contador sectionVersion al projectStore que se incrementa cuando el watcher detecta cambios en frontmatter/ o backmatter/. BookTabContent usa sectionVersion como dependencia de su useEffect de carga, asi que el preview del libro se actualiza en vivo.
+- Archivos modificados:
+  - src-tauri/src/watcher.rs (agrega frontmatter/ y backmatter/ al watch, refactor a loop sobre array de dirs)
+  - src/stores/projectStore.ts (sectionVersion: number, incrementSectionVersion(), reset en closeProject)
+  - src/hooks/useProjectWatcher.ts (detecta cambios en frontmatter//backmatter/ y llama incrementSectionVersion)
+  - src/components/layout/BookTabContent.tsx (suscribe a sectionVersion, lo usa como dependencia del useEffect de loadBook)
+- Decisiones tomadas:
+  - D-226: sectionVersion es un contador incremental que dispara re-render en componentes que lo consumen. Patron identico a editorVersion.
+  - D-227: La deteccion de cambios en frontmatter/backmatter usa includes('/frontmatter/') e includes('/backmatter/') sobre los paths reportados por el watcher. Simple y robusto.
+  - D-228: Los editores de frontmatter/backmatter no se recargan automaticamente con cambios externos (su propia logica de autosave maneja sus saves). El beneficio principal es que el tab Libro refleja cambios hechos por herramientas externas.
+- Tests: 425 TS -- todos verdes
+- Bugs encontrados: ninguno
 
 ### 2026-09-11 - Polish - Renombrar capitulo desde sidebar (doble-click)
 - Que se hizo: Doble-click en un capitulo en la sidebar entra en modo edicion inline. El usuario puede editar el titulo y confirmar con Enter o blur, o cancelar con Escape. Al confirmar, se reemplaza el H1 del archivo .md en disco, se actualiza la lista de capitulos, y si es el capitulo activo se recarga el contenido en el editor. Funcion pura replaceChapterTitle en project-fs.ts reemplaza el primer H1 o prepend uno nuevo si no existe.

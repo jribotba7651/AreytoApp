@@ -183,12 +183,12 @@ async function countMdInDir(dirPath: string): Promise<number> {
   }
 }
 
-const COVER_FILENAMES = [
+export const COVER_FILENAMES = [
   'portada.png', 'portada.jpg', 'portada.jpeg',
   'cover.png', 'cover.jpg', 'cover.jpeg',
 ];
 
-async function detectCoverImage(projectPath: string): Promise<string | null> {
+export async function detectCoverImage(projectPath: string): Promise<string | null> {
   for (const name of COVER_FILENAMES) {
     const path = `${projectPath}/${name}`;
     const exists = await invoke<boolean>('path_exists', { path });

@@ -54,3 +54,8 @@ pub fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
 pub fn rename_path(from: String, to: String) -> Result<(), String> {
     fs::rename(&from, &to).map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub fn copy_file(from: String, to: String) -> Result<(), String> {
+    fs::copy(&from, &to).map(|_| ()).map_err(|e| e.to_string())
+}

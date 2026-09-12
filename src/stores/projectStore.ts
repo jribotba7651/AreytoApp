@@ -27,6 +27,7 @@ interface ProjectState {
   lastSavedContent: string;
   externalChangePending: { path: string; diskContent: string } | null;
   editorVersion: number;
+  sectionVersion: number;
   flushAutosave: (() => Promise<void>) | null;
   syncAutosaveSaved: ((content: string) => void) | null;
   triggerOpenProject: (() => void) | null;
@@ -45,6 +46,7 @@ interface ProjectState {
   setClosedChapters: (chapters: ClosedChapter[]) => void;
   clearActiveChapter: () => void;
   incrementEditorVersion: () => void;
+  incrementSectionVersion: () => void;
   setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
   setLastSavedContent: (content: string) => void;
@@ -67,6 +69,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   lastSavedContent: '',
   externalChangePending: null,
   editorVersion: 0,
+  sectionVersion: 0,
   flushAutosave: null,
   syncAutosaveSaved: null,
   triggerOpenProject: null,
@@ -88,6 +91,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       lastSavedContent: '',
       externalChangePending: null,
       editorVersion: 0,
+      sectionVersion: 0,
     }),
 
   setActiveChapter: (path: string, content: string) =>
@@ -121,6 +125,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   incrementEditorVersion: () =>
     set((state) => ({ editorVersion: state.editorVersion + 1 })),
+
+  incrementSectionVersion: () =>
+    set((state) => ({ sectionVersion: state.sectionVersion + 1 })),
 
   setFlushAutosave: (fn: (() => Promise<void>) | null) => set({ flushAutosave: fn }),
 

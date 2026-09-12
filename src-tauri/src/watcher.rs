@@ -53,6 +53,8 @@ pub fn watch_project(
     let buf_writer = Arc::clone(&buffer);
     let capitulos = Path::new(&path).join("capitulos");
     let terminados = Path::new(&path).join("capitulos-terminados");
+    let frontmatter = Path::new(&path).join("frontmatter");
+    let backmatter = Path::new(&path).join("backmatter");
 
     let mut watcher = notify::recommended_watcher(move |res: Result<Event, notify::Error>| {
         if let Ok(event) = res {
@@ -84,15 +86,12 @@ pub fn watch_project(
     })
     .map_err(|e| e.to_string())?;
 
-    if capitulos.exists() {
-        watcher
-            .watch(&capitulos, RecursiveMode::NonRecursive)
-            .map_err(|e| e.to_string())?;
-    }
-    if terminados.exists() {
-        watcher
-            .watch(&terminados, RecursiveMode::NonRecursive)
-            .map_err(|e| e.to_string())?;
+    for dir in [&capitulos, &terminados, &frontmatter, &backmatter] {
+        if dir.exists() {
+            watcher
+                .watch(dir, RecursiveMode::NonRecursive)
+                .map_err(|e| e.to_string())?;
+        }
     }
 
     // Flusher thread: checks buffer every TICK_MS, emits after DEBOUNCE_MS quiet period

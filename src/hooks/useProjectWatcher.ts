@@ -51,6 +51,14 @@ export function useProjectWatcher() {
       const project = useProjectStore.getState().currentProject;
       if (!project) return;
 
+      const hasSectionChange = Array.from(changedPaths).some(
+        (p) => p.includes('/frontmatter/') || p.includes('/backmatter/')
+      );
+
+      if (hasSectionChange) {
+        useProjectStore.getState().incrementSectionVersion();
+      }
+
       await refreshChapters(project);
 
       const { activeChapterPath, activeChapterContent, lastSavedContent } =

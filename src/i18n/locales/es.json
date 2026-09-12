@@ -298,6 +298,15 @@
       "marginInner": "Interior",
       "marginOuter": "Exterior"
     },
+    "cover": {
+      "title": "Portada",
+      "detected": "Portada detectada",
+      "nocover": "Sin portada",
+      "nocoverHint": "Coloca una imagen (portada.png/jpg) en la raiz del proyecto, o selecciona una con el boton.",
+      "selectImage": "Seleccionar imagen",
+      "copySuccess": "Portada actualizada",
+      "copyError": "Error al copiar la imagen"
+    },
     "export": {
       "successBody": "Libro exportado en:\n{{path}}",
       "successTitle": "Exportación completada",

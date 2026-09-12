@@ -56,6 +56,7 @@ function BookTabContent() {
   const [preExportProblems, setPreExportProblems] = useState<string[]>([]);
   const [pendingExportTarget, setPendingExportTarget] = useState<ExportTarget | null>(null);
   const skipPreCheck = useRef(false);
+  const sectionVersion = useProjectStore((s) => s.sectionVersion);
 
   function computePreExportProblems(): string[] {
     const problems: string[] = [];
@@ -108,7 +109,7 @@ function BookTabContent() {
       setBookData(data);
       setLoading(false);
     });
-  }, [activeTab, currentProject]);
+  }, [activeTab, currentProject, sectionVersion]);
 
   async function handleExport(scope: ExportScope) {
     if (!currentProject) return;

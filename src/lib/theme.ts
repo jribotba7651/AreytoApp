@@ -102,10 +102,62 @@ const CLASSIC_LITERARY: Theme = {
   measure: { maxWidthCh: 60 },
 };
 
+const CLEAN_MODERN: Theme = {
+  id: 'clean-modern',
+  name: 'Clean Modern',
+  schemaVersion: 1,
+  typography: {
+    bodyFont: '"Helvetica Neue", "Segoe UI", system-ui, sans-serif',
+    headingFont: '"Helvetica Neue", "Segoe UI", system-ui, sans-serif',
+    monoFont: '"SF Mono", "Fira Code", monospace',
+    baseSizePt: 11,
+    baseSizePx: 17,
+    lineHeight: 1.85,
+    headingScale: { h1: 2.2, h2: 1.6, h3: 1.3, h4: 1.1, h5: 1.0, h6: 1.0 },
+    paragraph: { indentEm: 0, spacingEm: 1.2, justify: false },
+  },
+  chapterHeading: {
+    align: 'left',
+    numberStyle: 'none',
+    showTitle: true,
+    ornament: null,
+  },
+  sectionBreak: { ornament: null },
+  dropCaps: false,
+  measure: { maxWidthCh: 70 },
+};
+
+const HISPANICO_CLASICO: Theme = {
+  id: 'hispanico-clasico',
+  name: 'Hispanico Clasico',
+  schemaVersion: 1,
+  typography: {
+    bodyFont: '"Palatino Linotype", Palatino, "Book Antiqua", serif',
+    headingFont: '"Palatino Linotype", Palatino, "Book Antiqua", serif',
+    monoFont: '"Courier New", monospace',
+    baseSizePt: 12,
+    baseSizePx: 18,
+    lineHeight: 1.7,
+    headingScale: { h1: 1.7, h2: 1.4, h3: 1.15, h4: 1.05, h5: 1.0, h6: 1.0 },
+    paragraph: { indentEm: 1.8, spacingEm: 0, justify: true },
+  },
+  chapterHeading: {
+    align: 'center',
+    numberStyle: 'word',
+    showTitle: true,
+    ornament: null,
+  },
+  sectionBreak: { ornament: '~' },
+  dropCaps: true,
+  measure: { maxWidthCh: 64 },
+};
+
 const BUILT_IN_THEMES: Record<string, Theme> = {
   'jela-serif': JELA_SERIF,
   'modern-sans': MODERN_SANS,
   'classic-literary': CLASSIC_LITERARY,
+  'clean-modern': CLEAN_MODERN,
+  'hispanico-clasico': HISPANICO_CLASICO,
 };
 
 export const DEFAULT_THEME_ID = 'jela-serif';

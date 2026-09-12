@@ -11,6 +11,41 @@ use tauri::{
     Emitter,
 };
 
+fn detect_system_lang() -> &'static str {
+    for var in ["LANG", "LC_ALL", "LC_MESSAGES"] {
+        if let Ok(val) = std::env::var(var) {
+            if val.starts_with("es") {
+                return "es";
+            }
+        }
+    }
+    "en"
+}
+
+struct MenuLabels {
+    file: &'static str,
+    open_project: &'static str,
+    new_project: &'static str,
+    close_project: &'static str,
+}
+
+fn menu_labels(lang: &str) -> MenuLabels {
+    match lang {
+        "es" => MenuLabels {
+            file: "Archivo",
+            open_project: "Abrir proyecto\u{2026}",
+            new_project: "Nuevo proyecto\u{2026}",
+            close_project: "Cerrar proyecto",
+        },
+        _ => MenuLabels {
+            file: "File",
+            open_project: "Open Project\u{2026}",
+            new_project: "New Project\u{2026}",
+            close_project: "Close Project",
+        },
+    }
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -25,6 +60,7 @@ pub fn run() {
         .manage(std::sync::Mutex::new(None::<terminal::PtySession>))
         .manage(watcher::WatcherState::new())
         .menu(|app| {
+            let labels = menu_labels(detect_system_lang());
             let app_menu = Submenu::with_items(
                 app,
                 "Areyto",
@@ -37,13 +73,13 @@ pub fn run() {
             )?;
             let file_menu = Submenu::with_items(
                 app,
-                "File",
+                labels.file,
                 true,
                 &[
-                    &MenuItem::with_id(app, "open-project", "Open Project\u{2026}", true, Some("CmdOrCtrl+O"))?,
-                    &MenuItem::with_id(app, "new-project", "New Project\u{2026}", true, Some("CmdOrCtrl+Shift+N"))?,
+                    &MenuItem::with_id(app, "open-project", labels.open_project, true, Some("CmdOrCtrl+O"))?,
+                    &MenuItem::with_id(app, "new-project", labels.new_project, true, Some("CmdOrCtrl+Shift+N"))?,
                     &PredefinedMenuItem::separator(app)?,
-                    &MenuItem::with_id(app, "close-project", "Close Project", true, Some("CmdOrCtrl+Shift+W"))?,
+                    &MenuItem::with_id(app, "close-project", labels.close_project, true, Some("CmdOrCtrl+Shift+W"))?,
                 ],
             )?;
             Menu::with_items(app, &[&app_menu, &file_menu])
@@ -62,6 +98,7 @@ pub fn run() {
             project_fs::ensure_dir,
             project_fs::list_dir,
             project_fs::rename_path,
+            project_fs::copy_file,
             git::git_repo_exists,
             git::git_init,
             git::git_initial_commit,
