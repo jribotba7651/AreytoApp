@@ -10,6 +10,7 @@ export interface PanelSizes {
 
 export type BookViewMode = 'write' | 'format';
 export type DeviceFrame = 'none' | 'kindle' | 'print' | 'tablet';
+export type PreviewMode = 'print' | 'draft' | 'proof';
 
 export interface LayoutState {
   activeTab: Tab;
@@ -21,4 +22,5 @@ export interface LayoutState {
   showShortcutsModal: boolean;
   bookViewMode: BookViewMode;
   deviceFrame: DeviceFrame;
+  previewMode: PreviewMode;
 }

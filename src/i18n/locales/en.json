@@ -104,7 +104,9 @@
     "closeProject": "Close project",
     "export": "Export",
     "shortcuts": "Keyboard shortcuts",
-    "about": "About"
+    "about": "About",
+    "writing": "Writing",
+    "formatting": "Formatting"
   },
   "theme": {
     "light": "Light",
@@ -264,6 +266,16 @@
       "print": "Print",
       "tablet": "Tablet"
     },
+    "previewMode": {
+      "print": "Print",
+      "draft": "Draft",
+      "proof": "Print Proof"
+    },
+    "previewNav": {
+      "prevChapter": "Previous Chapter",
+      "nextChapter": "Next Chapter",
+      "chapterOf": "Chapter {{current}} of {{total}}"
+    },
     "themeGallery": {
       "title": "Book themes",
       "activeLabel": "Active"
@@ -378,5 +390,29 @@
     "openProject": "Open project",
     "closeProject": "Close project",
     "showShortcuts": "Show shortcuts"
+  },
+  "writingToolbar": {
+    "editorSettings": {
+      "title": "Editor Settings",
+      "fontFamily": "Font family",
+      "fontSize": "Font size",
+      "lineHeight": "Line height",
+      "paragraphStyle": "Paragraph style",
+      "indent": "Indent",
+      "spaced": "Spaced",
+      "justified": "Justified"
+    },
+    "findReplace": {
+      "title": "Find & Replace",
+      "chapter": "Chapter",
+      "find": "Find",
+      "searchPlaceholder": "Search...",
+      "replacePlaceholder": "Replace with...",
+      "findNext": "Find Next",
+      "replaceOne": "Replace"
+    },
+    "notes": "Notes",
+    "comments": "Comments",
+    "bookmarks": "Bookmarks"
   }
 }

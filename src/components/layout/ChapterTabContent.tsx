@@ -6,6 +6,7 @@ import SidebarPanel from '@/components/panels/SidebarPanel';
 import EditorPanel from '@/components/panels/EditorPanel';
 import TerminalPanel from '@/components/panels/TerminalPanel';
 import VersionsPanel from '@/components/panels/VersionsPanel';
+import WritingToolbar from '@/components/panels/WritingToolbar';
 import { useLayoutStore } from '@/stores/layoutStore';
 
 const HANDLE_H = 'resize-handle-h';
@@ -16,24 +17,29 @@ function MiddlePanels() {
   const { editor, terminal } = useLayoutStore((s) => s.sizes);
 
   return (
-    <Group
-      orientation="vertical"
-      defaultLayout={{ editor, terminal }}
-      onLayoutChanged={(layout: Layout) => {
-        setSizes({
-          editor: layout['editor'] ?? editor,
-          terminal: layout['terminal'] ?? terminal,
-        });
-      }}
-    >
-      <Panel id="editor" minSize="20%">
-        <EditorPanel />
-      </Panel>
-      <Separator className={HANDLE_V} />
-      <Panel id="terminal" minSize="15%">
-        <TerminalPanel />
-      </Panel>
-    </Group>
+    <div className="flex h-full">
+      <div className="flex-1 min-w-0">
+        <Group
+          orientation="vertical"
+          defaultLayout={{ editor, terminal }}
+          onLayoutChanged={(layout: Layout) => {
+            setSizes({
+              editor: layout['editor'] ?? editor,
+              terminal: layout['terminal'] ?? terminal,
+            });
+          }}
+        >
+          <Panel id="editor" minSize="20%">
+            <EditorPanel />
+          </Panel>
+          <Separator className={HANDLE_V} />
+          <Panel id="terminal" minSize="15%">
+            <TerminalPanel />
+          </Panel>
+        </Group>
+      </div>
+      <WritingToolbar />
+    </div>
   );
 }
 

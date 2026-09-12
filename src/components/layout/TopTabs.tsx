@@ -1,24 +1,11 @@
 import { useState } from 'react';
-import { X, Info, Upload, Keyboard } from 'lucide-react';
+import { X, Info, Upload, Keyboard, Settings, Archive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
-import type { Tab } from '@/types/layout';
 import type { SaveStatus } from '@/stores/projectStore';
 import AboutDialog from '@/components/about/AboutDialog';
 import ShortcutsDialog from '@/components/shortcuts/ShortcutsDialog';
-
-interface TabDef {
-  id: Tab;
-  shortcutHint: string;
-}
-
-const TABS: TabDef[] = [
-  { id: 'capitulo', shortcutHint: '⌘1' },
-  { id: 'libro', shortcutHint: '⌘2' },
-  { id: 'terminados', shortcutHint: '⌘3' },
-  { id: 'ajustes', shortcutHint: '⌘4' },
-];
 
 function TopTabs() {
   const { t } = useTranslation();
@@ -40,42 +27,84 @@ function TopTabs() {
   };
   const statusLabel = statusLabels[saveStatus];
 
-  return (
-    <div className="flex items-center bg-bg-secondary border-b border-border-subtle shrink-0">
-      {TABS.map((tab) => {
-        const isActive = activeTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            title={`${t('tabs.' + tab.id)} (${tab.shortcutHint})`}
-            className={[
-              'px-4 py-2 text-sm transition-colors duration-150 border-b-2 -mb-px',
-              isActive
-                ? 'text-text-primary border-accent'
-                : 'text-text-secondary border-transparent hover:text-text-primary',
-            ].join(' ')}
-          >
-            {t('tabs.' + tab.id)}
-          </button>
-        );
-      })}
+  const isWriting = activeTab === 'capitulo';
+  const isFormatting = activeTab === 'libro';
 
-      <div className="ml-auto flex items-center gap-3 px-3">
+  return (
+    <div className="flex items-center h-10 bg-bg-secondary border-b border-border-subtle shrink-0 px-3">
+      {/* Left: Book name */}
+      <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+        {currentProject ? (
+          <span className="text-sm font-medium text-text-primary max-w-48 truncate" title={currentProject.nombre}>
+            {currentProject.nombre}
+          </span>
+        ) : (
+          <span className="text-sm text-text-tertiary">{t('common.noProjectOpen')}</span>
+        )}
         {statusLabel && (
           <span className={[
-            'text-xs transition-colors duration-150',
+            'text-[11px] transition-colors duration-150',
             saveStatus === 'error' ? 'text-error' : 'text-text-tertiary',
           ].join(' ')}>
             {statusLabel}
           </span>
         )}
+      </div>
+
+      {/* Center: Writing / Formatting toggle */}
+      <div className="flex-1 flex justify-center">
+        <div className="flex items-center bg-bg-tertiary rounded-md p-0.5">
+          <button
+            onClick={() => setActiveTab('capitulo')}
+            title={`${t('tabs.capitulo')} (⌘1)`}
+            className={[
+              'px-4 py-1 text-xs font-medium rounded transition-colors duration-150',
+              isWriting
+                ? 'bg-white text-text-primary shadow-sm'
+                : 'text-text-secondary hover:text-text-primary',
+            ].join(' ')}
+          >
+            {t('topbar.writing')}
+          </button>
+          <button
+            onClick={() => setActiveTab('libro')}
+            title={`${t('tabs.libro')} (⌘2)`}
+            className={[
+              'px-4 py-1 text-xs font-medium rounded transition-colors duration-150',
+              isFormatting
+                ? 'bg-white text-text-primary shadow-sm'
+                : 'text-text-secondary hover:text-text-primary',
+            ].join(' ')}
+          >
+            {t('topbar.formatting')}
+          </button>
+        </div>
+      </div>
+
+      {/* Right: Actions */}
+      <div className="flex items-center gap-1 flex-shrink-0">
+        <button
+          onClick={() => setActiveTab('terminados')}
+          title={`${t('tabs.terminados')} (⌘3)`}
+          className={`flex items-center justify-center w-7 h-7 rounded transition-colors duration-150 ${
+            activeTab === 'terminados' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary'
+          }`}
+        >
+          <Archive size={15} />
+        </button>
+        <button
+          onClick={() => setActiveTab('ajustes')}
+          title={`${t('tabs.ajustes')} (⌘4)`}
+          className={`flex items-center justify-center w-7 h-7 rounded transition-colors duration-150 ${
+            activeTab === 'ajustes' ? 'bg-bg-tertiary text-text-primary' : 'text-text-tertiary hover:text-text-primary hover:bg-bg-tertiary'
+          }`}
+        >
+          <Settings size={15} />
+        </button>
 
         {currentProject && (
           <>
-            <span className="text-xs text-text-secondary max-w-48 truncate">
-              {currentProject.nombre}
-            </span>
+            <div className="w-px h-4 bg-border-subtle mx-1" />
             <button
               onClick={() => {
                 setActiveTab('libro');
@@ -83,7 +112,7 @@ function TopTabs() {
               }}
               aria-label={t('topbar.export')}
               title={t('topbar.export')}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
             >
               <Upload size={14} />
               <span>{t('topbar.export')}</span>
@@ -92,7 +121,7 @@ function TopTabs() {
               onClick={closeProject}
               aria-label={t('topbar.closeProject')}
               title={`${t('topbar.closeProject')} (⌘⇧W)`}
-              className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+              className="flex items-center justify-center w-7 h-7 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
             >
               <X size={14} />
             </button>
@@ -103,7 +132,7 @@ function TopTabs() {
           onClick={() => setShowShortcutsModal(true)}
           aria-label={t('topbar.shortcuts')}
           title={`${t('topbar.shortcuts')} (⌘⇧/)`}
-          className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+          className="flex items-center justify-center w-7 h-7 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
         >
           <Keyboard size={14} />
         </button>
@@ -112,7 +141,7 @@ function TopTabs() {
           onClick={() => setShowAbout(true)}
           aria-label={t('topbar.about')}
           title={t('topbar.about')}
-          className="flex items-center justify-center w-6 h-6 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+          className="flex items-center justify-center w-7 h-7 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
         >
           <Info size={14} />
         </button>

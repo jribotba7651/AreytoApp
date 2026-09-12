@@ -104,7 +104,9 @@
     "closeProject": "Cerrar proyecto",
     "export": "Exportar",
     "shortcuts": "Atajos de teclado",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "writing": "Escritura",
+    "formatting": "Formato"
   },
   "theme": {
     "light": "Claro",
@@ -264,6 +266,16 @@
       "print": "Impreso",
       "tablet": "Tablet"
     },
+    "previewMode": {
+      "print": "Impreso",
+      "draft": "Borrador",
+      "proof": "Prueba de impresion"
+    },
+    "previewNav": {
+      "prevChapter": "Capitulo anterior",
+      "nextChapter": "Capitulo siguiente",
+      "chapterOf": "Capitulo {{current}} de {{total}}"
+    },
     "themeGallery": {
       "title": "Temas del libro",
       "activeLabel": "Activo"
@@ -378,5 +390,29 @@
     "openProject": "Abrir proyecto",
     "closeProject": "Cerrar proyecto",
     "showShortcuts": "Mostrar atajos"
+  },
+  "writingToolbar": {
+    "editorSettings": {
+      "title": "Ajustes del editor",
+      "fontFamily": "Familia tipografica",
+      "fontSize": "Tamano de fuente",
+      "lineHeight": "Interlineado",
+      "paragraphStyle": "Estilo de parrafo",
+      "indent": "Sangria",
+      "spaced": "Espaciado",
+      "justified": "Justificado"
+    },
+    "findReplace": {
+      "title": "Buscar y reemplazar",
+      "chapter": "Capitulo",
+      "find": "Buscar",
+      "searchPlaceholder": "Buscar...",
+      "replacePlaceholder": "Reemplazar con...",
+      "findNext": "Buscar siguiente",
+      "replaceOne": "Reemplazar"
+    },
+    "notes": "Notas",
+    "comments": "Comentarios",
+    "bookmarks": "Marcadores"
   }
 }

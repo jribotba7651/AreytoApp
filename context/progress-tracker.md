@@ -3,12 +3,39 @@
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
 ## Estado actual
-- Fase activa: Polish/UX
+- Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: UI para gestionar portada del libro
+- Ultima feature completada: Rediseno visual estilo Atticus (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Rediseno visual estilo Atticus (4 sub-tareas)
+- Que se hizo:
+  1. ThemeGallery: tarjetas muestran texto REAL del libro (capitulo activo o primer capitulo) en vez de lorem ipsum. Grid 3 columnas con borde accent (border-2) en tema seleccionado. Corazon de favorito por tarjeta (estado local con Set). stripMarkdown() limpia headers/bold/links del sample text. Prop sampleText pasada desde BookTabContent.
+  2. Preview de pagina: reemplazo del DeviceFrame/device selector con vista estilo hoja impresa con box-shadow y padding generoso (48px 56px). Selector de vista Print/Draft/Print Proof. Navegacion Previous Chapter / Next Chapter con indicador "Capitulo X de Y". Modo draft sin sombra (ancho completo). Cada capitulo se renderiza individualmente.
+  3. Writing Mode sidebar derecho: 5 iconos verticales a la derecha del editor (T=editor settings, lupa=find/replace, BookOpen=notes stub, MessageSquare=comments stub, Bookmark=bookmarks stub). Click en T abre panel con font family select, font size slider, line height slider, paragraph indent/spaced toggle y justified checkbox. Click en lupa abre panel find/replace con tabs Chapter/Find, inputs de busqueda y reemplazo, botones Find Next y Replace.
+  4. Top Bar: nombre del libro a la izquierda, toggle Writing/Formatting centrado (pill toggle con bg-white y shadow en activo), iconos de Archive y Settings para tabs secundarios, acciones Export/Close/Shortcuts/About a la derecha.
+- Archivos creados:
+  - src/components/panels/WritingToolbar.tsx (sidebar derecho con iconos, EditorSettingsPanel y FindReplacePanel)
+- Archivos modificados:
+  - src/components/book/ThemeGallery.tsx (texto real, favoritos, border-2 accent, stripMarkdown)
+  - src/components/layout/BookTabContent.tsx (preview hoja impresa, selector Print/Draft/Proof, nav capitulos, remover DeviceFrame/renderContent)
+  - src/components/layout/TopTabs.tsx (rediseno completo: nombre izquierda, toggle centro, acciones derecha)
+  - src/components/layout/ChapterTabContent.tsx (integrar WritingToolbar en MiddlePanels)
+  - src/types/layout.ts (+PreviewMode type, +previewMode en LayoutState)
+  - src/stores/layoutStore.ts (+previewMode state, +setPreviewMode action)
+  - src/i18n/locales/en.json (+previewMode, +previewNav, +writingToolbar, +topbar.writing/formatting)
+  - src/i18n/locales/es.json (+previewMode, +previewNav, +writingToolbar, +topbar.writing/formatting)
+- Decisiones tomadas:
+  - D-237: El preview de pagina renderiza un capitulo a la vez con navegacion, en vez del libro completo como scroll. Simula hoja impresa real.
+  - D-238: El toggle Writing/Formatting en TopBar mapea directamente a tabs capitulo/libro. Es una vista simplificada del tab system.
+  - D-239: Los tabs Terminados y Ajustes se representan como iconos (Archive, Settings) en la barra derecha, accesibles pero secundarios.
+  - D-240: WritingToolbar es un sidebar estrecho (iconos 32px) que se expande a 224px (w-56) al abrir un panel. Vive dentro de MiddlePanels, a la derecha del editor.
+  - D-241: EditorSettingsPanel y FindReplacePanel son estado local por ahora, no conectados al editor. Se conectaran en una feature futura.
+  - D-242: Favoritos de temas usan estado local (useState Set), no persisten entre sesiones. Suficiente para la primera iteracion.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-12 - UI para gestionar portada del libro
 - Que se hizo: En el tab Libro, vista Formato, se agrego una seccion de portada debajo de BookSettings. Si existe una imagen de portada en la raiz del proyecto (portada.png/jpg/jpeg o cover.png/jpg/jpeg), muestra un thumbnail pequeno con opcion de cambiarla. Si no hay portada, muestra un hint y un boton "Seleccionar imagen" que abre el file picker nativo (tauri-plugin-dialog open()), copia la imagen seleccionada a la raiz del proyecto como portada.jpg via el comando Tauri copy_file, y refresca la deteccion. Reutiliza detectCoverImage y COVER_FILENAMES de export-service.ts. El thumbnail se muestra via convertFileSrc (protocolo asset de Tauri).

@@ -1,23 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { loadBook } from '@/lib/book-loader';
 import { exportBookMarkdown, exportBookDocx, exportBookEpub } from '@/lib/export-service';
 import { slugify } from '@/lib/export-composer';
-import BookHeader from '@/components/book/BookHeader';
 import BookChapter from '@/components/book/BookChapter';
 import BookChapterError from '@/components/book/BookChapterError';
 import BookEmptyState from '@/components/book/BookEmptyState';
-import BookFrontmatterTitle from '@/components/book/BookFrontmatterTitle';
-import BookFrontmatterCopyright from '@/components/book/BookFrontmatterCopyright';
-import BookFrontmatterDedicatoria from '@/components/book/BookFrontmatterDedicatoria';
-import BookIndice from '@/components/book/BookIndice';
-import BookBackmatterAgradecimientos from '@/components/book/BookBackmatterAgradecimientos';
-import BookBackmatterSobreElAutor from '@/components/book/BookBackmatterSobreElAutor';
-import BookBackmatterOtrosLibros from '@/components/book/BookBackmatterOtrosLibros';
 import PreExportCheckModal from '@/components/book/PreExportCheckModal';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
@@ -26,12 +19,11 @@ import ThemeGallery from '@/components/book/ThemeGallery';
 import ThemeControls from '@/components/book/ThemeControls';
 import BookSettings from '@/components/book/BookSettings';
 import BookCoverSection from '@/components/book/BookCoverSection';
-import DeviceFrame from '@/components/book/DeviceFrame';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import type { BookData } from '@/types/book';
 type ExportTarget = 'md' | 'docx' | 'epub';
 import type { ExportScope } from '@/lib/export-service';
-import type { BookViewMode, DeviceFrame as DeviceFrameType } from '@/types/layout';
+import type { BookViewMode, PreviewMode } from '@/types/layout';
 
 function BookTabContent() {
   const { t } = useTranslation();
@@ -47,8 +39,8 @@ function BookTabContent() {
   const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
   const bookViewMode = useLayoutStore((s) => s.bookViewMode);
   const setBookViewMode = useLayoutStore((s) => s.setBookViewMode);
-  const deviceFrame = useLayoutStore((s) => s.deviceFrame);
-  const setDeviceFrame = useLayoutStore((s) => s.setDeviceFrame);
+  const previewMode = useLayoutStore((s) => s.previewMode);
+  const setPreviewMode = useLayoutStore((s) => s.setPreviewMode);
   const [exportLoading, setExportLoading] = useState(false);
   const [showDocxDialog, setShowDocxDialog] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
@@ -58,6 +50,9 @@ function BookTabContent() {
   const [pendingExportTarget, setPendingExportTarget] = useState<ExportTarget | null>(null);
   const skipPreCheck = useRef(false);
   const sectionVersion = useProjectStore((s) => s.sectionVersion);
+  const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
+  const [previewChapterIdx, setPreviewChapterIdx] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   function computePreExportProblems(): string[] {
     const problems: string[] = [];
@@ -243,7 +238,27 @@ function BookTabContent() {
     );
   }
 
-  function renderContent() {
+  const VIEW_MODES: { id: BookViewMode; labelKey: string }[] = [
+    { id: 'write', labelKey: 'book.writeMode' },
+    { id: 'format', labelKey: 'book.formatMode' },
+  ];
+
+  const PREVIEW_MODES: { id: PreviewMode; labelKey: string }[] = [
+    { id: 'print', labelKey: 'book.previewMode.print' },
+    { id: 'draft', labelKey: 'book.previewMode.draft' },
+    { id: 'proof', labelKey: 'book.previewMode.proof' },
+  ];
+
+  const chapterSections = bookData?.sections ?? [];
+  const totalChapters = chapterSections.length;
+  const clampedIdx = Math.min(previewChapterIdx, Math.max(0, totalChapters - 1));
+
+  function goToChapter(idx: number) {
+    setPreviewChapterIdx(idx);
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderChapterPreview() {
     if (loading) {
       return (
         <div className="h-full flex items-center justify-center">
@@ -251,79 +266,32 @@ function BookTabContent() {
         </div>
       );
     }
-
-    if (!bookData || bookData.sections.length === 0) {
+    if (!bookData || totalChapters === 0) {
       return <BookEmptyState />;
     }
 
-    const validCount = bookData.sections.filter((s) => s.kind === 'chapter').length;
-    const { titulo, copyright, dedicatoria } = bookData.frontmatter;
-    const { agradecimientos, sobreElAutor, otrosLibros } = bookData.backmatter;
+    const section = chapterSections[clampedIdx];
+    if (!section) return <BookEmptyState />;
 
-    const tocItems = bookData.sections
-      .filter((s) => s.kind === 'chapter')
-      .map((s) => ({
-        title: s.chapter.title,
-        slug: slugify(s.chapter.filename.replace(/\.md$/, '')),
-      }));
+    if (section.kind === 'chapter-error') {
+      return <BookChapterError chapterFilename={section.chapter.filename} reason={section.reason} />;
+    }
 
+    const slug = slugify(section.chapter.filename.replace(/\.md$/, ''));
     return (
-      <>
-        {titulo && titulo.titulo ? (
-          <BookFrontmatterTitle titulo={titulo} />
-        ) : (
-          <BookHeader projectName={bookData.projectName} chapterCount={validCount} />
-        )}
-        {copyright && (copyright.titular || copyright.licencia) && (
-          <BookFrontmatterCopyright copyright={copyright} />
-        )}
-        {dedicatoria && <BookFrontmatterDedicatoria dedicatoria={dedicatoria} />}
-        <BookIndice items={tocItems} />
-        <div className="pb-24">
-          {bookData.sections.map((section, idx) => {
-            const isLast = idx === bookData.sections.length - 1;
-            if (section.kind === 'chapter') {
-              const slug = slugify(section.chapter.filename.replace(/\.md$/, ''));
-              return (
-                <BookChapter
-                  key={section.chapter.path}
-                  content={section.content}
-                  isLast={isLast}
-                  slug={slug}
-                  themeId={currentProject?.tema}
-                  themeOverrides={currentProject?.temaOverrides}
-                  bookSettings={currentProject?.bookSettings}
-                  projectRootPath={currentProject?.rootPath}
-                />
-              );
-            }
-            return (
-              <BookChapterError
-                key={section.chapter.path}
-                chapterFilename={section.chapter.filename}
-                reason={section.reason}
-              />
-            );
-          })}
-        </div>
-        {agradecimientos && <BookBackmatterAgradecimientos agradecimientos={agradecimientos} />}
-        {sobreElAutor && <BookBackmatterSobreElAutor sobreElAutor={sobreElAutor} />}
-        {otrosLibros && <BookBackmatterOtrosLibros otrosLibros={otrosLibros} />}
-      </>
+      <BookChapter
+        content={section.content}
+        isLast={false}
+        slug={slug}
+        themeId={currentProject?.tema}
+        themeOverrides={currentProject?.temaOverrides}
+        bookSettings={currentProject?.bookSettings}
+        projectRootPath={currentProject?.rootPath}
+      />
     );
   }
 
-  const VIEW_MODES: { id: BookViewMode; labelKey: string }[] = [
-    { id: 'write', labelKey: 'book.writeMode' },
-    { id: 'format', labelKey: 'book.formatMode' },
-  ];
-
-  const DEVICE_OPTIONS: { id: DeviceFrameType; labelKey: string }[] = [
-    { id: 'none', labelKey: 'book.deviceFrame.none' },
-    { id: 'kindle', labelKey: 'book.deviceFrame.kindle' },
-    { id: 'print', labelKey: 'book.deviceFrame.print' },
-    { id: 'tablet', labelKey: 'book.deviceFrame.tablet' },
-  ];
+  const isDraft = previewMode === 'draft';
 
   return (
     <div className="h-full flex flex-col bg-bg-primary">
@@ -346,28 +314,36 @@ function BookTabContent() {
         {bookViewMode === 'write' && (
           <>
             <div className="w-px h-4 bg-border-subtle mx-2" />
-            <select
-              value={deviceFrame}
-              onChange={(e) => setDeviceFrame(e.target.value as DeviceFrameType)}
-              className="px-2 py-1 text-xs text-text-secondary bg-transparent border border-border-subtle rounded hover:border-border-default focus:border-accent outline-none transition-colors duration-150"
-            >
-              {DEVICE_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {t(opt.labelKey)}
-                </option>
-              ))}
-            </select>
+            {PREVIEW_MODES.map((pm) => (
+              <button
+                key={pm.id}
+                onClick={() => setPreviewMode(pm.id)}
+                className={[
+                  'px-2 py-0.5 text-[11px] rounded transition-colors duration-150',
+                  previewMode === pm.id
+                    ? 'bg-bg-tertiary text-text-primary border border-border-default'
+                    : 'text-text-tertiary hover:text-text-secondary',
+                ].join(' ')}
+              >
+                {t(pm.labelKey)}
+              </button>
+            ))}
           </>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" ref={scrollRef}>
         {bookViewMode === 'format' ? (
           <>
             <ThemeGallery
               activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID}
               onSelectTheme={(id) => void updateProjectMeta({ tema: id, temaOverrides: undefined })}
               customThemes={customThemes}
+              sampleText={
+                activeChapterContent ||
+                bookData?.sections.find((s) => s.kind === 'chapter')?.content ||
+                ''
+              }
             />
             <ThemeControls
               themeId={currentProject.tema}
@@ -377,11 +353,47 @@ function BookTabContent() {
             <BookCoverSection />
           </>
         ) : (
-          <DeviceFrame device={deviceFrame}>
-            {renderContent()}
-          </DeviceFrame>
+          <div className="flex justify-center py-8 px-4">
+            <div
+              className={isDraft ? 'w-full max-w-3xl' : ''}
+              style={isDraft ? undefined : {
+                width: '580px',
+                minHeight: '780px',
+                padding: '48px 56px',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
+                borderRadius: '2px',
+              }}
+            >
+              {renderChapterPreview()}
+            </div>
+          </div>
         )}
       </div>
+
+      {bookViewMode === 'write' && totalChapters > 0 && (
+        <div className="flex items-center justify-between px-4 py-2 border-t border-border-subtle shrink-0 bg-bg-secondary">
+          <button
+            onClick={() => goToChapter(clampedIdx - 1)}
+            disabled={clampedIdx <= 0}
+            className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-default rounded hover:bg-bg-tertiary transition-colors duration-150"
+          >
+            <ChevronLeft size={14} />
+            <span>{t('book.previewNav.prevChapter')}</span>
+          </button>
+          <span className="text-xs text-text-tertiary">
+            {t('book.previewNav.chapterOf', { current: clampedIdx + 1, total: totalChapters })}
+          </span>
+          <button
+            onClick={() => goToChapter(clampedIdx + 1)}
+            disabled={clampedIdx >= totalChapters - 1}
+            className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-default rounded hover:bg-bg-tertiary transition-colors duration-150"
+          >
+            <span>{t('book.previewNav.nextChapter')}</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
 
       {preExportProblems.length > 0 && (
         <PreExportCheckModal

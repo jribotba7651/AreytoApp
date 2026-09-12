@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Tab, PanelSizes, LayoutState, EditorViewMode, BookViewMode, DeviceFrame } from '@/types/layout';
+import type { Tab, PanelSizes, LayoutState, EditorViewMode, BookViewMode, DeviceFrame, PreviewMode } from '@/types/layout';
 
 interface LayoutActions {
   setActiveTab: (tab: Tab) => void;
@@ -12,6 +12,7 @@ interface LayoutActions {
   setShowShortcutsModal: (show: boolean) => void;
   setBookViewMode: (mode: BookViewMode) => void;
   setDeviceFrame: (frame: DeviceFrame) => void;
+  setPreviewMode: (mode: PreviewMode) => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -33,6 +34,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   showShortcutsModal: false,
   bookViewMode: 'write',
   deviceFrame: 'none',
+  previewMode: 'print' as PreviewMode,
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -58,4 +60,6 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   setBookViewMode: (mode: BookViewMode) => set({ bookViewMode: mode }),
 
   setDeviceFrame: (frame: DeviceFrame) => set({ deviceFrame: frame }),
+
+  setPreviewMode: (mode: PreviewMode) => set({ previewMode: mode }),
 }));
