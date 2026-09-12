@@ -302,6 +302,48 @@ export async function createProjectInNewFolder(
   return createProject(rootPath, nombre.trim());
 }
 
+export async function reorderChapters(
+  project: Project,
+  orderedFilenames: string[]
+): Promise<ProjectResult<Chapter[]>> {
+  const chaptersDir = `${project.rootPath}/capitulos`;
+
+  // Rename to temporary names first to avoid collisions
+  for (let i = 0; i < orderedFilenames.length; i++) {
+    const from = `${chaptersDir}/${orderedFilenames[i]}`;
+    const tempName = `__reorder_${i}.md`;
+    const to = `${chaptersDir}/${tempName}`;
+    try {
+      await invoke('rename_path', { from, to });
+    } catch (e) {
+      return fail({ kind: 'WriteFailed', path: from, reason: String(e) });
+    }
+  }
+
+  // Rename from temp names to final ordered names
+  const result: Chapter[] = [];
+  for (let i = 0; i < orderedFilenames.length; i++) {
+    const tempName = `__reorder_${i}.md`;
+    const from = `${chaptersDir}/${tempName}`;
+    const newFilename = `cap-${String(i + 1).padStart(2, '0')}.md`;
+    const to = `${chaptersDir}/${newFilename}`;
+    try {
+      await invoke('rename_path', { from, to });
+    } catch (e) {
+      return fail({ kind: 'WriteFailed', path: to, reason: String(e) });
+    }
+
+    const read = await readFile(to);
+    const title = read.ok
+      ? extractChapterTitle(read.value, newFilename)
+      : newFilename.replace(/\.md$/, '');
+
+    result.push({ path: to, filename: newFilename, title, status: 'in-progress' });
+  }
+
+  return ok(result);
+}
+
 export async function closeChapter(
   _project: Project,
   chapter: Chapter

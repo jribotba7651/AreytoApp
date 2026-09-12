@@ -333,7 +333,9 @@
   "editor": {
     "edit": "Editar",
     "preview": "Previsualizar",
-    "noActiveChapter": "No hay capítulo activo"
+    "noActiveChapter": "No hay capítulo activo",
+    "wordCount": "{{count}} palabras",
+    "bookWordCount": "Libro: {{count}} palabras"
   },
   "versions": {
     "title": "Versiones",

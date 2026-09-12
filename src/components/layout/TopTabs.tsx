@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { X, Info, Upload, Keyboard, Settings, Archive } from 'lucide-react';
+import { X, Info, Upload, Keyboard, Settings, Archive, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
-import type { SaveStatus } from '@/stores/projectStore';
 import AboutDialog from '@/components/about/AboutDialog';
 import ShortcutsDialog from '@/components/shortcuts/ShortcutsDialog';
 
@@ -19,14 +18,6 @@ function TopTabs() {
   const setShowShortcutsModal = useLayoutStore((s) => s.setShowShortcutsModal);
   const [showAbout, setShowAbout] = useState(false);
 
-  const statusLabels: Record<SaveStatus, string> = {
-    idle: '',
-    saving: t('common.saving'),
-    saved: t('common.saved'),
-    error: t('common.saveError'),
-  };
-  const statusLabel = statusLabels[saveStatus];
-
   const isWriting = activeTab === 'capitulo';
   const isFormatting = activeTab === 'libro';
 
@@ -41,13 +32,18 @@ function TopTabs() {
         ) : (
           <span className="text-sm text-text-tertiary">{t('common.noProjectOpen')}</span>
         )}
-        {statusLabel && (
-          <span className={[
-            'text-[11px] transition-colors duration-150',
-            saveStatus === 'error' ? 'text-error' : 'text-text-tertiary',
-          ].join(' ')}>
-            {statusLabel}
+        {saveStatus === 'saving' && (
+          <span className="flex items-center gap-1.5" title={t('common.saving')}>
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
           </span>
+        )}
+        {saveStatus === 'saved' && (
+          <span className="flex items-center text-success transition-opacity duration-300" title={t('common.saved')}>
+            <Check size={14} strokeWidth={2.5} />
+          </span>
+        )}
+        {saveStatus === 'error' && (
+          <span className="text-[11px] text-error">{t('common.saveError')}</span>
         )}
       </div>
 

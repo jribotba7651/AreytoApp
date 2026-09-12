@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
-import { readChapter, updateProjectMeta, renameChapterTitle } from '@/lib/project-fs';
+import { readChapter, updateProjectMeta, renameChapterTitle, reorderChapters } from '@/lib/project-fs';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
 
@@ -12,6 +13,13 @@ function ChapterList() {
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
   const setCommits = useProjectStore((s) => s.setCommits);
   const setChapters = useProjectStore((s) => s.setChapters);
+
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Only in-progress chapters are draggable
+  const inProgressChapters = chapters.filter((c) => c.status === 'in-progress');
+  const finishedChapters = chapters.filter((c) => c.status === 'finished');
 
   async function handleSelect(chapterPath: string, filename: string) {
     if (chapterPath === activeChapterPath || !currentProject) return;
@@ -33,20 +41,77 @@ function ChapterList() {
     const result = await renameChapterTitle(chapter.path, newTitle);
     if (!result.ok) return;
 
-    // Update chapters list with new title
     setChapters(
       chapters.map((c) =>
         c.path === chapter.path ? { ...c, title: newTitle } : c
       )
     );
 
-    // If this is the active chapter, update its content too
     if (chapter.path === activeChapterPath) {
       const store = useProjectStore.getState();
       store.updateContent(result.value);
       store.setLastSavedContent(result.value);
       store.incrementEditorVersion();
     }
+  }
+
+  function handleDragStart(index: number) {
+    setDragIndex(index);
+  }
+
+  function handleDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  }
+
+  async function handleDrop(dropIndex: number) {
+    if (dragIndex === null || dragIndex === dropIndex || !currentProject) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const reordered = [...inProgressChapters];
+    const moved = reordered.splice(dragIndex, 1)[0];
+    if (!moved) return;
+    reordered.splice(dropIndex, 0, moved);
+
+    const orderedFilenames = reordered.map((c) => c.filename);
+    const result = await reorderChapters(currentProject, orderedFilenames);
+
+    if (result.ok) {
+      setChapters([...result.value, ...finishedChapters]);
+
+      // Update active chapter path if it changed
+      const wasActive = activeChapterPath;
+      if (wasActive) {
+        const activeFilename = wasActive.split('/').pop();
+        const movedChapter = orderedFilenames.findIndex(
+          (f) => f === activeFilename
+        );
+        const reorderedEntry = movedChapter >= 0 ? result.value[movedChapter] : undefined;
+        if (reorderedEntry) {
+          const newFilename = reorderedEntry.filename;
+          const newPath = reorderedEntry.path;
+          if (newPath !== wasActive) {
+            const read = await readChapter(newPath);
+            if (read.ok) {
+              setActiveChapter(newPath, read.value);
+              await updateProjectMeta(currentProject, { capituloActivo: newFilename });
+            }
+          }
+        }
+      }
+    }
+
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }
+
+  function handleDragEnd() {
+    setDragIndex(null);
+    setDragOverIndex(null);
   }
 
   if (chapters.length === 0) {
@@ -59,7 +124,7 @@ function ChapterList() {
 
   return (
     <div className="flex flex-col">
-      {chapters.map((chapter, i) => (
+      {inProgressChapters.map((chapter, i) => (
         <ChapterListItem
           key={chapter.path}
           chapter={chapter}
@@ -67,6 +132,28 @@ function ChapterList() {
           isActive={chapter.path === activeChapterPath}
           onClick={() => handleSelect(chapter.path, chapter.filename)}
           onRename={(newTitle) => handleRename(chapter, newTitle)}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          isDragOver={dragOverIndex === i && dragIndex !== i}
+          draggable
+        />
+      ))}
+      {finishedChapters.map((chapter, i) => (
+        <ChapterListItem
+          key={chapter.path}
+          chapter={chapter}
+          index={inProgressChapters.length + i}
+          isActive={chapter.path === activeChapterPath}
+          onClick={() => handleSelect(chapter.path, chapter.filename)}
+          onRename={(newTitle) => handleRename(chapter, newTitle)}
+          onDragStart={() => {}}
+          onDragOver={() => {}}
+          onDrop={() => {}}
+          onDragEnd={() => {}}
+          isDragOver={false}
+          draggable={false}
         />
       ))}
     </div>

@@ -5,10 +5,33 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Polish visual Atticus (4 sub-tareas)
+- Ultima feature completada: Polish Atticus - Word Count, Autosave Indicator, Drag Reorder (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-12
 
 ## Features completadas
+
+### 2026-09-12 - Polish Atticus: Word Count + Autosave Indicator + Drag Reorder (4 sub-tareas)
+- Que se hizo:
+  1. Word Count: barra inferior en el editor con conteo de palabras del capitulo activo (tiempo real) y total del libro. Formato i18n: "X words" / "X palabras". countWords() limpia markdown antes de contar. useBookWordCount() lee todos los capitulos para el total.
+  2. Chapter Title Editable: ya estaba implementado (ChapterListItem doble-click + renameChapterTitle en project-fs.ts).
+  3. Autosave Indicator: reemplazo del texto plano por indicadores visuales. Saving = punto verde pulsante (animate-pulse). Saved = checkmark verde (desaparece tras 2s). Idle = nada visible. Error = texto rojo. Removido import de SaveStatus type (no usado).
+  4. Drag to Reorder Chapters: HTML5 drag-and-drop nativo en sidebar. Solo capitulos in-progress son arrastrables. Al soltar, reorderChapters() en project-fs.ts renombra archivos con nombres temporales (__reorder_N.md) y luego al orden final (cap-01.md, cap-02.md, etc). Indicador visual border-t-accent al arrastrar sobre un item. Si el capitulo activo cambia de nombre, se re-selecciona automaticamente.
+- Archivos modificados:
+  - src/components/panels/EditorPanel.tsx (+countWords, +useBookWordCount hook, +barra inferior con word count)
+  - src/components/layout/TopTabs.tsx (indicador saving: punto verde pulsante, saved: checkmark, idle: nada)
+  - src/components/sidebar/ChapterListItem.tsx (+props drag-and-drop: onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable)
+  - src/components/sidebar/ChapterList.tsx (+estado drag/dragOver, +handleDrop con reorderChapters, separacion in-progress/finished)
+  - src/lib/project-fs.ts (+reorderChapters: renombra a temporales, luego a cap-XX.md final)
+  - src/i18n/locales/en.json (+editor.wordCount, +editor.bookWordCount)
+  - src/i18n/locales/es.json (+editor.wordCount, +editor.bookWordCount)
+- Decisiones tomadas:
+  - D-248: countWords() limpia headers (^# ...) y caracteres markdown antes de contar. No cuenta titulo H1 como palabras del cuerpo.
+  - D-249: useBookWordCount() lee todos los capitulos asincrónicamente al montar, y recalcula cuando cambia la lista de capitulos. El capitulo activo usa el contenido en memoria (tiempo real).
+  - D-250: El reordenamiento usa nombres temporales (__reorder_N.md) para evitar colisiones cuando dos archivos intercambian posiciones.
+  - D-251: Solo los capitulos in-progress son arrastrables. Los finished se muestran despues, no participan en el drag.
+  - D-252: El autosave indicator usa animate-pulse de Tailwind para el punto verde, consistente con la paleta de estados (--success: green-600).
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-12 - Polish visual Atticus (4 sub-tareas)
 - Que se hizo:

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Eye, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
@@ -17,7 +17,48 @@ import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAutosave } from '@/hooks/useAutosave';
+import { readChapter } from '@/lib/project-fs';
 import ExternalChangeBanner from '@/components/editor/ExternalChangeBanner';
+
+function countWords(text: string): number {
+  const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
+  const words = stripped.match(/\S+/g);
+  return words ? words.length : 0;
+}
+
+function useBookWordCount(): number {
+  const chapters = useProjectStore((s) => s.chapters);
+  const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
+  const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
+  const currentProject = useProjectStore((s) => s.currentProject);
+  const [otherChaptersWords, setOtherChaptersWords] = useState(0);
+
+  const otherChapters = useMemo(
+    () => chapters.filter((c) => c.path !== activeChapterPath),
+    [chapters, activeChapterPath]
+  );
+
+  useEffect(() => {
+    if (!currentProject || otherChapters.length === 0) {
+      setOtherChaptersWords(0);
+      return;
+    }
+
+    let cancelled = false;
+    async function load() {
+      let total = 0;
+      for (const ch of otherChapters) {
+        const result = await readChapter(ch.path);
+        if (result.ok) total += countWords(result.value);
+      }
+      if (!cancelled) setOtherChaptersWords(total);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [currentProject, otherChapters]);
+
+  return otherChaptersWords + countWords(activeChapterContent);
+}
 
 function ChapterView() {
   const { t } = useTranslation();
@@ -68,6 +109,8 @@ function ChapterView() {
   }
 
   const isPreview = editorViewMode === 'preview';
+  const chapterWords = countWords(activeChapterContent);
+  const bookWords = useBookWordCount();
 
   return (
     <div className="h-full flex flex-col bg-bg-editor">
@@ -121,6 +164,15 @@ function ChapterView() {
             projectRootPath={currentProject?.rootPath}
           />
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-3 py-1 border-t border-border-subtle shrink-0">
+        <span className="text-[11px] text-text-tertiary">
+          {t('editor.wordCount', { count: chapterWords })}
+        </span>
+        <span className="text-[11px] text-text-tertiary">
+          {t('editor.bookWordCount', { count: bookWords })}
+        </span>
       </div>
     </div>
   );

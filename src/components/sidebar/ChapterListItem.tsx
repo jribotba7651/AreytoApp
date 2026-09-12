@@ -7,9 +7,15 @@ interface ChapterListItemProps {
   isActive: boolean;
   onClick: () => void;
   onRename: (newTitle: string) => void;
+  onDragStart: (index: number) => void;
+  onDragOver: (e: React.DragEvent, index: number) => void;
+  onDrop: (index: number) => void;
+  onDragEnd: () => void;
+  isDragOver: boolean;
+  draggable: boolean;
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable }: ChapterListItemProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,17 +67,27 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename }: Chapte
   }
 
   const chapterNum = index + 1;
+  const isFinished = chapter.status === 'finished';
 
   return (
     <button
       onClick={onClick}
       onDoubleClick={handleDoubleClick}
+      draggable={draggable && !editing}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        onDragStart(index);
+      }}
+      onDragOver={(e) => onDragOver(e, index)}
+      onDrop={() => onDrop(index)}
+      onDragEnd={onDragEnd}
       className={[
         'w-full text-left px-3 py-1.5 text-sm font-sans cursor-pointer flex items-center gap-2',
         'border-l-2 transition-colors duration-150',
         isActive
           ? 'text-text-primary bg-bg-tertiary border-accent'
           : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-bg-tertiary',
+        isDragOver ? 'border-t-2 border-t-accent' : '',
       ].join(' ')}
       title={chapter.title}
     >
@@ -79,7 +95,7 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename }: Chapte
         {chapterNum}
       </span>
       <span className="truncate">{chapter.title}</span>
-      {chapter.status === 'finished' && (
+      {isFinished && (
         <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
       )}
     </button>
