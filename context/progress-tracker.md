@@ -5,10 +5,37 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Dark Mode audit + Empty States (2 sub-tareas)
+- Ultima feature completada: Onboarding Tour + Command Palette (2 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-14
 
 ## Features completadas
+
+### 2026-09-14 - Onboarding Tour + Command Palette (2 sub-tareas)
+- Que se hizo:
+  1. Onboarding Tour: cuando se abre un proyecto nuevo por primera vez (sin capitulos, sin historial), se muestra un tour de 3 pasos inline en el sidebar. Paso 1: explica que el editor trabaja por capitulos. Paso 2: como crear un capitulo con el boton +. Paso 3: como ir al tab Libro. El tour es descartable (boton "Entendido" en cualquier paso o al completar los 3). Guardado en GlobalSettings como onboardingCompleted. Indicador visual con dots de progreso. No se muestra de nuevo si ya lo vio.
+  2. Command Palette: Cmd+K abre una paleta de comandos flotante tipo VS Code. Busca entre: capitulos del proyecto (con icono FileText), acciones (crear capitulo, exportar, abrir ajustes, cambiar tema, focus mode, navegar entre tabs). CSS puro, sin dependencias. Filtrado en tiempo real. Navegacion con flechas y Enter. Escape cierra. Click fuera cierra. Categorias visuales (Capitulos, Acciones) con headers uppercase.
+- Archivos creados:
+  - src/components/sidebar/OnboardingTour.tsx (componente de tour de 3 pasos)
+  - src/components/command-palette/CommandPalette.tsx (paleta de comandos con busqueda)
+- Archivos modificados:
+  - src/lib/settings.ts (+onboardingCompleted en GlobalSettings)
+  - src/stores/settingsStore.ts (+onboardingCompleted state, +setOnboardingCompleted method)
+  - src/components/panels/SidebarPanel.tsx (+OnboardingTour cuando chapters.length === 0 y !onboardingCompleted)
+  - src/lib/keyboard-shortcuts.ts (+COMMAND_PALETTE shortcut Cmd+K)
+  - src/types/layout.ts (+showCommandPalette en LayoutState)
+  - src/stores/layoutStore.ts (+showCommandPalette, +setShowCommandPalette)
+  - src/hooks/useKeyboardShortcuts.ts (+handler COMMAND_PALETTE)
+  - src/App.tsx (+CommandPalette import, +showCommandPalette state, +renderizado en modo normal y focus mode)
+  - src/i18n/locales/en.json (+onboarding.*, +commandPalette.*, +shortcuts.commandPalette)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-279: onboardingCompleted se guarda en GlobalSettings (no por proyecto) porque es una preference global del usuario, no del proyecto. Una vez visto, no se muestra en ningun proyecto.
+  - D-280: El onboarding se muestra solo cuando chapters.length === 0 y !onboardingCompleted. Si el usuario crea su primer capitulo, el tour desaparece naturalmente porque la condicion chapters.length === 0 deja de cumplirse.
+  - D-281: El Command Palette usa COMMAND_PALETTE shortcut con alwaysOn: true para que funcione incluso con modales abiertos, igual que SAVE y SHOW_SHORTCUTS.
+  - D-282: El flatIndex para seleccion con flechas se calcula inline durante el render de items categorizados (chapters + actions). Esto evita una estructura de datos extra para mapear indice global a item.
+  - D-283: El CommandPalette es un componente con position: fixed y z-50, renderizado tanto en modo normal como en focus mode para que siempre sea accesible.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-14 - Dark Mode audit + Empty States (2 sub-tareas)
 - Que se hizo:

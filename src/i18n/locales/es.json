@@ -429,7 +429,8 @@
     "closeProject": "Cerrar proyecto",
     "showShortcuts": "Mostrar atajos",
     "exportBook": "Exportar libro",
-    "focusMode": "Modo enfoque"
+    "focusMode": "Modo enfoque",
+    "commandPalette": "Paleta de comandos"
   },
   "writingToolbar": {
     "editorSettings": {
@@ -456,6 +457,32 @@
     "notesPlaceholder": "Escribe notas para este capitulo...",
     "comments": "Comentarios",
     "bookmarks": "Marcadores"
+  },
+  "onboarding": {
+    "step1Title": "Escribe por capitulos",
+    "step1Body": "Cada capitulo es un archivo independiente. Selecciona uno desde este sidebar para empezar a escribir.",
+    "step2Title": "Crea un capitulo",
+    "step2Body": "Usa el boton + de abajo para crear tu primer capitulo. Puedes elegir una plantilla en blanco o una estructurada.",
+    "step3Title": "Mira el libro completo",
+    "step3Body": "Cambia al tab Libro para ver tu libro ensamblado con portada, capitulos y contraportada.",
+    "next": "Siguiente",
+    "done": "Entendido",
+    "stepOf": "Paso {{current}} de {{total}}"
+  },
+  "commandPalette": {
+    "placeholder": "Buscar capitulos, acciones...",
+    "noResults": "Sin resultados",
+    "chapters": "Capitulos",
+    "actions": "Acciones",
+    "actionNewChapter": "Crear nuevo capitulo",
+    "actionExport": "Exportar libro",
+    "actionSettings": "Abrir ajustes",
+    "actionToggleTheme": "Cambiar tema",
+    "actionFocusMode": "Modo enfoque",
+    "actionTabBook": "Ir al tab Libro",
+    "actionTabChapter": "Ir al tab Capitulo",
+    "actionTabFinished": "Ir al tab Terminados",
+    "actionTabStats": "Ir al tab Estadisticas"
   },
   "stats": {
     "title": "Estadisticas",

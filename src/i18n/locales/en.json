@@ -429,7 +429,8 @@
     "closeProject": "Close project",
     "showShortcuts": "Show shortcuts",
     "exportBook": "Export book",
-    "focusMode": "Focus mode"
+    "focusMode": "Focus mode",
+    "commandPalette": "Command palette"
   },
   "writingToolbar": {
     "editorSettings": {
@@ -456,6 +457,32 @@
     "notesPlaceholder": "Write notes for this chapter...",
     "comments": "Comments",
     "bookmarks": "Bookmarks"
+  },
+  "onboarding": {
+    "step1Title": "Write by chapters",
+    "step1Body": "Each chapter is an independent file. Select one from this sidebar to start writing.",
+    "step2Title": "Create a chapter",
+    "step2Body": "Use the + button below to create your first chapter. You can choose from a blank template or a structured one.",
+    "step3Title": "See the full book",
+    "step3Body": "Switch to the Book tab to see your complete book assembled with cover, chapters, and back matter.",
+    "next": "Next",
+    "done": "Got it",
+    "stepOf": "Step {{current}} of {{total}}"
+  },
+  "commandPalette": {
+    "placeholder": "Search chapters, actions...",
+    "noResults": "No results",
+    "chapters": "Chapters",
+    "actions": "Actions",
+    "actionNewChapter": "Create new chapter",
+    "actionExport": "Export book",
+    "actionSettings": "Open settings",
+    "actionToggleTheme": "Toggle theme",
+    "actionFocusMode": "Focus mode",
+    "actionTabBook": "Go to Book tab",
+    "actionTabChapter": "Go to Chapter tab",
+    "actionTabFinished": "Go to Finished tab",
+    "actionTabStats": "Go to Stats tab"
   },
   "stats": {
     "title": "Statistics",

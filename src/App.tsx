@@ -9,6 +9,7 @@ import SettingsTabContent from '@/components/settings/SettingsTabContent';
 import StatsTabContent from '@/components/layout/StatsTabContent';
 import EditorPanel from '@/components/panels/EditorPanel';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
+import CommandPalette from '@/components/command-palette/CommandPalette';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
@@ -24,6 +25,7 @@ function App() {
   const activeTab = useLayoutStore((s) => s.activeTab);
   const focusMode = useLayoutStore((s) => s.focusMode);
   const toggleFocusMode = useLayoutStore((s) => s.toggleFocusMode);
+  const showCommandPalette = useLayoutStore((s) => s.showCommandPalette);
   const currentProject = useProjectStore((s) => s.currentProject);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -112,6 +114,7 @@ function App() {
           >
             <Minimize2 size={14} />
           </button>
+        {showCommandPalette && <CommandPalette />}
         </div>
       </div>
     );
@@ -127,6 +130,7 @@ function App() {
         {activeTab === 'ajustes' && <SettingsTabContent />}
         {activeTab === 'stats' && <StatsTabContent />}
       </main>
+      {showCommandPalette && <CommandPalette />}
     </div>
   );
 }

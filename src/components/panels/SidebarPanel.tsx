@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import ChapterList from '@/components/sidebar/ChapterList';
 import NewChapterButton from '@/components/sidebar/NewChapterButton';
 import CloseChapterButton from '@/components/sidebar/CloseChapterButton';
@@ -7,10 +8,13 @@ import RefreshChaptersButton from '@/components/sidebar/RefreshChaptersButton';
 import FrontmatterSection from '@/components/sidebar/FrontmatterSection';
 import BackmatterSection from '@/components/sidebar/BackmatterSection';
 import CollapsibleSection from '@/components/sidebar/CollapsibleSection';
+import OnboardingTour from '@/components/sidebar/OnboardingTour';
 
 function SidebarPanel() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
+  const chapters = useProjectStore((s) => s.chapters);
+  const onboardingCompleted = useSettingsStore((s) => s.onboardingCompleted);
 
   if (!currentProject) {
     return (
@@ -36,6 +40,8 @@ function SidebarPanel() {
           </div>
         </CollapsibleSection>
       </div>
+
+      {chapters.length === 0 && !onboardingCompleted && <OnboardingTour />}
 
       <div className="border-t border-border-subtle">
         <BackmatterSection />

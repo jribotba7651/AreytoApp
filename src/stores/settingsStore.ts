@@ -54,6 +54,7 @@ interface SettingsState {
   chapterWordGoal: number;
   bookWordGoal: number;
   recentProjects: RecentProject[];
+  onboardingCompleted: boolean;
   loaded: boolean;
   load: () => Promise<void>;
   addRecentProject: (project: RecentProject) => Promise<void>;
@@ -70,6 +71,7 @@ interface SettingsState {
   addCustomTheme: (theme: Theme) => Promise<void>;
   setChapterWordGoal: (goal: number) => Promise<void>;
   setBookWordGoal: (goal: number) => Promise<void>;
+  setOnboardingCompleted: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -87,6 +89,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   chapterWordGoal: 1500,
   bookWordGoal: 0,
   recentProjects: [],
+  onboardingCompleted: false,
   loaded: false,
 
   load: async () => {
@@ -113,6 +116,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         chapterWordGoal: settings.chapterWordGoal ?? 1500,
         bookWordGoal: settings.bookWordGoal ?? 0,
         recentProjects: (settings.recentProjects ?? []) as RecentProject[],
+        onboardingCompleted: settings.onboardingCompleted ?? false,
         loaded: true,
       });
       applyTheme(themeMode);
@@ -265,6 +269,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, bookWordGoal: goal });
     } catch (err) {
       console.warn('[areyto] Failed to persist bookWordGoal:', err);
+    }
+  },
+
+  setOnboardingCompleted: async () => {
+    set({ onboardingCompleted: true });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, onboardingCompleted: true });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist onboardingCompleted:', err);
     }
   },
 

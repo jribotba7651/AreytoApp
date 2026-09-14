@@ -14,6 +14,7 @@ interface LayoutActions {
   setDeviceFrame: (frame: DeviceFrame) => void;
   setPreviewMode: (mode: PreviewMode) => void;
   toggleFocusMode: () => void;
+  setShowCommandPalette: (show: boolean) => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -37,6 +38,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   deviceFrame: 'none',
   previewMode: 'print' as PreviewMode,
   focusMode: false,
+  showCommandPalette: false,
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -70,4 +72,6 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
       if (state.focusMode) return { focusMode: false };
       return { focusMode: true, activeTab: 'capitulo' as Tab };
     }),
+
+  setShowCommandPalette: (show: boolean) => set({ showCommandPalette: show }),
 }));

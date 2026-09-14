@@ -32,6 +32,13 @@ export function useKeyboardShortcuts() {
         return;
       }
 
+      // Cmd+K: toggle command palette (always-on)
+      if (matchShortcut(e, SHORTCUTS.COMMAND_PALETTE)) {
+        e.preventDefault();
+        layout.setShowCommandPalette(!layout.showCommandPalette);
+        return;
+      }
+
       // All other shortcuts blocked when modal is open
       if (layout.showCloseChapterModal) return;
 

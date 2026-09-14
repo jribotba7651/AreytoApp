@@ -26,6 +26,7 @@ export interface GlobalSettings {
   chapterWordGoal?: number;
   bookWordGoal?: number;
   recentProjects?: RecentProject[];
+  onboardingCompleted?: boolean;
 }
 
 export interface RecentProject {

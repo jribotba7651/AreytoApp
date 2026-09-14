@@ -24,4 +24,5 @@ export interface LayoutState {
   deviceFrame: DeviceFrame;
   previewMode: PreviewMode;
   focusMode: boolean;
+  showCommandPalette: boolean;
 }
