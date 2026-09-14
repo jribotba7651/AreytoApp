@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Tab, PanelSizes, LayoutState, EditorViewMode, BookViewMode, DeviceFrame, PreviewMode } from '@/types/layout';
+import type { Tab, PanelSizes, LayoutState, EditorViewMode, BookViewMode, DeviceFrame, PreviewMode, SplitViewState } from '@/types/layout';
 
 interface LayoutActions {
   setActiveTab: (tab: Tab) => void;
@@ -15,6 +15,8 @@ interface LayoutActions {
   setPreviewMode: (mode: PreviewMode) => void;
   toggleFocusMode: () => void;
   setShowCommandPalette: (show: boolean) => void;
+  setSplitView: (splitView: Partial<SplitViewState>) => void;
+  toggleSplitView: () => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -39,6 +41,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   previewMode: 'print' as PreviewMode,
   focusMode: false,
   showCommandPalette: false,
+  splitView: { active: false, chapterPath: null },
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -74,4 +77,14 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
     }),
 
   setShowCommandPalette: (show: boolean) => set({ showCommandPalette: show }),
+
+  setSplitView: (partial: Partial<SplitViewState>) =>
+    set((state) => ({ splitView: { ...state.splitView, ...partial } })),
+
+  toggleSplitView: () =>
+    set((state) => ({
+      splitView: state.splitView.active
+        ? { active: false, chapterPath: null }
+        : { active: true, chapterPath: null },
+    })),
 }));

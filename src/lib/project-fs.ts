@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import i18n from '@/i18n/i18n';
-import type { BookSettings, Chapter, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
+import type { BookSettings, Chapter, ChapterColor, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
 
 interface ProyectoJson {
   nombre: string;
@@ -10,6 +10,7 @@ interface ProyectoJson {
   temaOverrides?: Record<string, unknown>;
   bookSettings?: BookSettings;
   excludedFromExport?: string[];
+  chapterColors?: Record<string, ChapterColor>;
 }
 
 interface RawDirEntry {
@@ -231,7 +232,7 @@ export async function createChapter(
 
 export async function updateProjectMeta(
   project: Project,
-  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport'>>
+  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors'>>
 ): Promise<ProjectResult<Project>> {
   const updated: Project = { ...project, ...updates };
   const meta: ProyectoJson = {
@@ -243,6 +244,7 @@ export async function updateProjectMeta(
   if (updated.temaOverrides !== undefined) meta.temaOverrides = updated.temaOverrides;
   if (updated.bookSettings !== undefined) meta.bookSettings = updated.bookSettings;
   if (updated.excludedFromExport !== undefined && updated.excludedFromExport.length > 0) meta.excludedFromExport = updated.excludedFromExport;
+  if (updated.chapterColors !== undefined && Object.keys(updated.chapterColors).length > 0) meta.chapterColors = updated.chapterColors;
 
   const jsonPath = `${project.rootPath}/proyecto.json`;
   const write = await writeFile(jsonPath, JSON.stringify(meta, null, 2));

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import type { ChapterColor } from '@/types/project';
 import { readChapter, updateProjectMeta, renameChapterTitle, reorderChapters } from '@/lib/project-fs';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
@@ -143,6 +144,18 @@ function ChapterList() {
     setDragOverIndex(null);
   }
 
+  async function handleColorChange(filename: string, color: ChapterColor | null) {
+    if (!currentProject) return;
+    const existing = currentProject.chapterColors ?? {};
+    const updated = { ...existing };
+    if (color) {
+      updated[filename] = color;
+    } else {
+      delete updated[filename];
+    }
+    await useProjectStore.getState().updateProjectMeta({ chapterColors: updated });
+  }
+
   if (chapters.length === 0) {
     return (
       <div className="px-3 py-2">
@@ -169,6 +182,8 @@ function ChapterList() {
           draggable
           wordCount={wordCounts[chapter.path] ?? 0}
           wordGoal={chapterWordGoal}
+          chapterColor={currentProject?.chapterColors?.[chapter.filename]}
+          onColorChange={(color) => handleColorChange(chapter.filename, color)}
         />
       ))}
       {finishedChapters.map((chapter, i) => (
@@ -187,6 +202,8 @@ function ChapterList() {
           draggable={false}
           wordCount={wordCounts[chapter.path] ?? 0}
           wordGoal={chapterWordGoal}
+          chapterColor={currentProject?.chapterColors?.[chapter.filename]}
+          onColorChange={(color) => handleColorChange(chapter.filename, color)}
         />
       ))}
     </div>

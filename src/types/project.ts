@@ -1,4 +1,15 @@
 export type ChapterStatus = 'in-progress' | 'finished';
+export type ChapterColor = 'red' | 'orange' | 'green' | 'blue' | 'purple';
+
+export const CHAPTER_COLORS: ChapterColor[] = ['red', 'orange', 'green', 'blue', 'purple'];
+
+export const CHAPTER_COLOR_MAP: Record<ChapterColor, string> = {
+  red: '#DC2626',
+  orange: '#D97706',
+  green: '#16A34A',
+  blue: '#2563EB',
+  purple: '#9333EA',
+};
 
 export interface Chapter {
   path: string;
@@ -34,6 +45,7 @@ export interface Project {
   temaOverrides?: Record<string, unknown>;
   bookSettings?: BookSettings;
   excludedFromExport?: string[];
+  chapterColors?: Record<string, ChapterColor>;
 }
 
 export type ProjectFsError =

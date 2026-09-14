@@ -12,6 +12,11 @@ export type BookViewMode = 'write' | 'format';
 export type DeviceFrame = 'none' | 'kindle' | 'print' | 'tablet';
 export type PreviewMode = 'print' | 'draft' | 'proof';
 
+export interface SplitViewState {
+  active: boolean;
+  chapterPath: string | null;
+}
+
 export interface LayoutState {
   activeTab: Tab;
   sizes: PanelSizes;
@@ -25,4 +30,5 @@ export interface LayoutState {
   previewMode: PreviewMode;
   focusMode: boolean;
   showCommandPalette: boolean;
+  splitView: SplitViewState;
 }

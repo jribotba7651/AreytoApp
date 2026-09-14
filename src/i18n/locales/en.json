@@ -349,7 +349,11 @@
     "noActiveChapter": "No active chapter",
     "wordCount": "{{count}} words",
     "bookWordCount": "Book: {{count}} words",
-    "projectLanguage": "Project language"
+    "projectLanguage": "Project language",
+    "splitView": "Split view",
+    "closeSplit": "Close split",
+    "splitSelectChapter": "Select a chapter...",
+    "splitEmpty": "Select a chapter to reference"
   },
   "versions": {
     "title": "Versions",
@@ -388,6 +392,15 @@
     "templateBlank": "Blank chapter",
     "templateScene": "Chapter with scenes",
     "templateDialogue": "Chapter with dialogue",
+    "chapterColor": "Label color",
+    "colorNone": "Remove color",
+    "colors": {
+      "red": "Red",
+      "orange": "Orange",
+      "green": "Green",
+      "blue": "Blue",
+      "purple": "Purple"
+    },
     "items": {
       "titulo": "Title and author",
       "copyright": "Copyright",

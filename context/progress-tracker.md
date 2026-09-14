@@ -5,10 +5,36 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Onboarding Tour + Command Palette (2 sub-tareas)
+- Ultima feature completada: Split View + Chapter Colors (2 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-14
 
 ## Features completadas
+
+### 2026-09-14 - Split View + Chapter Colors/Labels (2 sub-tareas)
+- Que se hizo:
+  1. Split View: en el tab Capitulo Activo, boton Columns2 en el header del editor para activar vista dividida horizontal. Al activarlo, el editor se parte en dos mitades: izquierda con el editor editable (o preview), derecha con un panel de solo lectura. El panel derecho tiene un dropdown para seleccionar cualquier otro capitulo del proyecto y mostrarlo renderizado con BookMarkdown. Boton X para cerrar el split. Util para referenciar otro capitulo mientras se escribe. Sin dependencias nuevas.
+  2. Chapter Colors/Labels: click derecho en un capitulo del sidebar abre un popover con 5 colores (rojo, naranja, verde, azul, morado). Al seleccionar un color, aparece un dot de color al lado del nombre del capitulo. Click en el mismo color lo quita. Boton X para quitar el color. Los colores se persisten en proyecto.json como campo chapterColors (mapa filename -> color). Se propaga via updateProjectMeta.
+- Archivos creados:
+  - src/components/editor/SplitReadPanel.tsx (panel de solo lectura con dropdown de capitulos)
+- Archivos modificados:
+  - src/types/layout.ts (+SplitViewState interface, +splitView en LayoutState)
+  - src/stores/layoutStore.ts (+splitView state, +setSplitView, +toggleSplitView actions)
+  - src/components/panels/EditorPanel.tsx (+Columns2 import, +SplitReadPanel import, +boton split en header, +layout flex con split condicional)
+  - src/types/project.ts (+ChapterColor type, +CHAPTER_COLORS array, +CHAPTER_COLOR_MAP record, +chapterColors en Project)
+  - src/lib/project-fs.ts (+ChapterColor import, +chapterColors en ProyectoJson, +chapterColors en updateProjectMeta)
+  - src/stores/projectStore.ts (+chapterColors en updateProjectMeta signature)
+  - src/components/sidebar/ChapterListItem.tsx (+chapterColor/onColorChange props, +color dot render, +context menu con color picker popover, +click-outside handler)
+  - src/components/sidebar/ChapterList.tsx (+handleColorChange, +chapterColor/onColorChange props pasadas a ChapterListItem)
+  - src/i18n/locales/en.json (+editor.splitView/closeSplit/splitSelectChapter/splitEmpty, +sidebar.chapterColor/colorNone/colors.*)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-284: El split view es 50/50 fijo (sin resize) para mantener la simplicidad. Se puede expandir a resizable en el futuro si se necesita.
+  - D-285: El panel derecho del split muestra el capitulo renderizado con BookMarkdown (solo lectura), no con CodeMirror, porque el proposito es referencia visual, no edicion.
+  - D-286: chapterColors se guarda como mapa filename -> color en proyecto.json. Se usa filename (no path) como clave para que sea portable si el proyecto se mueve de carpeta.
+  - D-287: El color picker se activa con click derecho (context menu nativo suprimido con preventDefault). Click en el mismo color lo deselecciona. Los colores son los 5 del design system: red-600, amber-600, green-600, blue-600, purple-600.
+  - D-288: Al cerrar el split view, se limpia el chapterPath seleccionado para liberar memoria del contenido cargado.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-14 - Onboarding Tour + Command Palette (2 sub-tareas)
 - Que se hizo:

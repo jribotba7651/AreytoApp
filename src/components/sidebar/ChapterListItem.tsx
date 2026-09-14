@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import type { Chapter } from '@/types/project';
+import { useTranslation } from 'react-i18next';
+import type { Chapter, ChapterColor } from '@/types/project';
+import { CHAPTER_COLORS, CHAPTER_COLOR_MAP } from '@/types/project';
 
 interface ChapterListItemProps {
   chapter: Chapter;
@@ -15,12 +17,17 @@ interface ChapterListItemProps {
   draggable: boolean;
   wordCount: number;
   wordGoal: number;
+  chapterColor?: ChapterColor;
+  onColorChange: (color: ChapterColor | null) => void;
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterColor, onColorChange }: ChapterListItemProps) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const colorPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (editing) {
@@ -28,6 +35,17 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
       inputRef.current?.select();
     }
   }, [editing]);
+
+  useEffect(() => {
+    if (!showColorPicker) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setShowColorPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showColorPicker]);
 
   function handleDoubleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -68,50 +86,102 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
     );
   }
 
+  function handleContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    setShowColorPicker(true);
+  }
+
   const chapterNum = index + 1;
   const isFinished = chapter.status === 'finished';
   const progress = wordGoal > 0 ? Math.min(100, Math.round((wordCount / wordGoal) * 100)) : 0;
 
   return (
-    <button
-      onClick={onClick}
-      onDoubleClick={handleDoubleClick}
-      draggable={draggable && !editing}
-      onDragStart={(e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        onDragStart(index);
-      }}
-      onDragOver={(e) => onDragOver(e, index)}
-      onDrop={() => onDrop(index)}
-      onDragEnd={onDragEnd}
-      className={[
-        'w-full text-left px-3 py-1.5 text-sm font-sans cursor-pointer',
-        'border-l-2 transition-colors duration-150',
-        isActive
-          ? 'text-text-primary bg-bg-tertiary border-accent'
-          : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-bg-tertiary',
-        isDragOver ? 'border-t-2 border-t-accent' : '',
-      ].join(' ')}
-      title={`${chapter.title} (${wordCount}/${wordGoal})`}
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
-          {chapterNum}
-        </span>
-        <span className="truncate">{chapter.title}</span>
-        {isFinished && (
-          <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
+    <div className="relative">
+      <button
+        onClick={onClick}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
+        draggable={draggable && !editing}
+        onDragStart={(e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          onDragStart(index);
+        }}
+        onDragOver={(e) => onDragOver(e, index)}
+        onDrop={() => onDrop(index)}
+        onDragEnd={onDragEnd}
+        className={[
+          'w-full text-left px-3 py-1.5 text-sm font-sans cursor-pointer',
+          'border-l-2 transition-colors duration-150',
+          isActive
+            ? 'text-text-primary bg-bg-tertiary border-accent'
+            : 'text-text-secondary border-transparent hover:text-text-primary hover:bg-bg-tertiary',
+          isDragOver ? 'border-t-2 border-t-accent' : '',
+        ].join(' ')}
+        title={`${chapter.title} (${wordCount}/${wordGoal})`}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
+            {chapterNum}
+          </span>
+          {chapterColor && (
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: CHAPTER_COLOR_MAP[chapterColor] }}
+            />
+          )}
+          <span className="truncate">{chapter.title}</span>
+          {isFinished && (
+            <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
+          )}
+        </div>
+        {wordGoal > 0 && !isFinished && (
+          <div className="mt-1 ml-6 h-1 rounded-full bg-border-subtle overflow-hidden">
+            <div
+              className="h-full rounded-full bg-accent transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         )}
-      </div>
-      {wordGoal > 0 && !isFinished && (
-        <div className="mt-1 ml-6 h-1 rounded-full bg-border-subtle overflow-hidden">
-          <div
-            className="h-full rounded-full bg-accent transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+      </button>
+
+      {showColorPicker && (
+        <div
+          ref={colorPickerRef}
+          className="absolute left-8 top-0 z-40 bg-bg-tertiary border border-border-default rounded-lg p-2 shadow-sm"
+        >
+          <p className="text-[10px] text-text-tertiary mb-1.5 px-0.5">{t('sidebar.chapterColor')}</p>
+          <div className="flex items-center gap-1.5">
+            {CHAPTER_COLORS.map((color) => (
+              <button
+                key={color}
+                onClick={() => {
+                  onColorChange(chapterColor === color ? null : color);
+                  setShowColorPicker(false);
+                }}
+                className={[
+                  'w-5 h-5 rounded-full border-2 transition-transform duration-150 hover:scale-110',
+                  chapterColor === color ? 'border-text-primary' : 'border-transparent',
+                ].join(' ')}
+                style={{ backgroundColor: CHAPTER_COLOR_MAP[color] }}
+                title={t(`sidebar.colors.${color}`)}
+              />
+            ))}
+            {chapterColor && (
+              <button
+                onClick={() => {
+                  onColorChange(null);
+                  setShowColorPicker(false);
+                }}
+                className="w-5 h-5 rounded-full border border-border-default bg-bg-editor flex items-center justify-center text-text-tertiary hover:text-text-primary transition-colors duration-150"
+                title={t('sidebar.colorNone')}
+              >
+                <span className="text-[10px]">&times;</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
-    </button>
+    </div>
   );
 }
 

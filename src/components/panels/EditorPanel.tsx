@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Eye, Pencil, Languages } from 'lucide-react';
+import { Eye, Pencil, Languages, Columns2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
@@ -20,6 +20,7 @@ import { useAutosave } from '@/hooks/useAutosave';
 import { readChapter } from '@/lib/project-fs';
 import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';
 import ExternalChangeBanner from '@/components/editor/ExternalChangeBanner';
+import SplitReadPanel from '@/components/editor/SplitReadPanel';
 
 function countWords(text: string): number {
   const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
@@ -75,6 +76,8 @@ function ChapterView() {
 
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
   const toggleEditorViewMode = useLayoutStore((s) => s.toggleEditorViewMode);
+  const splitView = useLayoutStore((s) => s.splitView);
+  const toggleSplitView = useLayoutStore((s) => s.toggleSplitView);
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
 
@@ -142,7 +145,19 @@ function ChapterView() {
         ) : (
           <div />
         )}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center gap-1">
+          <button
+            onClick={toggleSplitView}
+            className={[
+              'flex items-center gap-1.5 px-2 py-1 text-xs rounded transition-colors duration-150',
+              splitView.active
+                ? 'text-text-primary bg-bg-tertiary'
+                : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary',
+            ].join(' ')}
+            title={t('editor.splitView')}
+          >
+            <Columns2 size={14} />
+          </button>
           <button
             onClick={handleToggle}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
@@ -161,30 +176,38 @@ function ChapterView() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 relative">
-        <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
-          <ChapterEditor
-            ref={editorRef}
-            key={`${activeChapterPath}:${editorVersion}`}
-            initialContent={activeChapterContent}
-            onChange={updateContent}
-          />
+      <div className="flex-1 min-h-0 flex">
+        <div className={splitView.active ? 'w-1/2 min-w-0 relative' : 'flex-1 min-w-0 relative'}>
+          <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
+            <ChapterEditor
+              ref={editorRef}
+              key={`${activeChapterPath}:${editorVersion}`}
+              initialContent={activeChapterContent}
+              onChange={updateContent}
+            />
+          </div>
+
+          <div
+            ref={previewScrollRef}
+            className={[
+              'absolute inset-0 overflow-y-auto',
+              isPreview ? '' : 'invisible pointer-events-none',
+            ].join(' ')}
+          >
+            <BookMarkdown
+              content={activeChapterContent}
+              themeId={currentProject?.tema}
+              themeOverrides={currentProject?.temaOverrides}
+              projectRootPath={currentProject?.rootPath}
+            />
+          </div>
         </div>
 
-        <div
-          ref={previewScrollRef}
-          className={[
-            'absolute inset-0 overflow-y-auto',
-            isPreview ? '' : 'invisible pointer-events-none',
-          ].join(' ')}
-        >
-          <BookMarkdown
-            content={activeChapterContent}
-            themeId={currentProject?.tema}
-            themeOverrides={currentProject?.temaOverrides}
-            projectRootPath={currentProject?.rootPath}
-          />
-        </div>
+        {splitView.active && (
+          <div className="w-1/2 min-w-0">
+            <SplitReadPanel />
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between px-3 py-1 border-t border-border-subtle shrink-0">
