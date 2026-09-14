@@ -5,10 +5,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Polish: Terminados UX + Versiones UI + Accesibilidad (3 sub-tareas)
+- Ultima feature completada: Dark Mode audit + Empty States (2 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-14
 
 ## Features completadas
+
+### 2026-09-14 - Dark Mode audit + Empty States (2 sub-tareas)
+- Que se hizo:
+  1. Dark Mode audit: se revisaron todos los componentes nuevos creados desde F37. ThemeGallery tenia bg-white hardcodeado (corregido a bg-bg-editor). CommitDiffView usaba clases Tailwind con dark: prefix para colores de diff (bg-green-100, bg-red-100, etc.); reemplazadas por tokens del design system (bg-diff-added-bg, text-diff-added-text, bg-diff-removed-bg, text-diff-removed-text). BookTabContent tenia #f0f0f0, #d0d0d0, #e0e0e0 hardcodeados para modo proof; reemplazados por CSS vars (--proof-bg, --proof-border, --proof-inset). Se agregaron todos los tokens nuevos en globals.css tanto para light como dark theme. Los demas componentes auditados (FormatToolbar, CollapsibleSection, WritingToolbar, StatsTabContent, BookSettings, BookCoverSection, ThemeControls) ya usaban tokens correctamente.
+  2. Empty States mejorados: tres empty states rediseñados con ilustraciones SVG inline y mensajes mas descriptivos. TerminadosEmptyState: SVG de paginas apiladas con checkmark, titulo serif, descripcion de como cerrar capitulos, y hint sobre git tag + carpeta. StatsTabContent: SVG de grafico de barras con signo de interrogacion, titulo, descripcion de que aparecera al escribir. CommitList (sin capitulo activo): SVG de documento con cursor, hint para seleccionar capitulo. CommitList (sin historial): SVG de timeline git con circulos vacios, hint sobre autocommit.
+- Archivos modificados:
+  - src/styles/globals.css (+6 tokens nuevos en @theme, :root, y html[data-theme="dark"]: diff-added-bg, diff-added-text, diff-removed-bg, diff-removed-text, proof-bg, proof-border, proof-inset)
+  - src/components/book/ThemeGallery.tsx (bg-white -> bg-bg-editor)
+  - src/components/versions/CommitDiffView.tsx (bg-green-100/bg-red-100 + dark: variants -> bg-diff-added-bg/bg-diff-removed-bg tokens)
+  - src/components/layout/BookTabContent.tsx (#f0f0f0/#d0d0d0/#e0e0e0 -> var(--proof-bg)/var(--proof-inset)/var(--proof-border))
+  - src/components/terminados/TerminadosEmptyState.tsx (rediseñado con SVG + mensajes mejorados)
+  - src/components/layout/StatsTabContent.tsx (+empty state con SVG cuando chapterStats vacio)
+  - src/components/versions/CommitList.tsx (2 empty states rediseñados con SVG + hints)
+  - src/i18n/locales/en.json (+finished.emptyHint, +versions.noActiveChapterHint, +versions.noHistoryHint, +stats.emptyTitle/emptyBody/emptyHint, mensajes mejorados)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-275: Se crearon tokens CSS dedicados para diff (diff-added-bg, diff-removed-bg, etc.) en vez de usar clases Tailwind con dark: prefix. Esto asegura que el theming funcione via CSS vars como todo el resto del design system, sin depender del prefijo dark: de Tailwind.
+  - D-276: Los colores de proof mode (#f0f0f0, #e0e0e0, #d0d0d0) se movieron a CSS vars (--proof-bg, --proof-border, --proof-inset) con equivalentes oscuros basados en la paleta zinc del dark theme.
+  - D-277: Los SVGs de empty states son inline (no archivos separados) para evitar requests HTTP y mantener la coherencia con los tokens de color (usan currentColor y clases de Tailwind).
+  - D-278: Los empty states incluyen 3 niveles de texto: titulo (serif, xl), descripcion (sans, sm), y hint (sans, xs, opaco). El hint da contexto tecnico util sin sobrecargar.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-14 - Polish: Terminados UX + Versiones UI + Accesibilidad (3 sub-tareas)
 - Que se hizo:

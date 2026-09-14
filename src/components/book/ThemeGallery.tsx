@@ -82,7 +82,7 @@ function ThemeThumbnail({
       </button>
 
       {/* Mini preview with real book text */}
-      <div className="mb-2 rounded border border-border-subtle bg-white px-3 py-2 select-none overflow-hidden" style={{ height: '72px' }}>
+      <div className="mb-2 rounded border border-border-subtle bg-bg-editor px-3 py-2 select-none overflow-hidden" style={{ height: '72px' }}>
         <div
           className="text-text-editor leading-snug"
           style={{

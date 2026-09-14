@@ -75,8 +75,8 @@ function CommitDiffView({ commit, onClose, onRestore }: CommitDiffViewProps) {
             key={i}
             className={[
               'px-2 py-px whitespace-pre-wrap break-all',
-              line.kind === 'added' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : '',
-              line.kind === 'removed' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : '',
+              line.kind === 'added' ? 'bg-diff-added-bg text-diff-added-text' : '',
+              line.kind === 'removed' ? 'bg-diff-removed-bg text-diff-removed-text' : '',
               line.kind === 'same' ? 'text-text-tertiary' : '',
             ].join(' ')}
           >

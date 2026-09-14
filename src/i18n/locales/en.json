@@ -354,7 +354,9 @@
   "versions": {
     "title": "Versions",
     "noActiveChapter": "No active chapter",
+    "noActiveChapterHint": "Select a chapter from the sidebar to view its version history",
     "noHistory": "No history yet",
+    "noHistoryHint": "Each time you save, an automatic commit is created. Here you can view and restore previous versions.",
     "expandPanel": "Expand versions panel",
     "collapsePanel": "Collapse versions panel",
     "diffError": "Could not load the diff",
@@ -363,8 +365,9 @@
   },
   "finished": {
     "title": "Finished chapters",
-    "emptyTitle": "No finished chapters",
-    "emptyBody": "When you close a chapter from the sidebar it will appear here",
+    "emptyTitle": "No finished chapters yet",
+    "emptyBody": "When you consider a chapter done, right-click it in the sidebar and select \"Close chapter\". It will appear here with its history.",
+    "emptyHint": "Closed chapters are tagged in git and moved to the capitulos-terminados/ folder",
     "completed": "Completed",
     "wordCount": "{{count}} words",
     "searchPlaceholder": "Search finished chapters...",
@@ -464,6 +467,9 @@
     "last7Days": "Activity (last 7 days)",
     "projectStarted": "Project started",
     "chapterBreakdown": "Words by chapter",
-    "bookProgress": "Book progress"
+    "bookProgress": "Book progress",
+    "emptyTitle": "No data yet",
+    "emptyBody": "Statistics will appear once you start writing chapters. Each chapter adds words, pages, and activity to your history.",
+    "emptyHint": "Write at least one chapter to see your metrics"
   }
 }

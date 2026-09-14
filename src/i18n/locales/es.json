@@ -353,8 +353,10 @@
   },
   "versions": {
     "title": "Versiones",
-    "noActiveChapter": "Sin capítulo activo",
-    "noHistory": "Sin historial todavía",
+    "noActiveChapter": "Sin capitulo activo",
+    "noActiveChapterHint": "Selecciona un capitulo del sidebar para ver su historial de versiones",
+    "noHistory": "Sin historial todavia",
+    "noHistoryHint": "Cada vez que guardes, se creara un commit automatico. Aqui podras ver y restaurar versiones anteriores.",
     "expandPanel": "Expandir panel de versiones",
     "collapsePanel": "Colapsar panel de versiones",
     "diffError": "No se pudo cargar el diff",
@@ -363,8 +365,9 @@
   },
   "finished": {
     "title": "Capítulos terminados",
-    "emptyTitle": "No hay capítulos terminados",
-    "emptyBody": "Cuando cierres un capítulo desde el sidebar aparecerá aquí",
+    "emptyTitle": "No hay capitulos terminados aun",
+    "emptyBody": "Cuando consideres que un capitulo esta listo, haz clic derecho sobre el en el sidebar y selecciona \"Cerrar capitulo\". Aparecera aqui con su historial.",
+    "emptyHint": "Los capitulos cerrados se marcan con un tag de git y se mueven a la carpeta capitulos-terminados/",
     "completed": "Completado",
     "wordCount": "{{count}} palabras",
     "searchPlaceholder": "Buscar capitulos terminados...",
@@ -464,6 +467,9 @@
     "last7Days": "Actividad (ultimos 7 dias)",
     "projectStarted": "Inicio del proyecto",
     "chapterBreakdown": "Palabras por capitulo",
-    "bookProgress": "Progreso del libro"
+    "bookProgress": "Progreso del libro",
+    "emptyTitle": "Aun no hay datos",
+    "emptyBody": "Las estadisticas apareceran cuando empieces a escribir capitulos. Cada capitulo suma palabras, paginas y actividad al historial.",
+    "emptyHint": "Escribe al menos un capitulo para ver tus metricas"
   }
 }

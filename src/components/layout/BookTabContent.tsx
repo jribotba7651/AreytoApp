@@ -403,12 +403,12 @@ function BookTabContent() {
                   width: '580px',
                   minHeight: '780px',
                   padding: '48px 56px',
-                  backgroundColor: isProof ? '#f0f0f0' : 'var(--bg-editor)',
+                  backgroundColor: isProof ? 'var(--proof-bg)' : 'var(--bg-editor)',
                   boxShadow: isProof
-                    ? 'inset 0 0 0 1px #d0d0d0'
+                    ? 'inset 0 0 0 1px var(--proof-inset)'
                     : '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
                   borderRadius: '2px',
-                  border: isProof ? '12px solid #e0e0e0' : undefined,
+                  border: isProof ? '12px solid var(--proof-border)' : undefined,
                 }}
               >
                 {renderChapterPreview()}

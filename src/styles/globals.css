@@ -52,6 +52,16 @@
   --color-error: #DC2626;
   --color-info: #2563EB;
 
+  /* Diff */
+  --color-diff-added-bg: #dcfce7;
+  --color-diff-added-text: #166534;
+  --color-diff-removed-bg: #fee2e2;
+  --color-diff-removed-text: #991b1b;
+  /* Proof mode */
+  --color-proof-bg: #f0f0f0;
+  --color-proof-border: #e0e0e0;
+  --color-proof-inset: #d0d0d0;
+
   /* Typography */
   --font-ui: Inter, system-ui, sans-serif;
   --font-sans: Inter, system-ui, sans-serif;
@@ -79,6 +89,13 @@
   --warning: #B45309;
   --error: #DC2626;
   --info: #2563EB;
+  --diff-added-bg: #dcfce7;
+  --diff-added-text: #166534;
+  --diff-removed-bg: #fee2e2;
+  --diff-removed-text: #991b1b;
+  --proof-bg: #f0f0f0;
+  --proof-border: #e0e0e0;
+  --proof-inset: #d0d0d0;
   --font-ui: Inter, system-ui, sans-serif;
   /* F38 – Editor font (user preference, overridden via inline style by applyEditorFont()) */
   --font-editor: "Iowan Old Style", Charter, Georgia, serif;
@@ -110,6 +127,15 @@ html[data-theme="dark"] {
   --color-warning: #c4a572;
   --color-error: #b07070;
   --color-info: #7a93b8;
+  /* Diff */
+  --color-diff-added-bg: rgba(107, 154, 126, 0.15);
+  --color-diff-added-text: #6b9a7e;
+  --color-diff-removed-bg: rgba(176, 112, 112, 0.15);
+  --color-diff-removed-text: #b07070;
+  /* Proof mode */
+  --color-proof-bg: #27272a;
+  --color-proof-border: #34343a;
+  --color-proof-inset: #2a2a2e;
   /* Direct --bg-* vars (used by editor-theme.ts and explicit var() calls) */
   --bg-primary: #18181b;
   --bg-secondary: #1f1f23;
@@ -130,6 +156,13 @@ html[data-theme="dark"] {
   --warning: #c4a572;
   --error: #b07070;
   --info: #7a93b8;
+  --diff-added-bg: rgba(107, 154, 126, 0.15);
+  --diff-added-text: #6b9a7e;
+  --diff-removed-bg: rgba(176, 112, 112, 0.15);
+  --diff-removed-text: #b07070;
+  --proof-bg: #27272a;
+  --proof-border: #34343a;
+  --proof-inset: #2a2a2e;
 }
 
 /* F35 – Panel resize handles */

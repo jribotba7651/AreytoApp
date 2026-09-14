@@ -157,6 +157,39 @@ function StatsTabContent() {
 
         {loading ? (
           <p className="text-sm text-text-tertiary">{t('common.loading')}</p>
+        ) : chapterStats.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-5">
+            <svg
+              width="80"
+              height="80"
+              viewBox="0 0 80 80"
+              fill="none"
+              className="text-border-default"
+              aria-hidden="true"
+            >
+              {/* Bar chart */}
+              <rect x="10" y="52" width="10" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.3" />
+              <rect x="24" y="40" width="10" height="28" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.5" />
+              <rect x="38" y="28" width="10" height="40" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.7" />
+              <rect x="52" y="18" width="10" height="50" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+              {/* Baseline */}
+              <line x1="6" y1="68" x2="66" y2="68" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+              {/* Question mark */}
+              <text x="68" y="26" fontSize="18" className="fill-text-tertiary" fontWeight="300">?</text>
+            </svg>
+
+            <div className="flex flex-col items-center gap-2 max-w-sm">
+              <p className="font-serif text-xl text-text-secondary text-center">
+                {t('stats.emptyTitle')}
+              </p>
+              <p className="font-sans text-sm text-text-tertiary text-center leading-relaxed">
+                {t('stats.emptyBody')}
+              </p>
+              <p className="font-sans text-xs text-text-tertiary text-center mt-1 opacity-70">
+                {t('stats.emptyHint')}
+              </p>
+            </div>
+          </div>
         ) : (
           <>
             {/* Summary cards */}
