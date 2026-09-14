@@ -63,6 +63,8 @@ function ImportDocxModal({ docxPath, onClose, onImported }: ImportDocxModalProps
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
       className="fixed inset-0 flex items-center justify-center z-50 bg-black/60"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >

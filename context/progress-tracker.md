@@ -5,10 +5,36 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Stats Page + Reading Time + Chapter Notes + Auto Backup (4 sub-tareas)
-- Fecha de ultima actualizacion: 2026-09-12
+- Ultima feature completada: Polish: Terminados UX + Versiones UI + Accesibilidad (3 sub-tareas)
+- Fecha de ultima actualizacion: 2026-09-14
 
 ## Features completadas
+
+### 2026-09-14 - Polish: Terminados UX + Versiones UI + Accesibilidad (3 sub-tareas)
+- Que se hizo:
+  1. Tab Terminados mejorado: cada capitulo cerrado ahora muestra su titulo real (extraido del H1 del archivo), icono CheckCircle2 verde, conteo de palabras, y mejor layout con flex horizontal. ClosedChapter extendido con campos title y wordCount. closed-chapters-loader.ts lee el contenido de cada archivo terminado para calcular el word count. readFile exportada desde project-fs.ts.
+  2. Panel de versiones mejorado: CommitListItem rediseñado con iconos (GitCommitHorizontal para commits normales, RotateCcw para restores), badge "actual"/"current" i18n (reemplaza el hardcoded "(actual)"), version actual con texto en font-medium y color accent en el icono, items no-actuales con role="button" + tabIndex + keyboard nav (Enter/Space). CommitDiffView: boton de cerrar con aria-label.
+  3. Accesibilidad: role="dialog" + aria-modal="true" agregado a los 11 modales de la app (ReopenChapterModal, RestoreConfirmModal, CloseChapterModal, ShortcutsDialog, AboutDialog, CreateProjectModal, ImportDocxModal, ExportBookDialog, ExportBookDocxDialog, ExportBookEpubDialog, PreExportCheckModal). CollapsibleSection: aria-expanded agregado al boton toggle. TerminadosListItem: aria-label descriptivo, preventDefault en keyboard handler.
+- Archivos modificados:
+  - src/types/project.ts (+title, +wordCount en ClosedChapter)
+  - src/lib/closed-chapters-loader.ts (+readFile import, +countWordsSimple, +lectura de contenido para wordCount y title)
+  - src/lib/project-fs.ts (readFile exportada)
+  - src/lib/reopen-chapter-flow.test.ts (+title, +wordCount en CLOSED_CHAPTER fixture)
+  - src/components/terminados/TerminadosListItem.tsx (rediseñado con CheckCircle2, titulo real, wordCount, aria-label)
+  - src/components/versions/CommitListItem.tsx (rediseñado con iconos, badge i18n, role/tabIndex/keyboard nav)
+  - src/components/versions/CommitDiffView.tsx (+aria-label en boton cerrar)
+  - src/components/sidebar/CollapsibleSection.tsx (+aria-expanded)
+  - 11 modales: +role="dialog" +aria-modal="true"
+  - src/i18n/locales/en.json (+finished.completed, +finished.wordCount, +versions.current, +versions.viewDiff)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-270: ClosedChapter ahora incluye title y wordCount. El titulo se toma del Chapter que listChapters ya extraia; el wordCount se calcula leyendo el archivo con readFile (la lectura es rapida porque los capitulos terminados son archivos pequenos).
+  - D-271: readFile se exporto desde project-fs.ts porque closed-chapters-loader necesita leer archivos directamente. Antes era privada.
+  - D-272: CommitListItem distingue visualmente commits de restore (prefijo "restore:") con icono RotateCcw. Los demas usan GitCommitHorizontal.
+  - D-273: El badge "actual"/"current" usa i18n (versions.current) en vez del string hardcodeado "(actual)".
+  - D-274: role="dialog" + aria-modal="true" aplicado a todos los modales para cumplir WAI-ARIA dialog pattern.
+- Tests: tsc --noEmit limpio. 423 tests pasan; 2 fallos preexistentes en TopTabs.test.tsx (no relacionados).
+- Bugs encontrados: TopTabs.test.tsx busca texto "Libro" que ya no existe tras el rediseno a iconos (preexistente).
 
 ### 2026-09-12 - Stats Page + Reading Time + Chapter Notes + Auto Backup (4 sub-tareas)
 - Que se hizo:

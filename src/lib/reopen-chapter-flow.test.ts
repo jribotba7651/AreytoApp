@@ -52,6 +52,8 @@ const CLOSED_CHAPTER: ClosedChapter = {
   absolutePath: '/tmp/mi-libro/capitulos-terminados/cap-01.md',
   tagName: 'cap-01-final',
   closedAt: '2026-05-22T10:00:00.000Z',
+  title: 'Capitulo 1',
+  wordCount: 0,
 };
 
 const NEW_PATH = '/tmp/mi-libro/capitulos/cap-01.md';

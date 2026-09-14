@@ -56,6 +56,7 @@ function CommitDiffView({ commit, onClose, onRestore }: CommitDiffViewProps) {
         </button>
         <button
           onClick={onClose}
+          aria-label={t('common.close', 'Close')}
           className="p-1 text-text-tertiary hover:text-text-primary transition-colors duration-150"
         >
           <X size={14} />

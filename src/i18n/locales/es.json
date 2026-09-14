@@ -353,12 +353,16 @@
     "noHistory": "Sin historial todavía",
     "expandPanel": "Expandir panel de versiones",
     "collapsePanel": "Colapsar panel de versiones",
-    "diffError": "No se pudo cargar el diff"
+    "diffError": "No se pudo cargar el diff",
+    "current": "actual",
+    "viewDiff": "Ver cambios en esta versión"
   },
   "finished": {
     "title": "Capítulos terminados",
     "emptyTitle": "No hay capítulos terminados",
-    "emptyBody": "Cuando cierres un capítulo desde el sidebar aparecerá aquí"
+    "emptyBody": "Cuando cierres un capítulo desde el sidebar aparecerá aquí",
+    "completed": "Completado",
+    "wordCount": "{{count}} palabras"
   },
   "sidebar": {
     "frontmatter": "Frontmatter",

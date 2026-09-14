@@ -353,12 +353,16 @@
     "noHistory": "No history yet",
     "expandPanel": "Expand versions panel",
     "collapsePanel": "Collapse versions panel",
-    "diffError": "Could not load the diff"
+    "diffError": "Could not load the diff",
+    "current": "current",
+    "viewDiff": "View changes in this version"
   },
   "finished": {
     "title": "Finished chapters",
     "emptyTitle": "No finished chapters",
-    "emptyBody": "When you close a chapter from the sidebar it will appear here"
+    "emptyBody": "When you close a chapter from the sidebar it will appear here",
+    "completed": "Completed",
+    "wordCount": "{{count}} words"
   },
   "sidebar": {
     "frontmatter": "Frontmatter",

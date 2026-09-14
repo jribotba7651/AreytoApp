@@ -44,7 +44,7 @@ function fail<T>(error: ProjectFsError): ProjectResult<T> {
   return { ok: false, error };
 }
 
-async function readFile(path: string): Promise<ProjectResult<string>> {
+export async function readFile(path: string): Promise<ProjectResult<string>> {
   try {
     const content = await invoke<string>('read_text_file', { path });
     return ok(content);

@@ -15,6 +15,7 @@ function CollapsibleSection({ title, defaultOpen = true, children, actions }: Co
     <div className="shrink-0">
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
         className="w-full flex items-center gap-1.5 px-3 py-2 text-left group"
       >
         {open ? (

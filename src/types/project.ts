@@ -52,4 +52,6 @@ export interface ClosedChapter {
   absolutePath: string;
   tagName: string;
   closedAt: string;
+  title: string;
+  wordCount: number;
 }
