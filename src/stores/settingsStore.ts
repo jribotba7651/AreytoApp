@@ -55,6 +55,8 @@ interface SettingsState {
   bookWordGoal: number;
   recentProjects: RecentProject[];
   onboardingCompleted: boolean;
+  typewriterMode: boolean;
+  sentenceHighlight: boolean;
   loaded: boolean;
   load: () => Promise<void>;
   addRecentProject: (project: RecentProject) => Promise<void>;
@@ -72,6 +74,8 @@ interface SettingsState {
   setChapterWordGoal: (goal: number) => Promise<void>;
   setBookWordGoal: (goal: number) => Promise<void>;
   setOnboardingCompleted: () => Promise<void>;
+  setTypewriterMode: (value: boolean) => Promise<void>;
+  setSentenceHighlight: (value: boolean) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -90,6 +94,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   bookWordGoal: 0,
   recentProjects: [],
   onboardingCompleted: false,
+  typewriterMode: false,
+  sentenceHighlight: false,
   loaded: false,
 
   load: async () => {
@@ -117,6 +123,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         bookWordGoal: settings.bookWordGoal ?? 0,
         recentProjects: (settings.recentProjects ?? []) as RecentProject[],
         onboardingCompleted: settings.onboardingCompleted ?? false,
+        typewriterMode: settings.typewriterMode ?? false,
+        sentenceHighlight: settings.sentenceHighlight ?? false,
         loaded: true,
       });
       applyTheme(themeMode);
@@ -279,6 +287,26 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, onboardingCompleted: true });
     } catch (err) {
       console.warn('[areyto] Failed to persist onboardingCompleted:', err);
+    }
+  },
+
+  setTypewriterMode: async (value: boolean) => {
+    set({ typewriterMode: value });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, typewriterMode: value });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist typewriterMode:', err);
+    }
+  },
+
+  setSentenceHighlight: async (value: boolean) => {
+    set({ sentenceHighlight: value });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, sentenceHighlight: value });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist sentenceHighlight:', err);
     }
   },
 

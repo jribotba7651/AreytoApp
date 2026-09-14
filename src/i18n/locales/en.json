@@ -57,6 +57,14 @@
       "bookWordGoal": {
         "label": "Book word goal",
         "description": "Target total word count for the entire book. Shows a progress bar in the Stats tab. Set to 0 to hide."
+      },
+      "typewriterMode": {
+        "label": "Typewriter mode",
+        "description": "Keeps the cursor line centered vertically in the editor while you type. Smooth scrolling."
+      },
+      "sentenceHighlight": {
+        "label": "Sentence highlight",
+        "description": "Highlights the current sentence where the cursor is with a soft background. Helps maintain focus."
       }
     },
     "appearance": {
@@ -340,7 +348,12 @@
       "toWordTitle": "Export book to Word (.docx)",
       "toWordLabel": "Export to Word",
       "toMarkdownTitle": "Export book to markdown",
-      "toMarkdownLabel": "Export"
+      "toMarkdownLabel": "Export",
+      "progressTitle": "Exporting...",
+      "progressAssembling": "Assembling book",
+      "progressWriting": "Writing file",
+      "progressBackup": "Creating backup",
+      "progressDone": "Done"
     }
   },
   "editor": {
@@ -353,7 +366,8 @@
     "splitView": "Split view",
     "closeSplit": "Close split",
     "splitSelectChapter": "Select a chapter...",
-    "splitEmpty": "Select a chapter to reference"
+    "splitEmpty": "Select a chapter to reference",
+    "sessionTime": "{{time}}"
   },
   "versions": {
     "title": "Versions",

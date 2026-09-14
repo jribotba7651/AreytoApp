@@ -5,6 +5,8 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { createEditorTheme } from './editor-theme';
 import { markdownFormatKeymap } from './markdown-format';
+import { typewriterMode, sentenceHighlight } from './editor-extensions';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface ChapterEditorProps {
   initialContent: string;
@@ -19,6 +21,8 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
+  const typewriterEnabled = useSettingsStore((s) => s.typewriterMode);
+  const sentenceHighlightEnabled = useSettingsStore((s) => s.sentenceHighlight);
 
   useImperativeHandle(ref, () => ({
     getView: () => viewRef.current,
@@ -45,6 +49,8 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
             onChangeRef.current?.(update.state.doc.toString());
           }
         }),
+        typewriterMode(typewriterEnabled),
+        sentenceHighlight(sentenceHighlightEnabled),
       ],
     });
 
@@ -55,7 +61,7 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
       view.destroy();
       viewRef.current = null;
     };
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [typewriterEnabled, sentenceHighlightEnabled]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return <div ref={containerRef} className="h-full w-full overflow-auto" />;
 });

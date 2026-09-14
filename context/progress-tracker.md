@@ -5,10 +5,39 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Split View + Chapter Colors (2 sub-tareas)
+- Ultima feature completada: Typewriter Mode + Sentence Highlight + Export Progress + Session Timer (4 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-14
 
 ## Features completadas
+
+### 2026-09-14 - Typewriter Mode + Sentence Highlight + Export Progress + Session Timer (4 sub-tareas)
+- Que se hizo:
+  1. Typewriter Mode: extension de CodeMirror que mantiene la linea del cursor centrada verticalmente en el viewport del editor mientras se escribe. Scroll suave via scrollBy con behavior smooth. Toggle en Settings (seccion Editor) como switch on/off. Persistido en GlobalSettings como typewriterMode. La extension usa un Facet para enabled/disabled y un ViewPlugin que reacciona a cambios de seleccion y documento.
+  2. Sentence Highlight: extension de CodeMirror que resalta la oracion actual donde esta el cursor con un fondo suave (bg-tertiary). Detecta limites de oracion usando regex de terminadores (.!? seguido de espacio). Usa StateField con Decoration.mark para aplicar la clase CSS. Toggle en Settings (seccion Editor) como switch on/off. Persistido en GlobalSettings como sentenceHighlight.
+  3. Export Progress: al hacer export (md, docx o epub), se muestra una barra de progreso modal con 4 pasos: ensamblando libro, escribiendo archivo, creando respaldo, listo. Barra animada con transicion CSS suave. Se cierra automaticamente 600ms despues de completar. Componente ExportProgressBar con backdrop oscuro. Los tres handlers de export (handleExport, handleExportDocx, handleExportEpub) actualizados para mostrar progreso despues del file picker.
+  4. Session Timer: en la barra inferior del editor, junto al word count y el idioma, se muestra un icono Clock con el tiempo transcurrido desde que se abrio el proyecto. Formato: Xh Xm o Xm. Se actualiza cada minuto via setInterval. Hook useSessionTimer con useRef para el timestamp de inicio. Se reinicia al cambiar de proyecto.
+- Archivos creados:
+  - src/components/editor/editor-extensions.ts (extensiones CodeMirror: typewriterMode + sentenceHighlight)
+  - src/components/book/ExportProgressBar.tsx (barra de progreso modal para exports)
+  - src/hooks/useSessionTimer.ts (hook de timer de sesion)
+- Archivos modificados:
+  - src/lib/settings.ts (+typewriterMode, +sentenceHighlight en GlobalSettings)
+  - src/stores/settingsStore.ts (+typewriterMode, +sentenceHighlight state, +setTypewriterMode, +setSentenceHighlight methods)
+  - src/components/editor/ChapterEditor.tsx (+imports editor-extensions y settingsStore, +typewriterMode/sentenceHighlight extensions en EditorState, +deps en useEffect)
+  - src/components/settings/SettingsTabContent.tsx (+typewriterMode y sentenceHighlight toggles en seccion Editor)
+  - src/components/layout/BookTabContent.tsx (+ExportProgressBar import, +exportProgress state, +progreso en los 3 handlers de export, +render ExportProgressBar)
+  - src/components/panels/EditorPanel.tsx (+Clock icon, +useSessionTimer hook, +render sessionTime en barra inferior)
+  - src/i18n/locales/en.json (+settings.editor.typewriterMode.*, +settings.editor.sentenceHighlight.*, +editor.sessionTime, +book.export.progress*)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-289: El typewriter mode usa ViewPlugin (no StateField) porque necesita acceso a coordenadas del DOM (coordsAtPos, scrollBy). Solo se activa cuando el editor tiene focus para evitar scroll no deseado.
+  - D-290: El sentence highlight detecta oraciones con regex simple (.!? seguido de espacio) en vez de NLP porque no se pueden agregar dependencias externas. Para prosa normal funciona bien.
+  - D-291: El shortcut Cmd+Shift+T no se asigno al typewriter mode porque ya esta en uso por CLOSE_CHAPTER. El toggle queda solo en Settings.
+  - D-292: El export progress cierra el dialog de scope antes de mostrar la barra, para evitar superposicion de modales. El file picker nativo se muestra antes del progreso.
+  - D-293: El session timer se reinicia al cambiar de proyecto (via dependencia en active boolean). Se actualiza cada 60s para minimizar re-renders innecesarios.
+  - D-294: Las extensiones de CodeMirror (typewriter + sentence highlight) causan un remount del editor cuando cambian sus settings, porque estan en el deps array del useEffect. Esto es aceptable porque cambiar estos settings es infrecuente.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-14 - Split View + Chapter Colors/Labels (2 sub-tareas)
 - Que se hizo:

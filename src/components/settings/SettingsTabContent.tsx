@@ -75,6 +75,10 @@ function SettingsTabContent() {
   const setChapterWordGoal = useSettingsStore((s) => s.setChapterWordGoal);
   const bookWordGoal = useSettingsStore((s) => s.bookWordGoal);
   const setBookWordGoal = useSettingsStore((s) => s.setBookWordGoal);
+  const typewriterMode = useSettingsStore((s) => s.typewriterMode);
+  const setTypewriterMode = useSettingsStore((s) => s.setTypewriterMode);
+  const sentenceHighlight = useSettingsStore((s) => s.sentenceHighlight);
+  const setSentenceHighlight = useSettingsStore((s) => s.setSentenceHighlight);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -235,6 +239,62 @@ function SettingsTabContent() {
                 }}
                 className="shrink-0 w-24 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               />
+            </div>
+
+            <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  {t('settings.editor.typewriterMode.label')}
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  {t('settings.editor.typewriterMode.description')}
+                </span>
+              </div>
+              <button
+                role="switch"
+                aria-checked={typewriterMode}
+                onClick={() => void setTypewriterMode(!typewriterMode)}
+                className={[
+                  'relative inline-flex shrink-0 h-6 w-11 rounded-full border-2 border-transparent',
+                  'transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  typewriterMode ? 'bg-accent' : 'bg-bg-tertiary border border-border-default',
+                ].join(' ')}
+              >
+                <span
+                  className={[
+                    'inline-block h-5 w-5 rounded-full bg-text-primary shadow transition-transform duration-150',
+                    typewriterMode ? 'translate-x-5' : 'translate-x-0',
+                  ].join(' ')}
+                />
+              </button>
+            </div>
+
+            <div className="flex items-start justify-between gap-6 pt-4 border-t border-border-subtle">
+              <div className="flex-1">
+                <span className="block text-sm text-text-primary font-medium mb-1">
+                  {t('settings.editor.sentenceHighlight.label')}
+                </span>
+                <span className="block text-xs text-text-tertiary leading-relaxed">
+                  {t('settings.editor.sentenceHighlight.description')}
+                </span>
+              </div>
+              <button
+                role="switch"
+                aria-checked={sentenceHighlight}
+                onClick={() => void setSentenceHighlight(!sentenceHighlight)}
+                className={[
+                  'relative inline-flex shrink-0 h-6 w-11 rounded-full border-2 border-transparent',
+                  'transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  sentenceHighlight ? 'bg-accent' : 'bg-bg-tertiary border border-border-default',
+                ].join(' ')}
+              >
+                <span
+                  className={[
+                    'inline-block h-5 w-5 rounded-full bg-text-primary shadow transition-transform duration-150',
+                    sentenceHighlight ? 'translate-x-5' : 'translate-x-0',
+                  ].join(' ')}
+                />
+              </button>
             </div>
           </div>
         </section>

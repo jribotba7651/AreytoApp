@@ -21,6 +21,8 @@ import ThemeControls from '@/components/book/ThemeControls';
 import BookSettings from '@/components/book/BookSettings';
 import BookCoverSection from '@/components/book/BookCoverSection';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
+import ExportProgressBar from '@/components/book/ExportProgressBar';
+import type { ExportStep } from '@/components/book/ExportProgressBar';
 import type { BookData } from '@/types/book';
 type ExportTarget = 'md' | 'docx' | 'epub';
 
@@ -57,6 +59,7 @@ function BookTabContent() {
   const [epubLoading, setEpubLoading] = useState(false);
   const [preExportProblems, setPreExportProblems] = useState<string[]>([]);
   const [pendingExportTarget, setPendingExportTarget] = useState<ExportTarget | null>(null);
+  const [exportProgress, setExportProgress] = useState<ExportStep | null>(null);
   const skipPreCheck = useRef(false);
   const sectionVersion = useProjectStore((s) => s.sectionVersion);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
@@ -159,13 +162,21 @@ function BookTabContent() {
         return;
       }
 
+      setShowExportDialog(false);
+      setExportProgress('assembling');
+
+      setExportProgress('writing');
       await exportBookMarkdown(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
-      void backupExportedFile(outputPath);
+
+      setExportProgress('backup');
+      await backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
       if (chosenDir) void setExportFolder(chosenDir);
 
-      setShowExportDialog(false);
+      setExportProgress('done');
+      await new Promise((r) => setTimeout(r, 600));
+      setExportProgress(null);
       setExportLoading(false);
 
       await message(t('book.export.successBody', { path: outputPath }), {
@@ -173,6 +184,7 @@ function BookTabContent() {
         kind: 'info',
       });
     } catch (err) {
+      setExportProgress(null);
       setExportLoading(false);
       await message(t('book.export.errorBody', { error: String(err) }), {
         title: t('book.export.errorTitle'),
@@ -199,13 +211,21 @@ function BookTabContent() {
         return;
       }
 
+      setShowDocxDialog(false);
+      setExportProgress('assembling');
+
+      setExportProgress('writing');
       await exportBookDocx(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
-      void backupExportedFile(outputPath);
+
+      setExportProgress('backup');
+      await backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
       if (chosenDir) void setExportFolder(chosenDir);
 
-      setShowDocxDialog(false);
+      setExportProgress('done');
+      await new Promise((r) => setTimeout(r, 600));
+      setExportProgress(null);
       setDocxLoading(false);
 
       await message(t('book.export.successBody', { path: outputPath }), {
@@ -213,6 +233,7 @@ function BookTabContent() {
         kind: 'info',
       });
     } catch (err) {
+      setExportProgress(null);
       setDocxLoading(false);
       await message(t('book.export.errorBody', { error: String(err) }), {
         title: t('book.export.errorTitle'),
@@ -239,6 +260,10 @@ function BookTabContent() {
         return;
       }
 
+      setShowEpubDialog(false);
+      setExportProgress('assembling');
+
+      setExportProgress('writing');
       await exportBookEpub(
         currentProject.rootPath,
         { scope, excludedFilenames: currentProject.excludedFromExport },
@@ -247,12 +272,16 @@ function BookTabContent() {
         currentProject.temaOverrides,
         currentProject.nombre,
       );
-      void backupExportedFile(outputPath);
+
+      setExportProgress('backup');
+      await backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
       if (chosenDir) void setExportFolder(chosenDir);
 
-      setShowEpubDialog(false);
+      setExportProgress('done');
+      await new Promise((r) => setTimeout(r, 600));
+      setExportProgress(null);
       setEpubLoading(false);
 
       await message(t('book.export.successBody', { path: outputPath }), {
@@ -260,6 +289,7 @@ function BookTabContent() {
         kind: 'info',
       });
     } catch (err) {
+      setExportProgress(null);
       setEpubLoading(false);
       await message(t('book.export.errorBody', { error: String(err) }), {
         title: t('book.export.errorTitle'),
@@ -479,6 +509,7 @@ function BookTabContent() {
           loading={epubLoading}
         />
       )}
+      {exportProgress && <ExportProgressBar step={exportProgress} />}
     </div>
   );
 }

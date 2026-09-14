@@ -57,6 +57,14 @@
       "bookWordGoal": {
         "label": "Objetivo de palabras del libro",
         "description": "Meta total de palabras para el libro completo. Muestra una barra de progreso en el tab Estadisticas. Pon 0 para ocultar."
+      },
+      "typewriterMode": {
+        "label": "Modo maquina de escribir",
+        "description": "Mantiene la linea del cursor centrada verticalmente en el editor mientras escribes. Scroll suave."
+      },
+      "sentenceHighlight": {
+        "label": "Resaltado de oracion",
+        "description": "Resalta la oracion actual donde esta el cursor con un fondo suave. Ayuda a mantener el enfoque."
       }
     },
     "appearance": {
@@ -340,7 +348,12 @@
       "toWordTitle": "Exportar libro a Word (.docx)",
       "toWordLabel": "Exportar a Word",
       "toMarkdownTitle": "Exportar libro a markdown",
-      "toMarkdownLabel": "Exportar"
+      "toMarkdownLabel": "Exportar",
+      "progressTitle": "Exportando...",
+      "progressAssembling": "Ensamblando libro",
+      "progressWriting": "Escribiendo archivo",
+      "progressBackup": "Creando respaldo",
+      "progressDone": "Listo"
     }
   },
   "editor": {
@@ -353,7 +366,8 @@
     "splitView": "Vista dividida",
     "closeSplit": "Cerrar vista dividida",
     "splitSelectChapter": "Seleccionar capitulo...",
-    "splitEmpty": "Selecciona un capitulo de referencia"
+    "splitEmpty": "Selecciona un capitulo de referencia",
+    "sessionTime": "{{time}}"
   },
   "versions": {
     "title": "Versiones",

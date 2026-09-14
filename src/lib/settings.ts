@@ -27,6 +27,8 @@ export interface GlobalSettings {
   bookWordGoal?: number;
   recentProjects?: RecentProject[];
   onboardingCompleted?: boolean;
+  typewriterMode?: boolean;
+  sentenceHighlight?: boolean;
 }
 
 export interface RecentProject {

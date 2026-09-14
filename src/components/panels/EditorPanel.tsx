@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Eye, Pencil, Languages, Columns2 } from 'lucide-react';
+import { Eye, Pencil, Languages, Columns2, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
@@ -21,6 +21,7 @@ import { readChapter } from '@/lib/project-fs';
 import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';
 import ExternalChangeBanner from '@/components/editor/ExternalChangeBanner';
 import SplitReadPanel from '@/components/editor/SplitReadPanel';
+import { useSessionTimer } from '@/hooks/useSessionTimer';
 
 function countWords(text: string): number {
   const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
@@ -135,6 +136,7 @@ function ChapterView() {
   const isPreview = editorViewMode === 'preview';
   const chapterWords = countWords(activeChapterContent);
   const bookWords = useBookWordCount();
+  const sessionTime = useSessionTimer(!!currentProject);
 
   return (
     <div className="h-full flex flex-col bg-bg-editor">
@@ -230,6 +232,10 @@ function ChapterView() {
               <option value="de">DE</option>
               <option value="it">IT</option>
             </select>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={11} className="text-text-tertiary" />
+            <span className="text-[11px] text-text-tertiary">{sessionTime}</span>
           </div>
         </div>
         <span className="text-[11px] text-text-tertiary">
