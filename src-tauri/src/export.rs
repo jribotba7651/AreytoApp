@@ -13,7 +13,9 @@ fn build_full_markdown(
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
     chapter_headings: Option<HashMap<String, String>>,
+    excluded_filenames: Option<Vec<String>>,
 ) -> Result<String, String> {
+    let excluded = excluded_filenames.unwrap_or_default();
     let mut all_parts: Vec<String> = Vec::new();
 
     // D-157: pandoc frontmatter block va PRIMERO, antes de la portada visible
@@ -42,11 +44,11 @@ fn build_full_markdown(
     let mut chapter_files: Vec<PathBuf> = Vec::new();
     if include_terminados {
         let dir = PathBuf::from(project_path).join("capitulos-terminados");
-        collect_md_files(&dir, &mut chapter_files)?;
+        collect_md_files(&dir, &mut chapter_files, &excluded)?;
     }
     if include_en_progreso {
         let dir = PathBuf::from(project_path).join("capitulos");
-        collect_md_files(&dir, &mut chapter_files)?;
+        collect_md_files(&dir, &mut chapter_files, &excluded)?;
     }
 
     let slugs = chapter_slugs.unwrap_or_default();
@@ -107,7 +109,7 @@ fn promote_bold_to_heading(content: &str, heading: &str) -> String {
     lines.join("\n")
 }
 
-fn collect_md_files(dir: &PathBuf, files: &mut Vec<PathBuf>) -> Result<(), String> {
+fn collect_md_files(dir: &PathBuf, files: &mut Vec<PathBuf>, excluded: &[String]) -> Result<(), String> {
     if !dir.exists() {
         return Ok(());
     }
@@ -120,6 +122,7 @@ fn collect_md_files(dir: &PathBuf, files: &mut Vec<PathBuf>) -> Result<(), Strin
         .filter(|e| {
             e.metadata().map_or(false, |m| m.is_file())
                 && e.path().extension().map_or(false, |ext| ext == "md")
+                && !excluded.iter().any(|ex| e.file_name().to_str() == Some(ex.as_str()))
         })
         .map(|e| e.path())
         .collect();
@@ -142,6 +145,7 @@ pub fn export_book_markdown(
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
     chapter_headings: Option<HashMap<String, String>>,
+    excluded_filenames: Option<Vec<String>>,
 ) -> Result<(), String> {
     let output = build_full_markdown(
         &project_path,
@@ -153,6 +157,7 @@ pub fn export_book_markdown(
         indice_content,
         chapter_slugs,
         chapter_headings,
+        excluded_filenames,
     )?;
 
     if let Some(parent) = PathBuf::from(&output_path).parent() {
@@ -179,6 +184,7 @@ pub async fn export_book_docx(
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
     chapter_headings: Option<HashMap<String, String>>,
+    excluded_filenames: Option<Vec<String>>,
 ) -> Result<(), String> {
     use tauri_plugin_shell::ShellExt;
 
@@ -192,6 +198,7 @@ pub async fn export_book_docx(
         indice_content,
         chapter_slugs,
         chapter_headings,
+        excluded_filenames,
     )?;
 
     // D-170: escribir markdown a temp file para mejor diagnóstico de pandoc
@@ -245,6 +252,7 @@ pub async fn export_book_epub(
     indice_content: Option<String>,
     chapter_slugs: Option<HashMap<String, String>>,
     chapter_headings: Option<HashMap<String, String>>,
+    excluded_filenames: Option<Vec<String>>,
     epub_css: String,
     cover_path: Option<String>,
 ) -> Result<(), String> {
@@ -260,6 +268,7 @@ pub async fn export_book_epub(
         indice_content,
         chapter_slugs,
         chapter_headings,
+        excluded_filenames,
     )?;
 
     let pid = std::process::id();

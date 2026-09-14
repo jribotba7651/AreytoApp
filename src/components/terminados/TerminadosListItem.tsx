@@ -1,14 +1,16 @@
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, FileOutput } from 'lucide-react';
 import type { ClosedChapter } from '@/types/project';
 import { formatRelativeTime } from '@/lib/format-relative-time';
 
 interface TerminadosListItemProps {
   chapter: ClosedChapter;
   onClick: (chapter: ClosedChapter) => void;
+  includedInExport: boolean;
+  onToggleExport: (filename: string) => void;
 }
 
-function TerminadosListItem({ chapter, onClick }: TerminadosListItemProps) {
+function TerminadosListItem({ chapter, onClick, includedInExport, onToggleExport }: TerminadosListItemProps) {
   const { t } = useTranslation();
 
   return (
@@ -33,6 +35,18 @@ function TerminadosListItem({ chapter, onClick }: TerminadosListItemProps) {
           <span>{t('finished.wordCount', { count: chapter.wordCount })}</span>
         </div>
       </div>
+      <button
+        type="button"
+        title={includedInExport ? t('finished.excludeFromExport') : t('finished.includeInExport')}
+        onClick={(e) => { e.stopPropagation(); onToggleExport(chapter.filename); }}
+        className={`shrink-0 p-1.5 rounded transition-colors duration-150 ${
+          includedInExport
+            ? 'text-accent hover:text-accent-hover'
+            : 'text-text-tertiary hover:text-text-secondary opacity-40'
+        }`}
+      >
+        <FileOutput size={16} />
+      </button>
     </div>
   );
 }

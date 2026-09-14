@@ -24,6 +24,7 @@ export interface GlobalSettings {
   uiLocale?: string;
   customThemes?: Array<Record<string, unknown>>;
   chapterWordGoal?: number;
+  bookWordGoal?: number;
   recentProjects?: RecentProject[];
 }
 

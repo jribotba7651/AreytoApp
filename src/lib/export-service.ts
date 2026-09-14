@@ -22,6 +22,7 @@ export type ExportFormat = 'md' | 'docx' | 'epub';
 export interface ExportOptions {
   scope: ExportScope;
   format?: ExportFormat;
+  excludedFilenames?: string[];
 }
 
 export interface ExportAdditions {
@@ -86,9 +87,12 @@ export async function buildExportAdditions(
   const chapterSlugs: Record<string, string> = {};
   const chapterHeadings: Record<string, string> = {};
 
+  const excluded = new Set(opts.excludedFilenames ?? []);
+
   for (const dir of chapterDirs) {
     const filenames = await listSortedMdFilenames(dir);
     for (const filename of filenames) {
+      if (excluded.has(filename)) continue;
       const content = await readFileContent(`${dir}/${filename}`);
       const info = deriveExportChapterInfo(content ?? '', filename);
       const slug = slugify(filename.replace(/\.md$/, ''));
@@ -146,6 +150,7 @@ export async function exportBookMarkdown(
     indiceContent,
     chapterSlugs,
     chapterHeadings,
+    excludedFilenames: opts.excludedFilenames ?? [],
   });
 }
 
@@ -171,6 +176,7 @@ export async function exportBookDocx(
     indiceContent,
     chapterSlugs,
     chapterHeadings,
+    excludedFilenames: opts.excludedFilenames ?? [],
   });
 }
 
@@ -225,6 +231,7 @@ export async function exportBookEpub(
     indiceContent,
     chapterSlugs,
     chapterHeadings,
+    excludedFilenames: opts.excludedFilenames ?? [],
     epubCss: epubCss,
     coverPath,
   });

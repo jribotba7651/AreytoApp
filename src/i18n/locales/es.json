@@ -53,6 +53,10 @@
       "wordGoal": {
         "label": "Objetivo de palabras por capitulo",
         "description": "Meta de palabras por capitulo. Muestra una barra de progreso en el sidebar. Pon 0 para ocultar."
+      },
+      "bookWordGoal": {
+        "label": "Objetivo de palabras del libro",
+        "description": "Meta total de palabras para el libro completo. Muestra una barra de progreso en el tab Estadisticas. Pon 0 para ocultar."
       }
     },
     "appearance": {
@@ -362,7 +366,11 @@
     "emptyTitle": "No hay capítulos terminados",
     "emptyBody": "Cuando cierres un capítulo desde el sidebar aparecerá aquí",
     "completed": "Completado",
-    "wordCount": "{{count}} palabras"
+    "wordCount": "{{count}} palabras",
+    "searchPlaceholder": "Buscar capitulos terminados...",
+    "noResults": "Ningun capitulo coincide con la busqueda",
+    "includeInExport": "Incluir en export",
+    "excludeFromExport": "Excluir del export"
   },
   "sidebar": {
     "frontmatter": "Frontmatter",
@@ -455,6 +463,7 @@
     "words": "palabras",
     "last7Days": "Actividad (ultimos 7 dias)",
     "projectStarted": "Inicio del proyecto",
-    "chapterBreakdown": "Palabras por capitulo"
+    "chapterBreakdown": "Palabras por capitulo",
+    "bookProgress": "Progreso del libro"
   }
 }

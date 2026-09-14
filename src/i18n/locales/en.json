@@ -53,6 +53,10 @@
       "wordGoal": {
         "label": "Chapter word goal",
         "description": "Target word count per chapter. Shows a progress bar in the sidebar. Set to 0 to hide."
+      },
+      "bookWordGoal": {
+        "label": "Book word goal",
+        "description": "Target total word count for the entire book. Shows a progress bar in the Stats tab. Set to 0 to hide."
       }
     },
     "appearance": {
@@ -362,7 +366,11 @@
     "emptyTitle": "No finished chapters",
     "emptyBody": "When you close a chapter from the sidebar it will appear here",
     "completed": "Completed",
-    "wordCount": "{{count}} words"
+    "wordCount": "{{count}} words",
+    "searchPlaceholder": "Search finished chapters...",
+    "noResults": "No chapters match your search",
+    "includeInExport": "Include in export",
+    "excludeFromExport": "Exclude from export"
   },
   "sidebar": {
     "frontmatter": "Frontmatter",
@@ -455,6 +463,7 @@
     "words": "words",
     "last7Days": "Activity (last 7 days)",
     "projectStarted": "Project started",
-    "chapterBreakdown": "Words by chapter"
+    "chapterBreakdown": "Words by chapter",
+    "bookProgress": "Book progress"
   }
 }

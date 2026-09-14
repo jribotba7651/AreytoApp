@@ -159,7 +159,7 @@ function BookTabContent() {
         return;
       }
 
-      await exportBookMarkdown(currentProject.rootPath, { scope }, outputPath, currentProject.nombre);
+      await exportBookMarkdown(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
       void backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
@@ -199,7 +199,7 @@ function BookTabContent() {
         return;
       }
 
-      await exportBookDocx(currentProject.rootPath, { scope }, outputPath, currentProject.nombre);
+      await exportBookDocx(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
       void backupExportedFile(outputPath);
 
       const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
@@ -241,7 +241,7 @@ function BookTabContent() {
 
       await exportBookEpub(
         currentProject.rootPath,
-        { scope },
+        { scope, excludedFilenames: currentProject.excludedFromExport },
         outputPath,
         currentProject.tema,
         currentProject.temaOverrides,

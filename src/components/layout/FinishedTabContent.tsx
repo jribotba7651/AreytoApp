@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Search } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { loadClosedChapters } from '@/lib/closed-chapters-loader';
@@ -12,6 +13,7 @@ function FinishedTabContent() {
   const closedChapters = useProjectStore((s) => s.closedChapters);
   const setClosedChapters = useProjectStore((s) => s.setClosedChapters);
   const activeTab = useLayoutStore((s) => s.activeTab);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (activeTab !== 'terminados' || !currentProject) return;
@@ -19,6 +21,12 @@ function FinishedTabContent() {
       if (result.ok) setClosedChapters(result.value);
     });
   }, [activeTab, currentProject, setClosedChapters]);
+
+  const filteredChapters = useMemo(() => {
+    if (!searchQuery.trim()) return closedChapters;
+    const query = searchQuery.toLowerCase();
+    return closedChapters.filter((ch) => ch.title.toLowerCase().includes(query));
+  }, [closedChapters, searchQuery]);
 
   if (!currentProject) {
     return (
@@ -42,10 +50,28 @@ function FinishedTabContent() {
         <h1 className="font-serif text-3xl font-semibold text-text-primary mb-2">
           {t('finished.title')}
         </h1>
-        <p className="text-sm text-text-tertiary font-sans mb-8">
+        <p className="text-sm text-text-tertiary font-sans mb-4">
           {t('common.chapterCount', { count: closedChapters.length })}
         </p>
-        <TerminadosList chapters={closedChapters} project={currentProject} />
+
+        <div className="relative mb-8">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('finished.searchPlaceholder')}
+            className="w-full bg-bg-tertiary border border-border-default rounded pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-border-strong focus:outline-none"
+          />
+        </div>
+
+        {filteredChapters.length === 0 ? (
+          <p className="text-sm text-text-tertiary text-center py-8">
+            {t('finished.noResults')}
+          </p>
+        ) : (
+          <TerminadosList chapters={filteredChapters} project={currentProject} />
+        )}
       </div>
     </div>
   );

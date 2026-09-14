@@ -9,6 +9,7 @@ interface ProyectoJson {
   tema?: string;
   temaOverrides?: Record<string, unknown>;
   bookSettings?: BookSettings;
+  excludedFromExport?: string[];
 }
 
 interface RawDirEntry {
@@ -230,7 +231,7 @@ export async function createChapter(
 
 export async function updateProjectMeta(
   project: Project,
-  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings'>>
+  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport'>>
 ): Promise<ProjectResult<Project>> {
   const updated: Project = { ...project, ...updates };
   const meta: ProyectoJson = {
@@ -241,6 +242,7 @@ export async function updateProjectMeta(
   if (updated.tema !== undefined) meta.tema = updated.tema;
   if (updated.temaOverrides !== undefined) meta.temaOverrides = updated.temaOverrides;
   if (updated.bookSettings !== undefined) meta.bookSettings = updated.bookSettings;
+  if (updated.excludedFromExport !== undefined && updated.excludedFromExport.length > 0) meta.excludedFromExport = updated.excludedFromExport;
 
   const jsonPath = `${project.rootPath}/proyecto.json`;
   const write = await writeFile(jsonPath, JSON.stringify(meta, null, 2));

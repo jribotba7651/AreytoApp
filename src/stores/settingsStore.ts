@@ -52,6 +52,7 @@ interface SettingsState {
   uiLocale: string;
   customThemes: Theme[];
   chapterWordGoal: number;
+  bookWordGoal: number;
   recentProjects: RecentProject[];
   loaded: boolean;
   load: () => Promise<void>;
@@ -68,6 +69,7 @@ interface SettingsState {
   setUiLocale: (locale: string) => Promise<void>;
   addCustomTheme: (theme: Theme) => Promise<void>;
   setChapterWordGoal: (goal: number) => Promise<void>;
+  setBookWordGoal: (goal: number) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -83,6 +85,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   uiLocale: 'en',
   customThemes: [],
   chapterWordGoal: 1500,
+  bookWordGoal: 0,
   recentProjects: [],
   loaded: false,
 
@@ -108,6 +111,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         uiLocale,
         customThemes: (settings.customThemes ?? []) as unknown as Theme[],
         chapterWordGoal: settings.chapterWordGoal ?? 1500,
+        bookWordGoal: settings.bookWordGoal ?? 0,
         recentProjects: (settings.recentProjects ?? []) as RecentProject[],
         loaded: true,
       });
@@ -251,6 +255,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, chapterWordGoal: goal });
     } catch (err) {
       console.warn('[areyto] Failed to persist chapterWordGoal:', err);
+    }
+  },
+
+  setBookWordGoal: async (goal: number) => {
+    set({ bookWordGoal: goal });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, bookWordGoal: goal });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist bookWordGoal:', err);
     }
   },
 

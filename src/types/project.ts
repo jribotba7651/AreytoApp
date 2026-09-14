@@ -33,6 +33,7 @@ export interface Project {
   tema?: string;
   temaOverrides?: Record<string, unknown>;
   bookSettings?: BookSettings;
+  excludedFromExport?: string[];
 }
 
 export type ProjectFsError =

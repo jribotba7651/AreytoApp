@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { listChapters, readChapter } from '@/lib/project-fs';
 import type { Chapter } from '@/types/project';
 
@@ -31,6 +32,7 @@ function extractTitle(content: string, filename: string): string {
 function StatsTabContent() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
+  const bookWordGoal = useSettingsStore((s) => s.bookWordGoal);
   const [chapterStats, setChapterStats] = useState<ChapterStat[]>([]);
   const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
   const [projectStartDate, setProjectStartDate] = useState<string | null>(null);
@@ -190,6 +192,29 @@ function StatsTabContent() {
                 )}
               </div>
             </div>
+
+            {/* Book progress toward goal */}
+            {bookWordGoal > 0 && (
+              <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[11px] text-text-tertiary uppercase tracking-wide">{t('stats.bookProgress')}</p>
+                  <p className="text-xs text-text-secondary">
+                    {totalWords.toLocaleString()} / {bookWordGoal.toLocaleString()} {t('stats.words')}
+                  </p>
+                </div>
+                <div className="h-4 bg-bg-tertiary rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      totalWords >= bookWordGoal ? 'bg-success' : 'bg-accent-muted'
+                    }`}
+                    style={{ width: `${Math.min((totalWords / bookWordGoal) * 100, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-text-tertiary mt-2 text-right">
+                  {Math.min(Math.round((totalWords / bookWordGoal) * 100), 100)}%
+                </p>
+              </div>
+            )}
 
             {/* Daily activity chart */}
             {dailyCounts.length > 0 && (
