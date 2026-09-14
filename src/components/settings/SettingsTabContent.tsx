@@ -79,6 +79,10 @@ function SettingsTabContent() {
   const setTypewriterMode = useSettingsStore((s) => s.setTypewriterMode);
   const sentenceHighlight = useSettingsStore((s) => s.sentenceHighlight);
   const setSentenceHighlight = useSettingsStore((s) => s.setSentenceHighlight);
+  const customEditorFont = useSettingsStore((s) => s.customEditorFont);
+  const setCustomEditorFont = useSettingsStore((s) => s.setCustomEditorFont);
+  const customBookFont = useSettingsStore((s) => s.customBookFont);
+  const setCustomBookFont = useSettingsStore((s) => s.setCustomBookFont);
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -296,6 +300,34 @@ function SettingsTabContent() {
                 />
               </button>
             </div>
+
+            <div className="pt-4 border-t border-border-subtle">
+              <div className="flex items-start justify-between gap-6">
+                <div className="flex-1">
+                  <span className="block text-sm text-text-primary font-medium mb-1">
+                    {t('settings.editor.customFont.label')}
+                  </span>
+                  <span className="block text-xs text-text-tertiary leading-relaxed">
+                    {t('settings.editor.customFont.description')}
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={customEditorFont}
+                  onChange={(e) => void setCustomEditorFont(e.target.value)}
+                  placeholder={t('settings.editor.customFont.placeholder')}
+                  className="shrink-0 w-40 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                />
+              </div>
+              {customEditorFont && (
+                <p
+                  className="mt-2 text-sm text-text-secondary p-2 bg-bg-tertiary rounded"
+                  style={{ fontFamily: `"${customEditorFont}", serif` }}
+                >
+                  {t('settings.editor.customFont.preview')}
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
@@ -439,6 +471,34 @@ function SettingsTabContent() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="pt-4 border-t border-border-subtle">
+              <div className="flex items-start justify-between gap-6">
+                <div className="flex-1">
+                  <span className="block text-sm text-text-primary font-medium mb-1">
+                    {t('settings.book.customFont.label')}
+                  </span>
+                  <span className="block text-xs text-text-tertiary leading-relaxed">
+                    {t('settings.book.customFont.description')}
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={customBookFont}
+                  onChange={(e) => void setCustomBookFont(e.target.value)}
+                  placeholder={t('settings.book.customFont.placeholder')}
+                  className="shrink-0 w-40 bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                />
+              </div>
+              {customBookFont && (
+                <p
+                  className="mt-2 text-sm text-text-secondary p-2 bg-bg-tertiary rounded"
+                  style={{ fontFamily: `"${customBookFont}", serif` }}
+                >
+                  {t('settings.book.customFont.preview')}
+                </p>
+              )}
             </div>
           </div>
         </section>

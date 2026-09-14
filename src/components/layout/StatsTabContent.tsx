@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -29,6 +29,46 @@ function extractTitle(content: string, filename: string): string {
   return match?.[1]?.trim() ?? filename.replace(/\.md$/, '');
 }
 
+function computeStreaks(writingDays: string[]): { current: number; max: number } {
+  if (writingDays.length === 0) return { current: 0, max: 0 };
+  const sorted = [...new Set(writingDays)].sort();
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  let maxStreak = 1;
+  let currentRun = 1;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1] + 'T12:00:00');
+    const curr = new Date(sorted[i] + 'T12:00:00');
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
+    if (diffDays === 1) {
+      currentRun++;
+    } else {
+      currentRun = 1;
+    }
+    if (currentRun > maxStreak) maxStreak = currentRun;
+  }
+
+  // Current streak: count backwards from today (or yesterday if today not yet recorded)
+  const last = sorted[sorted.length - 1];
+  if (last !== today && last !== yesterday) return { current: 0, max: maxStreak };
+
+  let currentStreak = 1;
+  for (let i = sorted.length - 2; i >= 0; i--) {
+    const curr = new Date(sorted[i + 1] + 'T12:00:00');
+    const prev = new Date(sorted[i] + 'T12:00:00');
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
+    if (diffDays === 1) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  return { current: currentStreak, max: maxStreak };
+}
+
 function StatsTabContent() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
@@ -36,7 +76,22 @@ function StatsTabContent() {
   const [chapterStats, setChapterStats] = useState<ChapterStat[]>([]);
   const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
   const [projectStartDate, setProjectStartDate] = useState<string | null>(null);
+  const writingDays = useSettingsStore((s) => s.writingDays);
   const [loading, setLoading] = useState(true);
+
+  const streaks = useMemo(() => computeStreaks(writingDays), [writingDays]);
+
+  const last30Days = useMemo(() => {
+    const days: { date: string; active: boolean }[] = [];
+    const daySet = new Set(writingDays);
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      days.push({ date: dateStr, active: daySet.has(dateStr) });
+    }
+    return days;
+  }, [writingDays]);
 
   useEffect(() => {
     if (!currentProject) return;
@@ -248,6 +303,43 @@ function StatsTabContent() {
                 </p>
               </div>
             )}
+
+            {/* Writing streaks */}
+            <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
+              <p className="text-[11px] text-text-tertiary uppercase tracking-wide mb-4">{t('stats.writingStreaks')}</p>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <p className="text-2xl font-medium text-text-primary">{streaks.current}</p>
+                  <p className="text-xs text-text-secondary">{t('stats.currentStreak')}</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-medium text-text-primary">{streaks.max}</p>
+                  <p className="text-xs text-text-secondary">{t('stats.maxStreak')}</p>
+                </div>
+              </div>
+              <p className="text-[10px] text-text-tertiary mb-2">{t('stats.last30Days')}</p>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(10, 1fr)',
+                  gap: '4px',
+                }}
+              >
+                {last30Days.map((day) => (
+                  <div
+                    key={day.date}
+                    title={day.date}
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1',
+                      borderRadius: '50%',
+                    }}
+                    className={day.active ? 'bg-accent-muted' : 'bg-bg-tertiary'}
+                  />
+                ))}
+              </div>
+              <p className="text-[10px] text-text-tertiary mt-2">{t('stats.streakHint')}</p>
+            </div>
 
             {/* Daily activity chart */}
             {dailyCounts.length > 0 && (

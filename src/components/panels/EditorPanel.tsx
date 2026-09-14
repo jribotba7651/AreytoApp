@@ -29,6 +29,11 @@ function countWords(text: string): number {
   return words ? words.length : 0;
 }
 
+function countParagraphs(text: string): number {
+  if (!text.trim()) return 0;
+  return text.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length;
+}
+
 function useBookWordCount(): number {
   const chapters = useProjectStore((s) => s.chapters);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
@@ -135,6 +140,7 @@ function ChapterView() {
 
   const isPreview = editorViewMode === 'preview';
   const chapterWords = countWords(activeChapterContent);
+  const chapterParagraphs = countParagraphs(activeChapterContent);
   const bookWords = useBookWordCount();
   const sessionTime = useSessionTimer(!!currentProject);
 
@@ -216,6 +222,9 @@ function ChapterView() {
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-text-tertiary">
             {t('editor.wordCount', { count: chapterWords })}
+          </span>
+          <span className="text-[11px] text-text-tertiary">
+            {t('editor.paragraphCount', { count: chapterParagraphs })}
           </span>
           <div className="flex items-center gap-1">
             <Languages size={12} className="text-text-tertiary" />

@@ -29,13 +29,19 @@ export function applyTheme(mode: ThemeMode): void {
   } catch (_) {}
 }
 
-export function applyEditorFont(family: EditorFontFamily, size: number): void {
-  document.documentElement.style.setProperty('--font-editor', EDITOR_FONT_STACKS[family]);
+export function applyEditorFont(family: EditorFontFamily, size: number, customFont?: string): void {
+  const stack = customFont
+    ? `"${customFont}", ${EDITOR_FONT_STACKS[family]}`
+    : EDITOR_FONT_STACKS[family];
+  document.documentElement.style.setProperty('--font-editor', stack);
   document.documentElement.style.setProperty('--font-size-editor', `${size}px`);
 }
 
-export function applyBookFont(family: BookFontFamily, size: number): void {
-  document.documentElement.style.setProperty('--font-book', EDITOR_FONT_STACKS[family]);
+export function applyBookFont(family: BookFontFamily, size: number, customFont?: string): void {
+  const stack = customFont
+    ? `"${customFont}", ${EDITOR_FONT_STACKS[family]}`
+    : EDITOR_FONT_STACKS[family];
+  document.documentElement.style.setProperty('--font-book', stack);
   document.documentElement.style.setProperty('--font-size-book', `${size}px`);
 }
 
@@ -57,6 +63,9 @@ interface SettingsState {
   onboardingCompleted: boolean;
   typewriterMode: boolean;
   sentenceHighlight: boolean;
+  writingDays: string[];
+  customEditorFont: string;
+  customBookFont: string;
   loaded: boolean;
   load: () => Promise<void>;
   addRecentProject: (project: RecentProject) => Promise<void>;
@@ -76,6 +85,9 @@ interface SettingsState {
   setOnboardingCompleted: () => Promise<void>;
   setTypewriterMode: (value: boolean) => Promise<void>;
   setSentenceHighlight: (value: boolean) => Promise<void>;
+  recordWritingDay: (wordCount: number) => Promise<void>;
+  setCustomEditorFont: (font: string) => Promise<void>;
+  setCustomBookFont: (font: string) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -96,6 +108,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   onboardingCompleted: false,
   typewriterMode: false,
   sentenceHighlight: false,
+  writingDays: [],
+  customEditorFont: '',
+  customBookFont: '',
   loaded: false,
 
   load: async () => {
@@ -125,11 +140,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         onboardingCompleted: settings.onboardingCompleted ?? false,
         typewriterMode: settings.typewriterMode ?? false,
         sentenceHighlight: settings.sentenceHighlight ?? false,
+        writingDays: settings.writingDays ?? [],
+        customEditorFont: settings.customEditorFont ?? '',
+        customBookFont: settings.customBookFont ?? '',
         loaded: true,
       });
+      const customEditorFont = settings.customEditorFont ?? '';
+      const customBookFont = settings.customBookFont ?? '';
       applyTheme(themeMode);
-      applyEditorFont(editorFontFamily, editorFontSize);
-      applyBookFont(bookFontFamily, bookFontSize);
+      applyEditorFont(editorFontFamily, editorFontSize, customEditorFont || undefined);
+      applyBookFont(bookFontFamily, bookFontSize, customBookFont || undefined);
       void i18n.changeLanguage(uiLocale);
     } catch {
       set({ loaded: true });
@@ -169,8 +189,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   setEditorFontFamily: async (family: EditorFontFamily) => {
     set({ editorFontFamily: family });
-    const size = useSettingsStore.getState().editorFontSize;
-    applyEditorFont(family, size);
+    const { editorFontSize: size, customEditorFont } = useSettingsStore.getState();
+    applyEditorFont(family, size, customEditorFont || undefined);
     try {
       const current = await readGlobalSettings();
       await writeGlobalSettings({ ...current, editorFontFamily: family });
@@ -181,8 +201,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   setEditorFontSize: async (size: number) => {
     set({ editorFontSize: size });
-    const family = useSettingsStore.getState().editorFontFamily;
-    applyEditorFont(family, size);
+    const { editorFontFamily: family, customEditorFont } = useSettingsStore.getState();
+    applyEditorFont(family, size, customEditorFont || undefined);
     try {
       const current = await readGlobalSettings();
       await writeGlobalSettings({ ...current, editorFontSize: size });
@@ -203,8 +223,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   setBookFontFamily: async (family: BookFontFamily) => {
     set({ bookFontFamily: family });
-    const size = useSettingsStore.getState().bookFontSize;
-    applyBookFont(family, size);
+    const { bookFontSize: size, customBookFont } = useSettingsStore.getState();
+    applyBookFont(family, size, customBookFont || undefined);
     try {
       const current = await readGlobalSettings();
       await writeGlobalSettings({ ...current, bookFontFamily: family });
@@ -215,8 +235,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   setBookFontSize: async (size: number) => {
     set({ bookFontSize: size });
-    const family = useSettingsStore.getState().bookFontFamily;
-    applyBookFont(family, size);
+    const { bookFontFamily: family, customBookFont } = useSettingsStore.getState();
+    applyBookFont(family, size, customBookFont || undefined);
     try {
       const current = await readGlobalSettings();
       await writeGlobalSettings({ ...current, bookFontSize: size });
@@ -307,6 +327,45 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, sentenceHighlight: value });
     } catch (err) {
       console.warn('[areyto] Failed to persist sentenceHighlight:', err);
+    }
+  },
+
+  setCustomEditorFont: async (font: string) => {
+    set({ customEditorFont: font });
+    const { editorFontFamily, editorFontSize } = useSettingsStore.getState();
+    applyEditorFont(editorFontFamily, editorFontSize, font || undefined);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, customEditorFont: font });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist customEditorFont:', err);
+    }
+  },
+
+  setCustomBookFont: async (font: string) => {
+    set({ customBookFont: font });
+    const { bookFontFamily, bookFontSize } = useSettingsStore.getState();
+    applyBookFont(bookFontFamily, bookFontSize, font || undefined);
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, customBookFont: font });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist customBookFont:', err);
+    }
+  },
+
+  recordWritingDay: async (wordCount: number) => {
+    if (wordCount < 100) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const prev = useSettingsStore.getState().writingDays;
+    if (prev.includes(today)) return;
+    const updated = [...prev, today];
+    set({ writingDays: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, writingDays: updated });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist writingDays:', err);
     }
   },
 

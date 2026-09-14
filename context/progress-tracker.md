@@ -5,10 +5,32 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Typewriter Mode + Sentence Highlight + Export Progress + Session Timer (4 sub-tareas)
+- Ultima feature completada: Writing Streaks + Custom Fonts + Paragraph Counter (3 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-14
 
 ## Features completadas
+
+### 2026-09-14 - Writing Streaks + Custom Fonts + Paragraph Counter (3 sub-tareas)
+- Que se hizo:
+  1. Writing Streaks: en el tab Stats se muestra la racha de dias consecutivos escribiendo (al menos 100 palabras guardadas ese dia). Se guardan las fechas activas en GlobalSettings como writingDays (array de strings YYYY-MM-DD). El registro ocurre en useAutosave despues de cada save exitoso si el contenido tiene >= 100 palabras. Se calcula racha actual (contando hacia atras desde hoy/ayer) y racha maxima. Calendario visual de los ultimos 30 dias con grid CSS de puntos (10 columnas, 3 filas) donde los dias activos se marcan con color accent-muted.
+  2. Custom Fonts: en Settings > Editor, input de texto libre para ingresar el nombre de una fuente del sistema. La fuente se antepone al font stack existente via CSS font-family. Preview en vivo debajo del input mostrando texto de ejemplo con la fuente. Lo mismo en Settings > Libro para la vista del libro. Persistido en GlobalSettings como customEditorFont y customBookFont. Las funciones applyEditorFont y applyBookFont ahora aceptan un parametro opcional customFont.
+  3. Paragraph Counter: en la barra inferior del editor, junto al conteo de palabras, se muestra el numero de parrafos del capitulo activo. Los parrafos se cuentan dividiendo el texto por lineas en blanco dobles y filtrando los vacios.
+- Archivos modificados:
+  - src/lib/settings.ts (+writingDays, +customEditorFont, +customBookFont en GlobalSettings)
+  - src/stores/settingsStore.ts (+writingDays, +customEditorFont, +customBookFont state; +recordWritingDay, +setCustomEditorFont, +setCustomBookFont methods; applyEditorFont/applyBookFont ahora aceptan customFont param; load() pasa custom fonts)
+  - src/hooks/useAutosave.ts (+recordWritingDay call despues de save exitoso)
+  - src/components/layout/StatsTabContent.tsx (+computeStreaks helper, +writingDays/streaks/last30Days state, +seccion visual de streaks con calendario grid)
+  - src/components/settings/SettingsTabContent.tsx (+customEditorFont/customBookFont inputs con preview en secciones Editor y Libro)
+  - src/components/panels/EditorPanel.tsx (+countParagraphs helper, +chapterParagraphs en barra inferior)
+  - src/i18n/locales/en.json (+stats.writingStreaks/currentStreak/maxStreak/last30Days/streakHint, +settings.editor.customFont.*, +settings.book.customFont.*, +editor.paragraphCount)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-295: writingDays se guarda como array de strings YYYY-MM-DD en GlobalSettings (global, no por proyecto) porque las rachas son del usuario, no del proyecto. Un dia cuenta si se guardo al menos 100 palabras en cualquier save.
+  - D-296: El registro de writingDays ocurre en useAutosave (no en el store de escritura) porque es el punto donde se confirma que el contenido se guardo a disco exitosamente.
+  - D-297: Las custom fonts se anteponen al font stack del preset seleccionado (serif/sans/mono/inter), no lo reemplazan. Si la fuente custom no existe en el sistema, el fallback funciona automaticamente via CSS.
+  - D-298: El paragraph counter usa split por doble newline (\n\s*\n) que es el estandar de Markdown para separar parrafos. Headings cuentan como parrafos separados.
+- Tests: tsc --noEmit limpio
+- Bugs encontrados: ninguno
 
 ### 2026-09-14 - Typewriter Mode + Sentence Highlight + Export Progress + Session Timer (4 sub-tareas)
 - Que se hizo:

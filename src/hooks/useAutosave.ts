@@ -52,6 +52,10 @@ export function useAutosave({
       useProjectStore.getState().setLastSavedContent(saveContent);
       onStatusChangeRef.current('saved');
 
+      // Record writing day for streak tracking
+      const words = saveContent.match(/\S+/g);
+      void useSettingsStore.getState().recordWritingDay(words ? words.length : 0);
+
       if (saveProjPath) {
         const { autoCommit, loaded } = useSettingsStore.getState();
         const shouldCommit = !loaded || autoCommit;

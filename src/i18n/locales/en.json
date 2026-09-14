@@ -65,6 +65,12 @@
       "sentenceHighlight": {
         "label": "Sentence highlight",
         "description": "Highlights the current sentence where the cursor is with a soft background. Helps maintain focus."
+      },
+      "customFont": {
+        "label": "Custom font",
+        "description": "Enter a system font name to use in the editor. Leave empty for default.",
+        "placeholder": "e.g. Palatino",
+        "preview": "The quick brown fox jumps over the lazy dog."
       }
     },
     "appearance": {
@@ -104,6 +110,12 @@
       "fontSize": {
         "label": "Font size",
         "description": "Text size in the Book tab."
+      },
+      "customFont": {
+        "label": "Custom font",
+        "description": "Enter a system font name to use in the book preview. Leave empty for default.",
+        "placeholder": "e.g. Baskerville",
+        "preview": "The quick brown fox jumps over the lazy dog."
       }
     },
     "export": {
@@ -361,6 +373,7 @@
     "preview": "Preview",
     "noActiveChapter": "No active chapter",
     "wordCount": "{{count}} words",
+    "paragraphCount": "{{count}} paragraphs",
     "bookWordCount": "Book: {{count}} words",
     "projectLanguage": "Project language",
     "splitView": "Split view",
@@ -524,6 +537,11 @@
     "bookProgress": "Book progress",
     "emptyTitle": "No data yet",
     "emptyBody": "Statistics will appear once you start writing chapters. Each chapter adds words, pages, and activity to your history.",
-    "emptyHint": "Write at least one chapter to see your metrics"
+    "emptyHint": "Write at least one chapter to see your metrics",
+    "writingStreaks": "Writing streaks",
+    "currentStreak": "Current streak (days)",
+    "maxStreak": "Best streak (days)",
+    "last30Days": "Last 30 days",
+    "streakHint": "A day counts when you save at least 100 words"
   }
 }

@@ -29,6 +29,9 @@ export interface GlobalSettings {
   onboardingCompleted?: boolean;
   typewriterMode?: boolean;
   sentenceHighlight?: boolean;
+  writingDays?: string[];
+  customEditorFont?: string;
+  customBookFont?: string;
 }
 
 export interface RecentProject {

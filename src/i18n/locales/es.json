@@ -65,6 +65,12 @@
       "sentenceHighlight": {
         "label": "Resaltado de oracion",
         "description": "Resalta la oracion actual donde esta el cursor con un fondo suave. Ayuda a mantener el enfoque."
+      },
+      "customFont": {
+        "label": "Fuente personalizada",
+        "description": "Ingresa el nombre de una fuente del sistema para el editor. Deja vacio para usar la predeterminada.",
+        "placeholder": "ej. Palatino",
+        "preview": "El veloz zorro marron salta sobre el perro perezoso."
       }
     },
     "appearance": {
@@ -104,6 +110,12 @@
       "fontSize": {
         "label": "Tamaño de fuente",
         "description": "Tamaño del texto en el tab Libro."
+      },
+      "customFont": {
+        "label": "Fuente personalizada",
+        "description": "Ingresa el nombre de una fuente del sistema para la vista del libro. Deja vacio para usar la predeterminada.",
+        "placeholder": "ej. Baskerville",
+        "preview": "El veloz zorro marron salta sobre el perro perezoso."
       }
     },
     "export": {
@@ -361,6 +373,7 @@
     "preview": "Previsualizar",
     "noActiveChapter": "No hay capítulo activo",
     "wordCount": "{{count}} palabras",
+    "paragraphCount": "{{count}} parrafos",
     "bookWordCount": "Libro: {{count}} palabras",
     "projectLanguage": "Idioma del proyecto",
     "splitView": "Vista dividida",
@@ -524,6 +537,11 @@
     "bookProgress": "Progreso del libro",
     "emptyTitle": "Aun no hay datos",
     "emptyBody": "Las estadisticas apareceran cuando empieces a escribir capitulos. Cada capitulo suma palabras, paginas y actividad al historial.",
-    "emptyHint": "Escribe al menos un capitulo para ver tus metricas"
+    "emptyHint": "Escribe al menos un capitulo para ver tus metricas",
+    "writingStreaks": "Rachas de escritura",
+    "currentStreak": "Racha actual (dias)",
+    "maxStreak": "Mejor racha (dias)",
+    "last30Days": "Ultimos 30 dias",
+    "streakHint": "Un dia cuenta cuando guardas al menos 100 palabras"
   }
 }
