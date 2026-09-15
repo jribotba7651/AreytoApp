@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { save, message, open } from '@tauri-apps/plugin-dialog';
+import { Printer } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
@@ -22,6 +24,7 @@ import ThemeGallery from '@/components/book/ThemeGallery';
 import ThemeControls from '@/components/book/ThemeControls';
 import BookSettings from '@/components/book/BookSettings';
 import BookCoverSection from '@/components/book/BookCoverSection';
+import BookPrintView from '@/components/book/BookPrintView';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import ExportProgressBar from '@/components/book/ExportProgressBar';
 import type { ExportStep } from '@/components/book/ExportProgressBar';
@@ -101,6 +104,10 @@ function BookTabContent() {
   function handlePreExportCancel() {
     setPreExportProblems([]);
     setPendingExportTarget(null);
+  }
+
+  function handlePrint() {
+    window.print();
   }
 
   useEffect(() => {
@@ -468,6 +475,16 @@ function exportBaseNameNoExt(): string {
                 {t(pm.labelKey)}
               </button>
             ))}
+            {bookData && totalChapters > 0 && (
+              <button
+                onClick={handlePrint}
+                className="ml-auto flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded transition-colors duration-150"
+                title={t('book.print')}
+              >
+                <Printer size={14} />
+                <span>{t('book.print')}</span>
+              </button>
+            )}
           </>
         )}
       </div>
@@ -557,6 +574,17 @@ function exportBaseNameNoExt(): string {
         />
       )}
       {exportProgress && <ExportProgressBar step={exportProgress} />}
+
+      {bookData &&
+        bookData.sections.some((s) => s.kind === 'chapter') &&
+        createPortal(
+          <BookPrintView
+            bookData={bookData}
+            themeId={currentProject.tema}
+            themeOverrides={currentProject.temaOverrides}
+          />,
+          document.body,
+        )}
     </div>
   );
 }

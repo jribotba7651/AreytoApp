@@ -5,10 +5,35 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Correccion de bugs de tests Rust y persistencia de settings
+- Ultima feature completada: Print Button + Chapter Links + Word Frequency (3 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Print Button + Chapter Links + Word Frequency (3 sub-tareas)
+- Que se hizo:
+  1. Print Button: en el tab Libro (modo Escribir), boton "Imprimir" (icono Printer) junto a los selectores de preview. Al pulsarlo llama window.print(). El contenido imprimible se renderiza en un portal a document.body con id #print-book (titulo + autor + todos los capitulos via BookMarkdown, sin UI). CSS @media print en globals.css oculta #app-shell y muestra solo #print-book; el texto se fuerza a oscuro sobre blanco (funciona tambien en dark theme). Cada capitulo sale en su propia pagina (break-after: page).
+  2. Chapter Links: en el preview del editor, el patron [[nombre-capitulo]] se convierte en un link clickeable. BookMarkdown gano la prop enableChapterLinks y una funcion applyChapterLinks que recorre los hijos de <p> y <li>, parte los strings por regex /\[\[([^\]]+)\]\]/g y renderiza <ChapterLink> (boton estilo accent). Al hacer click resuelve el capitulo por titulo exacto, titulo slugificado, filename o filename slugificado (con slugify de export-composer), hace flush del autosave pendiente, lee el capitulo y lo activa (setActiveChapter + updateProjectMeta capituloActivo + setActiveTab('capitulo')). Solo se habilita en EditorPanel (preview y split).
+  3. Word Frequency: en el tab Stats se muestra la seccion "Palabras mas frecuentes" con las 10 palabras mas comunes del libro, excluyendo stopwords en espanol e ingles. Logica pura en lib/word-frequency.ts (computeWordFrequencies) que elimina lineas de heading, tokeniza con /[\p{L}]+/u (acentos y ñ), descarta palabras de 1 letra y stopwords, y devuelve top N ordenado por frecuencia. Barras CSS puras proporcionales al maximo.
+- Archivos creados:
+  - src/components/book/BookPrintView.tsx (contenido imprimible del libro)
+  - src/lib/word-frequency.ts (stopwords ES/EN + computeWordFrequencies)
+  - src/lib/word-frequency.test.ts (6 tests)
+- Archivos modificados:
+  - src/styles/globals.css (+#print-book oculto por defecto, +bloque @media print que oculta #app-shell y muestra #print-book)
+  - src/App.tsx (+id="app-shell" en el wrapper principal para poder ocultarlo en print)
+  - src/components/layout/BookTabContent.tsx (+boton Imprimir con handlePrint, +portal BookPrintView a document.body)
+  - src/components/book/BookMarkdown.tsx (+prop enableChapterLinks, +ChapterLink/applyChapterLinks/splitChapterLinks/resolveChapterByLink; MD_COMPONENTS convertido a buildComponents con renderInline)
+  - src/components/panels/EditorPanel.tsx (+enableChapterLinks en los 2 BookMarkdown del editor)
+  - src/components/layout/StatsTabContent.tsx (+estado wordFrequencies, +acumulacion de contenido, +seccion de frecuencias con barras CSS)
+  - src/i18n/locales/es.json y en.json (+book.print, +stats.wordFrequency)
+- Decisiones tomadas:
+  - D-318: El contenido de print se renderiza en un portal a document.body (id #print-book, display:none en pantalla) en vez de reusar el DOM del tab Libro. Asi se evita el recorte de los contenedores overflow-hidden/overflow-y-auto de la app y se imprime solo texto limpio con tipografia. El wrapper principal de App gano id="app-shell" para ocultarlo via @media print.
+  - D-319: La deteccion de chapter links es por regex en los hijos de texto de <p> y <li> (mismo patron de React.Children que BookCallout), no un plugin de remark, para no agregar dependencias. La resolucion acepta titulo, titulo slugificado, filename sin extension y filename slugificado.
+  - D-320: Antes de navegar a otro capitulo desde un link, se hace flushAutosave para no perder cambios sin guardar del capitulo actual (los demas flujos de cambio de capitulo usan autosave por debounce, pero aqui el click es un salto directo).
+  - D-321: computeWordFrequencies vive en lib/ (testeable segun code-standards), a diferencia de countWords/computeStreaks que quedaron inline en StatsTabContent. Elimina lineas de heading antes de tokenizar para no sesgar por el H1 de cada capitulo, y usa /[\p{L}]+/u para respetar acentos y ñ.
+- Tests: tsc --noEmit limpio. npm test: 431 pasan, 0 fallan (6 nuevos en word-frequency.test.ts).
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Correccion de bugs: tests Rust y persistencia de settings
 - Que se hizo:

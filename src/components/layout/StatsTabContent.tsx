@@ -5,6 +5,7 @@ import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { listChapters, readChapter } from '@/lib/project-fs';
 import { readTitulo, readMetadata } from '@/lib/frontmatter-fs';
+import { computeWordFrequencies, type WordFrequency } from '@/lib/word-frequency';
 import type { Chapter } from '@/types/project';
 
 interface ChapterStat {
@@ -88,6 +89,7 @@ function StatsTabContent() {
   const [chapterStats, setChapterStats] = useState<ChapterStat[]>([]);
   const [healthIssues, setHealthIssues] = useState<HealthIssue[]>([]);
   const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
+  const [wordFrequencies, setWordFrequencies] = useState<WordFrequency[]>([]);
   const [projectStartDate, setProjectStartDate] = useState<string | null>(null);
   const writingDays = useSettingsStore((s) => s.writingDays);
   const readingGoalMinutes = useSettingsStore((s) => s.readingGoalMinutes);
@@ -122,10 +124,12 @@ function StatsTabContent() {
 
       const allChapters: Chapter[] = chaptersResult.value;
       const stats: ChapterStat[] = [];
+      let combinedText = '';
 
       for (const ch of allChapters) {
         const result = await readChapter(ch.path);
         if (result.ok) {
+          combinedText += `\n${result.value}`;
           stats.push({
             filename: ch.filename,
             title: extractTitle(result.value, ch.filename),
@@ -135,6 +139,7 @@ function StatsTabContent() {
       }
 
       setChapterStats(stats);
+      setWordFrequencies(computeWordFrequencies(combinedText, 10));
 
       const [titulo, metadata] = await Promise.all([
         readTitulo(currentProject!.rootPath),
@@ -518,6 +523,33 @@ function StatsTabContent() {
                         <div className="h-1.5 bg-bg-tertiary rounded overflow-hidden">
                           <div
                             className="h-full bg-accent-muted rounded transition-all duration-300"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Word frequency */}
+            {wordFrequencies.length > 0 && (
+              <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
+                <p className="text-[11px] text-text-tertiary uppercase tracking-wide mb-3">{t('stats.wordFrequency')}</p>
+                <div className="space-y-2">
+                  {wordFrequencies.map((wf) => {
+                    const maxCount = wordFrequencies[0]?.count ?? 1;
+                    const pct = maxCount > 0 ? (wf.count / maxCount) * 100 : 0;
+                    return (
+                      <div key={wf.word}>
+                        <div className="flex items-center justify-between text-xs mb-0.5">
+                          <span className="text-text-primary">{wf.word}</span>
+                          <span className="text-text-secondary">{wf.count.toLocaleString()}</span>
+                        </div>
+                        <div className="h-1.5 bg-bg-tertiary rounded overflow-hidden">
+                          <div
+                            className="h-full bg-accent rounded transition-all duration-300"
                             style={{ width: `${pct}%` }}
                           />
                         </div>

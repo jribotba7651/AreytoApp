@@ -4,7 +4,11 @@ import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { resolveTheme, themeToCssVars } from '@/lib/theme';
-import { DEFAULT_BOOK_SETTINGS, type BookSettings } from '@/types/project';
+import { DEFAULT_BOOK_SETTINGS, type BookSettings, type Chapter } from '@/types/project';
+import { readChapter, updateProjectMeta } from '@/lib/project-fs';
+import { slugify } from '@/lib/export-composer';
+import { useProjectStore } from '@/stores/projectStore';
+import { useLayoutStore } from '@/stores/layoutStore';
 import { Info, AlertTriangle, Quote } from 'lucide-react';
 
 type CalloutType = 'nota' | 'aviso' | 'cita';
@@ -122,9 +126,92 @@ interface BookMarkdownProps {
   themeOverrides?: Record<string, unknown> | null;
   bookSettings?: BookSettings;
   projectRootPath?: string;
+  enableChapterLinks?: boolean;
 }
 
-const MD_COMPONENTS: Components = {
+const CHAPTER_LINK_RE = /\[\[([^\]]+)\]\]/g;
+
+function resolveChapterByLink(chapters: Chapter[], name: string): Chapter | null {
+  const target = name.trim();
+  if (!target) return null;
+  const targetLower = target.toLowerCase();
+  const targetSlug = slugify(target);
+
+  const byTitle = chapters.find((c) => c.title.toLowerCase() === targetLower);
+  if (byTitle) return byTitle;
+  const byTitleSlug = chapters.find((c) => slugify(c.title) === targetSlug);
+  if (byTitleSlug) return byTitleSlug;
+  const byFilename = chapters.find(
+    (c) => c.filename.replace(/\.md$/, '').toLowerCase() === targetLower.replace(/\.md$/, ''),
+  );
+  if (byFilename) return byFilename;
+  const byFilenameSlug = chapters.find(
+    (c) => slugify(c.filename.replace(/\.md$/, '')) === targetSlug,
+  );
+  return byFilenameSlug ?? null;
+}
+
+function ChapterLink({ name }: { name: string }) {
+  const chapters = useProjectStore((s) => s.chapters);
+  const currentProject = useProjectStore((s) => s.currentProject);
+
+  const target = resolveChapterByLink(chapters, name);
+
+  async function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!target || !currentProject) return;
+    await useProjectStore.getState().flushAutosave?.();
+    const read = await readChapter(target.path);
+    if (!read.ok) return;
+    useProjectStore.getState().setActiveChapter(target.path, read.value);
+    await updateProjectMeta(currentProject, { capituloActivo: target.filename });
+    useLayoutStore.getState().setActiveTab('capitulo');
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => void handleClick(e)}
+      className="text-accent hover:underline font-medium text-inherit"
+      title={target ? target.title : name}
+    >
+      {name}
+    </button>
+  );
+}
+
+function splitChapterLinks(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  for (const match of text.matchAll(CHAPTER_LINK_RE)) {
+    const idx = match.index ?? 0;
+    if (idx > lastIndex) parts.push(text.slice(lastIndex, idx));
+    parts.push(<ChapterLink key={`chapter-link-${idx}`} name={match[1] ?? ''} />);
+    lastIndex = idx + match[0].length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts;
+}
+
+function applyChapterLinks(children: React.ReactNode): React.ReactNode {
+  return React.Children.map(children, (child) => {
+    if (typeof child === 'string') return splitChapterLinks(child);
+    if (React.isValidElement(child)) {
+      const el = child as React.ReactElement<{ children?: React.ReactNode }>;
+      return el.props.children != null
+        ? React.cloneElement(el, {}, applyChapterLinks(el.props.children))
+        : child;
+    }
+    return child;
+  });
+}
+
+function buildComponents(
+  renderInline: (children: React.ReactNode) => React.ReactNode,
+  projectRootPath?: string,
+): Components {
+  return {
   h1: ({ children }) => (
     <h1
       className="font-semibold text-text-primary mt-12 mb-6 leading-tight"
@@ -165,7 +252,7 @@ const MD_COMPONENTS: Components = {
         textAlign: 'var(--book-justify)' as React.CSSProperties['textAlign'],
       }}
     >
-      {children}
+      {renderInline(children)}
     </p>
   ),
   strong: ({ children }) => (
@@ -215,7 +302,7 @@ const MD_COMPONENTS: Components = {
         lineHeight: 'var(--book-line-height)',
       }}
     >
-      {children}
+      {renderInline(children)}
     </li>
   ),
   a: ({ children, href }) => (
@@ -229,7 +316,27 @@ const MD_COMPONENTS: Components = {
     </a>
   ),
   hr: () => <hr className="border-border-subtle my-8 mx-auto w-16" />,
-};
+  img: (({ src, alt }: { src?: string; alt?: string }) => {
+    if (!src) return null;
+    const resolved = resolveImageSrc(src, projectRootPath);
+    return (
+      <figure className="my-6 flex flex-col items-center">
+        <img
+          src={resolved}
+          alt={alt ?? ''}
+          style={{ maxWidth: '100%', height: 'auto' }}
+          className="rounded"
+        />
+        {alt && (
+          <figcaption className="text-sm text-text-secondary mt-2 text-center italic">
+            {alt}
+          </figcaption>
+        )}
+      </figure>
+    );
+  }) as Components['img'],
+  };
+}
 
 const DROP_CAPS_CSS = `
 .book-md-dropcaps > p:first-of-type::first-letter {
@@ -262,34 +369,17 @@ function resolveImageSrc(src: string, projectRootPath?: string): string {
   return src;
 }
 
-function BookMarkdown({ content, themeId, themeOverrides, bookSettings, projectRootPath }: BookMarkdownProps) {
+function BookMarkdown({ content, themeId, themeOverrides, bookSettings, projectRootPath, enableChapterLinks }: BookMarkdownProps) {
   const theme = resolveTheme(themeId, themeOverrides);
   const cssVars = themeToCssVars(theme);
   const bs = bookSettings ?? DEFAULT_BOOK_SETTINGS;
   const trimStyle = bookSettingsToStyle(bs);
 
-  const components = useMemo<Components>(() => ({
-    ...MD_COMPONENTS,
-    img: ({ src, alt }: { src?: string; alt?: string }) => {
-      if (!src) return null;
-      const resolved = resolveImageSrc(src, projectRootPath);
-      return (
-        <figure className="my-6 flex flex-col items-center">
-          <img
-            src={resolved}
-            alt={alt ?? ''}
-            style={{ maxWidth: '100%', height: 'auto' }}
-            className="rounded"
-          />
-          {alt && (
-            <figcaption className="text-sm text-text-secondary mt-2 text-center italic">
-              {alt}
-            </figcaption>
-          )}
-        </figure>
-      );
-    },
-  }), [projectRootPath]);
+  const components = useMemo<Components>(() => {
+    const renderInline = (children: React.ReactNode) =>
+      enableChapterLinks ? applyChapterLinks(children) : children;
+    return buildComponents(renderInline, projectRootPath);
+  }, [projectRootPath, enableChapterLinks]);
 
   return (
     <div

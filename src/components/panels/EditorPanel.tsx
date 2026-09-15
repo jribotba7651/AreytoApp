@@ -249,6 +249,7 @@ function ChapterView() {
                 themeId={currentProject?.tema}
                 themeOverrides={currentProject?.temaOverrides}
                 projectRootPath={currentProject?.rootPath}
+                enableChapterLinks
               />
             </div>
           </>
@@ -276,6 +277,7 @@ function ChapterView() {
                   themeId={currentProject?.tema}
                   themeOverrides={currentProject?.temaOverrides}
                   projectRootPath={currentProject?.rootPath}
+                  enableChapterLinks
                 />
               </div>
             </div>

@@ -321,6 +321,7 @@
       "chapterOf": "Capitulo {{current}} de {{total}}"
     },
     "readingTime": "Tiempo de lectura estimado: {{minutes}} min",
+    "print": "Imprimir",
     "themeGallery": {
       "title": "Temas del libro",
       "activeLabel": "Activo"
@@ -562,6 +563,7 @@
     "last7Days": "Actividad (ultimos 7 dias)",
     "projectStarted": "Inicio del proyecto",
     "chapterBreakdown": "Palabras por capitulo",
+    "wordFrequency": "Palabras mas frecuentes",
     "bookProgress": "Progreso del libro",
     "emptyTitle": "Aun no hay datos",
     "emptyBody": "Las estadisticas apareceran cuando empieces a escribir capitulos. Cada capitulo suma palabras, paginas y actividad al historial.",

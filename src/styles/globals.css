@@ -272,3 +272,60 @@ body {
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Print: hide the app shell, show only the book content */
+#print-book {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  #app-shell {
+    display: none !important;
+  }
+
+  #print-book {
+    display: block !important;
+    color: #1c1917;
+    font-family: var(--font-serif);
+  }
+
+  #print-book,
+  #print-book * {
+    color: #1c1917 !important;
+    background: #ffffff !important;
+  }
+
+  .print-book-title {
+    text-align: center;
+    font-size: 28pt;
+    font-weight: 600;
+    margin: 0 0 8pt;
+    line-height: 1.2;
+  }
+
+  .print-book-author {
+    text-align: center;
+    font-size: 14pt;
+    margin: 0 0 24pt;
+  }
+
+  .print-book-chapter {
+    break-after: page;
+  }
+
+  .print-book-chapter .mx-auto {
+    max-width: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .print-book-chapter a {
+    color: #1c1917;
+    text-decoration: none;
+  }
+}
