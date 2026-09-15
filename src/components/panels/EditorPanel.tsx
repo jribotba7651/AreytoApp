@@ -81,7 +81,7 @@ function ChapterView() {
   const setSyncAutosaveSaved = useProjectStore((s) => s.setSyncAutosaveSaved);
 
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
-  const toggleEditorViewMode = useLayoutStore((s) => s.toggleEditorViewMode);
+  const setEditorViewMode = useLayoutStore((s) => s.setEditorViewMode);
   const splitView = useLayoutStore((s) => s.splitView);
   const toggleSplitView = useLayoutStore((s) => s.toggleSplitView);
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
@@ -89,6 +89,8 @@ function ChapterView() {
 
   const editorRef = useRef<ChapterEditorHandle>(null);
   const previewScrollRef = useRef<HTMLDivElement>(null);
+  const splitPreviewRef = useRef<HTMLDivElement>(null);
+  const syncingScrollRef = useRef(false);
 
   const { flush, syncSaved } = useAutosave({
     content: activeChapterContent,
@@ -115,7 +117,37 @@ function ChapterView() {
 
   async function handleToggle() {
     await flushAutosave?.();
-    toggleEditorViewMode();
+    const next =
+      editorViewMode === 'edit' ? 'preview' : editorViewMode === 'preview' ? 'split' : 'edit';
+    setEditorViewMode(next);
+  }
+
+  function handleEditorScroll(scrollTop: number, scrollHeight: number, clientHeight: number) {
+    if (syncingScrollRef.current) return;
+    const preview = splitPreviewRef.current;
+    if (!preview) return;
+    const editorMax = scrollHeight - clientHeight;
+    const previewMax = preview.scrollHeight - preview.clientHeight;
+    if (editorMax <= 0 || previewMax <= 0) return;
+    const ratio = scrollTop / editorMax;
+    syncingScrollRef.current = true;
+    preview.scrollTop = ratio * previewMax;
+    requestAnimationFrame(() => { syncingScrollRef.current = false; });
+  }
+
+  function handlePreviewScroll() {
+    if (syncingScrollRef.current) return;
+    const preview = splitPreviewRef.current;
+    const view = editorRef.current?.getView();
+    const dom = view?.scrollDOM;
+    if (!preview || !dom) return;
+    const previewMax = preview.scrollHeight - preview.clientHeight;
+    const editorMax = dom.scrollHeight - dom.clientHeight;
+    if (previewMax <= 0 || editorMax <= 0) return;
+    const ratio = preview.scrollTop / previewMax;
+    syncingScrollRef.current = true;
+    dom.scrollTop = ratio * editorMax;
+    requestAnimationFrame(() => { syncingScrollRef.current = false; });
   }
 
   const [projectLang, setProjectLang] = useState('en');
@@ -139,6 +171,21 @@ function ChapterView() {
   }
 
   const isPreview = editorViewMode === 'preview';
+  const isSplit = editorViewMode === 'split';
+  const viewModeNextLabel =
+    editorViewMode === 'edit'
+      ? t('editor.preview')
+      : editorViewMode === 'preview'
+        ? t('editor.split')
+        : t('editor.edit');
+  const viewModeNextIcon =
+    editorViewMode === 'edit' ? (
+      <Eye size={14} />
+    ) : editorViewMode === 'preview' ? (
+      <Columns2 size={14} />
+    ) : (
+      <Pencil size={14} />
+    );
   const chapterWords = countWords(activeChapterContent);
   const chapterParagraphs = countParagraphs(activeChapterContent);
   const bookWords = useBookWordCount();
@@ -169,14 +216,10 @@ function ChapterView() {
           <button
             onClick={handleToggle}
             className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
-            title={isPreview ? `${t('editor.edit')} (⌘E)` : `${t('editor.preview')} (⌘E)`}
+            title={viewModeNextLabel}
           >
-            {isPreview ? (
-              <Pencil size={14} />
-            ) : (
-              <Eye size={14} />
-            )}
-            <span>{isPreview ? t('editor.edit') : t('editor.preview')}</span>
+            {viewModeNextIcon}
+            <span>{viewModeNextLabel}</span>
           </button>
           <div className="pl-1.5">
             <ShortcutHint text="⌘E" />
@@ -185,36 +228,64 @@ function ChapterView() {
       </div>
 
       <div className="flex-1 min-h-0 flex">
-        <div className={splitView.active ? 'w-1/2 min-w-0 relative' : 'flex-1 min-w-0 relative'}>
-          <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
-            <ChapterEditor
-              ref={editorRef}
-              key={`${activeChapterPath}:${editorVersion}`}
-              initialContent={activeChapterContent}
-              onChange={updateContent}
-            />
-          </div>
+        {isSplit ? (
+          <>
+            <div className="w-1/2 min-w-0 h-full border-r border-border-subtle">
+              <ChapterEditor
+                ref={editorRef}
+                key={`${activeChapterPath}:${editorVersion}`}
+                initialContent={activeChapterContent}
+                onChange={updateContent}
+                onScroll={handleEditorScroll}
+              />
+            </div>
+            <div
+              ref={splitPreviewRef}
+              onScroll={handlePreviewScroll}
+              className="w-1/2 min-w-0 h-full overflow-y-auto"
+            >
+              <BookMarkdown
+                content={activeChapterContent}
+                themeId={currentProject?.tema}
+                themeOverrides={currentProject?.temaOverrides}
+                projectRootPath={currentProject?.rootPath}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={splitView.active ? 'w-1/2 min-w-0 relative' : 'flex-1 min-w-0 relative'}>
+              <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
+                <ChapterEditor
+                  ref={editorRef}
+                  key={`${activeChapterPath}:${editorVersion}`}
+                  initialContent={activeChapterContent}
+                  onChange={updateContent}
+                />
+              </div>
 
-          <div
-            ref={previewScrollRef}
-            className={[
-              'absolute inset-0 overflow-y-auto',
-              isPreview ? '' : 'invisible pointer-events-none',
-            ].join(' ')}
-          >
-            <BookMarkdown
-              content={activeChapterContent}
-              themeId={currentProject?.tema}
-              themeOverrides={currentProject?.temaOverrides}
-              projectRootPath={currentProject?.rootPath}
-            />
-          </div>
-        </div>
+              <div
+                ref={previewScrollRef}
+                className={[
+                  'absolute inset-0 overflow-y-auto',
+                  isPreview ? '' : 'invisible pointer-events-none',
+                ].join(' ')}
+              >
+                <BookMarkdown
+                  content={activeChapterContent}
+                  themeId={currentProject?.tema}
+                  themeOverrides={currentProject?.temaOverrides}
+                  projectRootPath={currentProject?.rootPath}
+                />
+              </div>
+            </div>
 
-        {splitView.active && (
-          <div className="w-1/2 min-w-0">
-            <SplitReadPanel />
-          </div>
+            {splitView.active && (
+              <div className="w-1/2 min-w-0">
+                <SplitReadPanel />
+              </div>
+            )}
+          </>
         )}
       </div>
 

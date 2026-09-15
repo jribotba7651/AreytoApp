@@ -28,6 +28,7 @@ type HealthIssue =
 
 const WORDS_PER_PAGE = 250;
 const MIN_CHAPTER_WORDS = 100;
+const WORDS_PER_MINUTE = 200;
 
 function countWords(text: string): number {
   const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
@@ -89,6 +90,8 @@ function StatsTabContent() {
   const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
   const [projectStartDate, setProjectStartDate] = useState<string | null>(null);
   const writingDays = useSettingsStore((s) => s.writingDays);
+  const readingGoalMinutes = useSettingsStore((s) => s.readingGoalMinutes);
+  const readingSecondsByDay = useSettingsStore((s) => s.readingSecondsByDay);
   const [loading, setLoading] = useState(true);
 
   const streaks = useMemo(() => computeStreaks(writingDays), [writingDays]);
@@ -236,6 +239,11 @@ function StatsTabContent() {
     : null;
 
   const maxDaily = Math.max(...dailyCounts.map((d) => d.count), 1);
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const readingSecondsToday = readingSecondsByDay[todayKey] ?? 0;
+  const readingMinutesToday = Math.floor(readingSecondsToday / 60);
+  const wordsReadToday = Math.round((readingSecondsToday / 60) * WORDS_PER_MINUTE);
 
   function healthMessage(issue: HealthIssue): string {
     switch (issue.kind) {
@@ -425,6 +433,36 @@ function StatsTabContent() {
               </div>
               <p className="text-[10px] text-text-tertiary mt-2">{t('stats.streakHint')}</p>
             </div>
+
+            {/* Daily reading progress */}
+            {readingGoalMinutes > 0 && (
+              <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[11px] text-text-tertiary uppercase tracking-wide">
+                    {t('stats.reading.title')}
+                  </p>
+                  <p className="text-xs text-text-secondary">
+                    {t('stats.reading.minutes', {
+                      current: readingMinutesToday,
+                      goal: readingGoalMinutes,
+                    })}
+                  </p>
+                </div>
+                <div className="h-4 bg-bg-tertiary rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      readingMinutesToday >= readingGoalMinutes ? 'bg-success' : 'bg-accent-muted'
+                    }`}
+                    style={{
+                      width: `${Math.min((readingMinutesToday / readingGoalMinutes) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-text-tertiary mt-2 text-right">
+                  {t('stats.reading.wordsRead', { count: wordsReadToday.toLocaleString() })}
+                </p>
+              </div>
+            )}
 
             {/* Daily activity chart */}
             {dailyCounts.length > 0 && (

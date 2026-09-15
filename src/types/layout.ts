@@ -1,5 +1,5 @@
 export type Tab = 'capitulo' | 'libro' | 'terminados' | 'ajustes' | 'stats';
-export type EditorViewMode = 'edit' | 'preview';
+export type EditorViewMode = 'edit' | 'preview' | 'split';
 
 export interface PanelSizes {
   sidebar: number;

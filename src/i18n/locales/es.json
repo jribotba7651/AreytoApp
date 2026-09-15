@@ -58,6 +58,10 @@
         "label": "Objetivo de palabras del libro",
         "description": "Meta total de palabras para el libro completo. Muestra una barra de progreso en el tab Estadisticas. Pon 0 para ocultar."
       },
+      "readingGoal": {
+        "label": "Objetivo de lectura diaria (minutos)",
+        "description": "Meta de tiempo de lectura al dia. El progreso se muestra en el tab Estadisticas."
+      },
       "typewriterMode": {
         "label": "Modo maquina de escribir",
         "description": "Mantiene la linea del cursor centrada verticalmente en el editor mientras escribes. Scroll suave."
@@ -386,6 +390,7 @@
   "editor": {
     "edit": "Editar",
     "preview": "Previsualizar",
+    "split": "Dividido",
     "noActiveChapter": "No hay capítulo activo",
     "wordCount": "{{count}} palabras",
     "paragraphCount": "{{count}} parrafos",
@@ -511,6 +516,8 @@
     "notes": "Notas",
     "notesNoChapter": "Selecciona un capitulo para ver sus notas.",
     "notesPlaceholder": "Escribe notas para este capitulo...",
+    "summary": "Resumen",
+    "summaryPlaceholder": "Escribe un resumen corto del capitulo...",
     "comments": "Comentarios",
     "bookmarks": "Marcadores"
   },
@@ -564,6 +571,11 @@
     "maxStreak": "Mejor racha (dias)",
     "last30Days": "Ultimos 30 dias",
     "streakHint": "Un dia cuenta cuando guardas al menos 100 palabras",
+    "reading": {
+      "title": "Lectura de hoy",
+      "minutes": "{{current}} de {{goal}} min",
+      "wordsRead": "≈ {{count}} palabras leidas"
+    },
     "health": {
       "title": "Salud del proyecto",
       "emptyChapter": "Capitulo sin contenido: {{title}}",

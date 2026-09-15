@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Type, Search, BookOpen, MessageSquare, Bookmark } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { invoke } from '@tauri-apps/api/core';
@@ -156,54 +156,80 @@ function FindReplacePanel() {
   );
 }
 
+function ChapterNoteField({
+  filePath,
+  dirPath,
+  placeholder,
+}: {
+  filePath: string | null;
+  dirPath: string | null;
+  placeholder: string;
+}) {
+  const [content, setContent] = useState('');
+  const [loaded, setLoaded] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!filePath) {
+      setContent('');
+      setLoaded(true);
+      return;
+    }
+    setLoaded(false);
+    invoke<string>('read_text_file', { path: filePath })
+      .then((c) => {
+        setContent(c);
+        setLoaded(true);
+      })
+      .catch(() => {
+        setContent('');
+        setLoaded(true);
+      });
+  }, [filePath]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
+
+  function handleChange(value: string) {
+    setContent(value);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      if (!filePath || !dirPath) return;
+      invoke('ensure_dir', { path: dirPath })
+        .then(() => invoke('write_text_file', { path: filePath, contents: value }))
+        .catch((err) => console.error('Failed to save note:', err));
+    }, 800);
+  }
+
+  if (!loaded) {
+    return <div className="flex-1 w-full" />;
+  }
+
+  return (
+    <textarea
+      value={content}
+      onChange={(e) => handleChange(e.target.value)}
+      placeholder={placeholder}
+      className="flex-1 w-full min-h-[120px] px-2 py-1.5 text-xs bg-bg-tertiary border border-border-subtle rounded focus:border-accent outline-none placeholder:text-text-tertiary resize-none font-sans"
+    />
+  );
+}
+
 function ChapterNotesPanel() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
   const chapters = useProjectStore((s) => s.chapters);
   const activeChapter = chapters.find((c) => c.path === activeChapterPath) ?? null;
-  const [noteContent, setNoteContent] = useState('');
-  const [loaded, setLoaded] = useState(false);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeTab, setActiveTab] = useState<'notes' | 'summary'>('notes');
 
-  const notePath = currentProject && activeChapter
-    ? `${currentProject.rootPath}/.notes/${activeChapter.filename.replace(/\.md$/, '')}.md`
-    : null;
+  const baseName = activeChapter ? activeChapter.filename.replace(/\.md$/, '') : null;
   const notesDirPath = currentProject ? `${currentProject.rootPath}/.notes` : null;
-
-  useEffect(() => {
-    if (!notePath) {
-      setNoteContent('');
-      setLoaded(true);
-      return;
-    }
-    setLoaded(false);
-    invoke<string>('read_text_file', { path: notePath })
-      .then((content) => {
-        setNoteContent(content);
-        setLoaded(true);
-      })
-      .catch(() => {
-        setNoteContent('');
-        setLoaded(true);
-      });
-  }, [notePath]);
-
-  const saveNote = useCallback(async (content: string) => {
-    if (!notePath || !notesDirPath) return;
-    try {
-      await invoke('ensure_dir', { path: notesDirPath });
-      await invoke('write_text_file', { path: notePath, contents: content });
-    } catch (err) {
-      console.error('Failed to save note:', err);
-    }
-  }, [notePath, notesDirPath]);
-
-  function handleChange(value: string) {
-    setNoteContent(value);
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => void saveNote(value), 800);
-  }
+  const notePath = currentProject && baseName ? `${notesDirPath}/${baseName}.md` : null;
+  const summaryPath = currentProject && baseName ? `${notesDirPath}/${baseName}-summary.md` : null;
 
   if (!activeChapter) {
     return (
@@ -218,18 +244,36 @@ function ChapterNotesPanel() {
 
   return (
     <div className="p-3 flex flex-col h-full">
-      <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
-        {t('writingToolbar.notes')}
-      </h4>
-      <p className="text-[10px] text-text-tertiary mb-2 truncate">{activeChapter.title}</p>
-      {loaded && (
-        <textarea
-          value={noteContent}
-          onChange={(e) => handleChange(e.target.value)}
+      <div className="flex border-b border-border-subtle">
+        {(['notes', 'summary'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-3 py-1.5 text-[11px] border-b-2 -mb-px transition-colors duration-150 ${
+              activeTab === tab
+                ? 'text-text-primary border-accent'
+                : 'text-text-tertiary border-transparent hover:text-text-secondary'
+            }`}
+          >
+            {tab === 'notes' ? t('writingToolbar.notes') : t('writingToolbar.summary')}
+          </button>
+        ))}
+      </div>
+      <p className="text-[10px] text-text-tertiary mt-2 mb-2 truncate">{activeChapter.title}</p>
+      <div className={activeTab === 'notes' ? 'flex-1 flex flex-col min-h-0' : 'hidden'}>
+        <ChapterNoteField
+          filePath={notePath}
+          dirPath={notesDirPath}
           placeholder={t('writingToolbar.notesPlaceholder')}
-          className="flex-1 w-full min-h-[120px] px-2 py-1.5 text-xs bg-bg-tertiary border border-border-subtle rounded focus:border-accent outline-none placeholder:text-text-tertiary resize-none font-sans"
         />
-      )}
+      </div>
+      <div className={activeTab === 'summary' ? 'flex-1 flex flex-col min-h-0' : 'hidden'}>
+        <ChapterNoteField
+          filePath={summaryPath}
+          dirPath={notesDirPath}
+          placeholder={t('writingToolbar.summaryPlaceholder')}
+        />
+      </div>
     </div>
   );
 }

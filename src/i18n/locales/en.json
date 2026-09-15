@@ -58,6 +58,10 @@
         "label": "Book word goal",
         "description": "Target total word count for the entire book. Shows a progress bar in the Stats tab. Set to 0 to hide."
       },
+      "readingGoal": {
+        "label": "Daily reading goal (minutes)",
+        "description": "Daily reading time target. Progress is shown in the Stats tab."
+      },
       "typewriterMode": {
         "label": "Typewriter mode",
         "description": "Keeps the cursor line centered vertically in the editor while you type. Smooth scrolling."
@@ -386,6 +390,7 @@
   "editor": {
     "edit": "Edit",
     "preview": "Preview",
+    "split": "Split",
     "noActiveChapter": "No active chapter",
     "wordCount": "{{count}} words",
     "paragraphCount": "{{count}} paragraphs",
@@ -511,6 +516,8 @@
     "notes": "Notes",
     "notesNoChapter": "Select a chapter to see its notes.",
     "notesPlaceholder": "Write notes for this chapter...",
+    "summary": "Summary",
+    "summaryPlaceholder": "Write a short summary of the chapter...",
     "comments": "Comments",
     "bookmarks": "Bookmarks"
   },
@@ -564,6 +571,11 @@
     "maxStreak": "Best streak (days)",
     "last30Days": "Last 30 days",
     "streakHint": "A day counts when you save at least 100 words",
+    "reading": {
+      "title": "Today's reading",
+      "minutes": "{{current}} of {{goal}} min",
+      "wordsRead": "≈ {{count}} words read"
+    },
     "health": {
       "title": "Project health",
       "emptyChapter": "Chapter without content: {{title}}",

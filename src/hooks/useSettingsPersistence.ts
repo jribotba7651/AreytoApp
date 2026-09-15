@@ -31,6 +31,8 @@ export function useSettingsPersistence() {
   const bookFontSize = useSettingsStore((s) => s.bookFontSize);
   const exportFolder = useSettingsStore((s) => s.exportFolder);
   const uiLocale = useSettingsStore((s) => s.uiLocale);
+  const readingGoalMinutes = useSettingsStore((s) => s.readingGoalMinutes);
+  const readingSecondsByDay = useSettingsStore((s) => s.readingSecondsByDay);
 
   const persistGlobal = useRef(
     debounce((settings: GlobalSettings) => {
@@ -69,9 +71,11 @@ export function useSettingsPersistence() {
       bookFontSize,
       exportFolder,
       uiLocale,
+      readingGoalMinutes,
+      readingSecondsByDay,
       version: 1,
     });
-  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs, themeMode, editorFontFamily, editorFontSize, defaultProjectLanguage, bookFontFamily, bookFontSize, exportFolder, uiLocale]);
+  }, [currentProjectPath, sidebarSize, editorSize, terminalSize, versionsSize, editorViewMode, autoCommit, autosaveIntervalMs, themeMode, editorFontFamily, editorFontSize, defaultProjectLanguage, bookFontFamily, bookFontSize, exportFolder, uiLocale, readingGoalMinutes, readingSecondsByDay]);
 
   useEffect(() => {
     if (!currentProjectPath || !activeChapterPath) return;

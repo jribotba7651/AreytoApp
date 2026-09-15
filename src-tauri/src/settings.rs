@@ -49,6 +49,10 @@ pub struct GlobalSettings {
     pub export_folder: String,
     #[serde(default = "default_ui_locale")]
     pub ui_locale: String,
+    #[serde(default = "default_reading_goal_minutes")]
+    pub reading_goal_minutes: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reading_seconds_by_day: Option<std::collections::HashMap<String, u32>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -106,6 +110,10 @@ fn default_export_folder() -> String {
 
 fn default_ui_locale() -> String {
     "en".to_string()
+}
+
+fn default_reading_goal_minutes() -> u32 {
+    30
 }
 
 fn validate_settings(mut s: GlobalSettings) -> GlobalSettings {
@@ -432,5 +440,30 @@ mod tests {
         };
         let validated = validate_settings(s);
         assert_eq!(validated.autosave_interval_ms, 500, "valor fuera de rango debe caer al default 500");
+    }
+
+    #[test]
+    fn default_reading_goal_minutes_es_30_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert_eq!(s.reading_goal_minutes, 30, "reading_goal_minutes debe ser 30 cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_reading_seconds_by_day() {
+        let mut map = std::collections::HashMap::new();
+        map.insert("2026-09-15".to_string(), 120);
+        let original = GlobalSettings {
+            version: 1,
+            reading_seconds_by_day: Some(map),
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(
+            parsed.reading_seconds_by_day.unwrap().get("2026-09-15"),
+            Some(&120),
+            "reading_seconds_by_day debe preservarse en roundtrip"
+        );
     }
 }

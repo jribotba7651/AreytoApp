@@ -11,16 +11,18 @@ import { useSettingsStore } from '@/stores/settingsStore';
 interface ChapterEditorProps {
   initialContent: string;
   onChange?: (content: string) => void;
+  onScroll?: (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
 }
 
 export interface ChapterEditorHandle {
   getView: () => EditorView | null;
 }
 
-const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange }, ref) {
+const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange, onScroll }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
+  const onScrollRef = useRef(onScroll);
   const typewriterEnabled = useSettingsStore((s) => s.typewriterMode);
   const sentenceHighlightEnabled = useSettingsStore((s) => s.sentenceHighlight);
 
@@ -31,6 +33,10 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  useEffect(() => {
+    onScrollRef.current = onScroll;
+  }, [onScroll]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -57,7 +63,14 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
     const view = new EditorView({ state, parent: containerRef.current });
     viewRef.current = view;
 
+    const scrollDom = view.scrollDOM;
+    const handleScroll = () => {
+      onScrollRef.current?.(scrollDom.scrollTop, scrollDom.scrollHeight, scrollDom.clientHeight);
+    };
+    scrollDom.addEventListener('scroll', handleScroll);
+
     return () => {
+      scrollDom.removeEventListener('scroll', handleScroll);
       view.destroy();
       viewRef.current = null;
     };

@@ -18,6 +18,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useMenuEvents } from '@/hooks/useMenuEvents';
 import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
 import { useProjectWatcher } from '@/hooks/useProjectWatcher';
+import { useReadingTracker } from '@/hooks/useReadingTracker';
 import { readGlobalSettings, pathExists } from '@/lib/settings';
 import { openProjectByPath } from '@/lib/open-project-flow';
 
@@ -36,6 +37,7 @@ function App() {
   useMenuEvents();
   useSettingsPersistence();
   useProjectWatcher();
+  useReadingTracker();
 
   const themeMode = useSettingsStore((s) => s.themeMode);
 
@@ -68,7 +70,11 @@ function App() {
           }
         }
 
-        if (settings.editorViewMode === 'edit' || settings.editorViewMode === 'preview') {
+        if (
+          settings.editorViewMode === 'edit' ||
+          settings.editorViewMode === 'preview' ||
+          settings.editorViewMode === 'split'
+        ) {
           useLayoutStore.getState().setEditorViewMode(settings.editorViewMode);
         }
 

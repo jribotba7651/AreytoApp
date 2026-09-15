@@ -5,10 +5,41 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Global Search + Export All + Project Health Check
+- Ultima feature completada: Markdown Preview Sync + Chapter Summary + Reading Goals
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Markdown Preview Sync + Chapter Summary + Reading Goals (3 sub-tareas)
+- Que se hizo:
+  1. Markdown Preview Sync: el boton de vista del editor ahora cicla entre tres modos: edit, preview y split. El modo split muestra el editor a la izquierda y el preview del MISMO capitulo activo a la derecha (50/50). El scroll de ambos paneles se sincroniza proporcionalmente en ambas direcciones. Se agrego el modo 'split' al tipo EditorViewMode, y ChapterEditor acepta una prop onScroll que reporta scrollTop/scrollHeight/clientHeight del scrollDOM de CodeMirror.
+  2. Chapter Summary: el panel de notas del sidebar derecho (WritingToolbar) ahora tiene dos pestanas: Notas y Resumen. El resumen se guarda en .notes/{capitulo}-summary.md separado de las notas (.notes/{capitulo}.md). Se extrajo un componente reutilizable ChapterNoteField para cargar/guardar con autosave debounce de 800ms.
+  3. Reading Goals: en Settings > Editor se agrega el objetivo de lectura diaria en minutos (default 30). Un hook useReadingTracker acumula segundos (cada 10s) mientras el usuario esta en un contexto de lectura (tab Libro, o modo preview/split del editor). Se estiman las palabras leidas a 200 palabras/min. En el tab Stats se muestra el progreso de lectura de hoy (minutos vs objetivo + barra + palabras estimadas) usando los segundos del dia guardados en GlobalSettings como readingSecondsByDay.
+- Archivos creados:
+  - src/hooks/useReadingTracker.ts (acumula segundos de lectura en contextos de lectura)
+- Archivos modificados:
+  - src/types/layout.ts (+'split' en EditorViewMode)
+  - src/lib/settings.ts (+'split' en editorViewMode, +readingGoalMinutes, +readingSecondsByDay)
+  - src/components/editor/ChapterEditor.tsx (+onScroll prop que reporta el scrollDOM)
+  - src/components/panels/EditorPanel.tsx (ciclo edit/preview/split, render split 50/50, scroll sync proporcional bidireccional)
+  - src/components/panels/WritingToolbar.tsx (ChapterNotesPanel con pestanas Notas/Resumen + ChapterNoteField reutilizable)
+  - src/components/layout/StatsTabContent.tsx (+seccion Lectura de hoy con WORDS_PER_MINUTE)
+  - src/components/settings/SettingsTabContent.tsx (+input de objetivo de lectura diaria)
+  - src/stores/settingsStore.ts (+readingGoalMinutes, +readingSecondsByDay, +setReadingGoalMinutes, +addReadingSeconds)
+  - src/hooks/useSettingsPersistence.ts (+readingGoalMinutes, +readingSecondsByDay en el objeto persistido)
+  - src/App.tsx (+restore 'split', +useReadingTracker)
+  - src-tauri/src/settings.rs (+reading_goal_minutes, +reading_seconds_by_day en GlobalSettings + 2 tests)
+  - src/i18n/locales/en.json y es.json (+editor.split, +writingToolbar.summary/summaryPlaceholder, +settings.editor.readingGoal.*, +stats.reading.*)
+- Decisiones tomadas:
+  - D-311: El preview sync se implementa como un tercer modo del editor ('split') con editor izquierda y preview derecha del mismo capitulo activo. No se toca la vista dividida existente (SplitReadPanel) que referencia otro capitulo; conviven como features separadas. El toggle de vista cicla edit -> preview -> split -> edit.
+  - D-312: La sincronizacion de scroll es proporcional (ratio scrollTop/scrollable) y bidireccional. Un flag syncingScrollRef evita el bucle de realimentacion y se resetea en requestAnimationFrame. El scroll del editor viene del scrollDOM de CodeMirror via la prop onScroll.
+  - D-313: El resumen se guarda en .notes/{base}-summary.md usando el mismo base que las notas (.notes/{base}.md). ChapterNoteField es reutilizable para ambos textareas con autosave debounce de 800ms. Ambas pestanas permanecen montadas (toggle de visibilidad) para no perder texto al cambiar de pestana.
+  - D-314: Las palabras leidas se estiman a 200 palabras/min (misma constante del tiempo de lectura del tab Libro). El "tiempo de lectura" se acumula solo en contextos de lectura: tab Libro, o modo preview/split (no en modo edit). readingSecondsByDay es un mapa fecha -> segundos en GlobalSettings.
+  - D-315: reading_goal_minutes y reading_seconds_by_day se agregaron al struct Rust GlobalSettings (con serde defaults) porque settings.json persiste via esa ruta. Sin esto, serde descartaria los campos al escribir.
+- Tests: npm test: 425 pasan, 0 fallan. tsc --noEmit limpio. cargo check limpio.
+- Bugs encontrados:
+  - (preexistente) cargo test no compila por 11 errores en src-tauri/src/export.rs: los tests de export no se actualizaron cuando build_full_markdown y asoc. ganaron el parametro excluded_filenames. No relacionado con esta feature.
+  - (preexistente) src-tauri/src/settings.rs GlobalSettings no incluye varios campos ya presentes en el TS GlobalSettings (customThemes, chapterWordGoal, bookWordGoal, recentProjects, onboardingCompleted, typewriterMode, sentenceHighlight, writingDays, customEditorFont, customBookFont), por lo que esos settings no persisten entre reinicios. Se agrego reading_goal_minutes/reading_seconds_by_day para que esta feature si persista; el resto sigue roto.
 
 ### 2026-09-15 - Global Search + Export All + Project Health Check (3 sub-tareas)
 - Que se hizo:

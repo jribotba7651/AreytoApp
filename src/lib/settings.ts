@@ -10,7 +10,7 @@ export interface PanelSizes {
 export interface GlobalSettings {
   lastProjectPath?: string;
   panels: PanelSizes;
-  editorViewMode?: 'edit' | 'preview';
+  editorViewMode?: 'edit' | 'preview' | 'split';
   version: number;
   autoCommit?: boolean;
   autosaveIntervalMs?: number;
@@ -32,6 +32,8 @@ export interface GlobalSettings {
   writingDays?: string[];
   customEditorFont?: string;
   customBookFont?: string;
+  readingGoalMinutes?: number;
+  readingSecondsByDay?: Record<string, number>;
 }
 
 export interface RecentProject {

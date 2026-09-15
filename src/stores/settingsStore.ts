@@ -66,6 +66,8 @@ interface SettingsState {
   writingDays: string[];
   customEditorFont: string;
   customBookFont: string;
+  readingGoalMinutes: number;
+  readingSecondsByDay: Record<string, number>;
   loaded: boolean;
   load: () => Promise<void>;
   addRecentProject: (project: RecentProject) => Promise<void>;
@@ -88,6 +90,8 @@ interface SettingsState {
   recordWritingDay: (wordCount: number) => Promise<void>;
   setCustomEditorFont: (font: string) => Promise<void>;
   setCustomBookFont: (font: string) => Promise<void>;
+  setReadingGoalMinutes: (goal: number) => Promise<void>;
+  addReadingSeconds: (seconds: number) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -111,6 +115,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   writingDays: [],
   customEditorFont: '',
   customBookFont: '',
+  readingGoalMinutes: 30,
+  readingSecondsByDay: {},
   loaded: false,
 
   load: async () => {
@@ -143,6 +149,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         writingDays: settings.writingDays ?? [],
         customEditorFont: settings.customEditorFont ?? '',
         customBookFont: settings.customBookFont ?? '',
+        readingGoalMinutes: settings.readingGoalMinutes ?? 30,
+        readingSecondsByDay: settings.readingSecondsByDay ?? {},
         loaded: true,
       });
       const customEditorFont = settings.customEditorFont ?? '';
@@ -380,6 +388,29 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, recentProjects: updated });
     } catch (err) {
       console.warn('[areyto] Failed to persist recentProjects:', err);
+    }
+  },
+
+  setReadingGoalMinutes: async (goal: number) => {
+    set({ readingGoalMinutes: goal });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, readingGoalMinutes: goal });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist readingGoalMinutes:', err);
+    }
+  },
+
+  addReadingSeconds: async (seconds: number) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const prev = useSettingsStore.getState().readingSecondsByDay;
+    const updated = { ...prev, [today]: (prev[today] ?? 0) + seconds };
+    set({ readingSecondsByDay: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, readingSecondsByDay: updated });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist readingSecondsByDay:', err);
     }
   },
 }));
