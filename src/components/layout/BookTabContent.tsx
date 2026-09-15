@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { save, message } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { loadBook } from '@/lib/book-loader';
 import { exportBookMarkdown, exportBookDocx, exportBookEpub } from '@/lib/export-service';
-import { slugify } from '@/lib/export-composer';
+import { slugify, deriveExportChapterInfo } from '@/lib/export-composer';
+import type { IndiceItem } from '@/lib/export-composer';
 import BookChapter from '@/components/book/BookChapter';
+import BookIndice from '@/components/book/BookIndice';
 import BookChapterError from '@/components/book/BookChapterError';
 import BookEmptyState from '@/components/book/BookEmptyState';
 import PreExportCheckModal from '@/components/book/PreExportCheckModal';
@@ -23,18 +24,11 @@ import BookCoverSection from '@/components/book/BookCoverSection';
 import { DEFAULT_THEME_ID } from '@/lib/theme';
 import ExportProgressBar from '@/components/book/ExportProgressBar';
 import type { ExportStep } from '@/components/book/ExportProgressBar';
-import type { BookData } from '@/types/book';
-type ExportTarget = 'md' | 'docx' | 'epub';
-
-const WORDS_PER_MINUTE = 200;
-
-function countWordsSimple(text: string): number {
-  const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
-  const words = stripped.match(/\S+/g);
-  return words ? words.length : 0;
-}
+import type { BookData, BookSection } from '@/types/book';
 import type { ExportScope } from '@/lib/export-service';
 import type { BookViewMode, PreviewMode } from '@/types/layout';
+
+type ExportTarget = 'md' | 'docx' | 'epub';
 
 function BookTabContent() {
   const { t } = useTranslation();
@@ -63,8 +57,6 @@ function BookTabContent() {
   const skipPreCheck = useRef(false);
   const sectionVersion = useProjectStore((s) => s.sectionVersion);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
-  const [previewChapterIdx, setPreviewChapterIdx] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   function computePreExportProblems(): string[] {
     const problems: string[] = [];
@@ -319,28 +311,15 @@ function BookTabContent() {
 
   const chapterSections = bookData?.sections ?? [];
   const totalChapters = chapterSections.length;
-  const clampedIdx = Math.min(previewChapterIdx, Math.max(0, totalChapters - 1));
 
-  function goToChapter(idx: number) {
-    setPreviewChapterIdx(idx);
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  const tocItems: IndiceItem[] = chapterSections
+    .filter((s) => s.kind === 'chapter')
+    .map((s) => ({
+      title: deriveExportChapterInfo(s.content, s.chapter.filename).title,
+      slug: slugify(s.chapter.filename.replace(/\.md$/, '')),
+    }));
 
-  function renderChapterPreview() {
-    if (loading) {
-      return (
-        <div className="h-full flex items-center justify-center">
-          <p className="font-sans text-sm text-text-tertiary">{t('book.loading')}</p>
-        </div>
-      );
-    }
-    if (!bookData || totalChapters === 0) {
-      return <BookEmptyState />;
-    }
-
-    const section = chapterSections[clampedIdx];
-    if (!section) return <BookEmptyState />;
-
+  function renderChapterSection(section: BookSection, isLast: boolean) {
     if (section.kind === 'chapter-error') {
       return <BookChapterError chapterFilename={section.chapter.filename} reason={section.reason} />;
     }
@@ -349,7 +328,7 @@ function BookTabContent() {
     return (
       <BookChapter
         content={section.content}
-        isLast={false}
+        isLast={isLast}
         slug={slug}
         themeId={currentProject?.tema}
         themeOverrides={currentProject?.temaOverrides}
@@ -361,6 +340,25 @@ function BookTabContent() {
 
   const isDraft = previewMode === 'draft';
   const isProof = previewMode === 'proof';
+
+  const sheetStyle: CSSProperties = isProof
+    ? {
+        width: '580px',
+        minHeight: '780px',
+        padding: '48px 56px',
+        backgroundColor: 'var(--proof-bg)',
+        boxShadow: 'inset 0 0 0 1px var(--proof-inset)',
+        borderRadius: '2px',
+        border: '12px solid var(--proof-border)',
+      }
+    : {
+        width: '580px',
+        minHeight: '780px',
+        padding: '48px 56px',
+        backgroundColor: 'var(--bg-editor)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
+        borderRadius: '2px',
+      };
 
   return (
     <div className="h-full flex flex-col bg-bg-primary">
@@ -401,7 +399,7 @@ function BookTabContent() {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto scroll-smooth">
         {bookViewMode === 'format' ? (
           <>
             <ThemeGallery
@@ -421,65 +419,34 @@ function BookTabContent() {
             <BookSettings />
             <BookCoverSection />
           </>
+        ) : loading ? (
+          <div className="h-full flex items-center justify-center">
+            <p className="font-sans text-sm text-text-tertiary">{t('book.loading')}</p>
+          </div>
+        ) : !bookData || totalChapters === 0 ? (
+          <BookEmptyState />
         ) : (
-          <div className="flex justify-center py-8 px-4">
-            {isDraft ? (
-              <div className="w-full max-w-3xl">
-                {renderChapterPreview()}
-              </div>
-            ) : (
-              <div
-                style={{
-                  width: '580px',
-                  minHeight: '780px',
-                  padding: '48px 56px',
-                  backgroundColor: isProof ? 'var(--proof-bg)' : 'var(--bg-editor)',
-                  boxShadow: isProof
-                    ? 'inset 0 0 0 1px var(--proof-inset)'
-                    : '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
-                  borderRadius: '2px',
-                  border: isProof ? '12px solid var(--proof-border)' : undefined,
-                }}
-              >
-                {renderChapterPreview()}
-              </div>
-            )}
+          <div className="flex flex-col items-center gap-8 py-8 px-4">
+            <BookIndice items={tocItems} />
+            {chapterSections.map((section, idx) => {
+              const key = section.kind === 'chapter' ? section.chapter.filename : `error-${idx}`;
+              const isLast = idx === totalChapters - 1;
+              if (isDraft) {
+                return (
+                  <div key={key} className="w-full max-w-3xl">
+                    {renderChapterSection(section, isLast)}
+                  </div>
+                );
+              }
+              return (
+                <div key={key} style={sheetStyle}>
+                  {renderChapterSection(section, isLast)}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
-
-      {bookViewMode === 'write' && totalChapters > 0 && (
-        <div className="flex items-center justify-between px-4 py-2 border-t border-border-subtle shrink-0 bg-bg-secondary">
-          <button
-            onClick={() => goToChapter(clampedIdx - 1)}
-            disabled={clampedIdx <= 0}
-            className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-default rounded hover:bg-bg-tertiary transition-colors duration-150"
-          >
-            <ChevronLeft size={14} />
-            <span>{t('book.previewNav.prevChapter')}</span>
-          </button>
-          <div className="flex flex-col items-center">
-            <span className="text-xs text-text-tertiary">
-              {t('book.previewNav.chapterOf', { current: clampedIdx + 1, total: totalChapters })}
-            </span>
-            {chapterSections[clampedIdx]?.kind === 'chapter' && (
-              <span className="text-[10px] text-text-tertiary">
-                {t('book.readingTime', {
-                  minutes: Math.max(1, Math.ceil(countWordsSimple(chapterSections[clampedIdx].content) / WORDS_PER_MINUTE)),
-                })}
-              </span>
-            )}
-          </div>
-          <button
-            onClick={() => goToChapter(clampedIdx + 1)}
-            disabled={clampedIdx >= totalChapters - 1}
-            className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:cursor-default rounded hover:bg-bg-tertiary transition-colors duration-150"
-          >
-            <span>{t('book.previewNav.nextChapter')}</span>
-            <ChevronRight size={14} />
-          </button>
-        </div>
-      )}
 
       {preExportProblems.length > 0 && (
         <PreExportCheckModal

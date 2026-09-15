@@ -5,10 +5,23 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Writing Streaks + Custom Fonts + Paragraph Counter (3 sub-tareas)
-- Fecha de ultima actualizacion: 2026-09-14
+- Ultima feature completada: Table of Contents interactivo en tab Libro
+- Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Table of Contents interactivo en tab Libro
+- Que se hizo: El tab Libro en modo Escribir ahora muestra el libro completo en scroll continuo con un indice automatico al inicio del preview. El indice lista todos los capitulos in-progress con links de ancla (href="#slug") que hacen scroll suave al capitulo correspondiente. Cada capitulo renderiza su propia hoja segun el modo de preview (draft, print, proof) y conserva el id del slug para el ancla. Se reemplazo la navegacion por paginas (un capitulo a la vez, botones prev/siguiente) por el scroll continuo, y se removieron el contador "Capitulo X de Y" y el tiempo de lectura asociados a la paginacion. El scroll suave es CSS puro via la utilidad Tailwind scroll-smooth sobre el contenedor, sin dependencias nuevas ni JavaScript.
+- Archivos modificados:
+  - src/components/layout/BookTabContent.tsx (agregado BookIndice y tocItems con deriveExportChapterInfo; renderizado de todos los capitulos en scroll continuo con hoja por capitulo; eliminada la paginacion prev/siguiente, el contador de capitulo, el tiempo de lectura y las funciones countWordsSimple/goToChapter; scroll-smooth en el contenedor)
+  - Sin cambios en i18n (book.indice ya existia) ni dependencias nuevas.
+- Decisiones tomadas:
+  - D-299: El TOC reutiliza el componente existente BookIndice (creado en F28 y en desuso desde el rediseno visual) y deriveExportChapterInfo de export-composer para el titulo mostrado. El slug del ancla sigue slugify(filename sin extension), estable ante cambios de titulo.
+  - D-300: El modo Escribir del tab Libro pasa de paginado (D-237) a scroll continuo con indice al inicio. El scroll entre capitulos es el mecanismo de navegacion pedido, en lugar de los botones prev/siguiente.
+  - D-301: El scroll suave se logra con scroll-behavior: smooth via la utilidad Tailwind scroll-smooth en el contenedor. Los links de BookIndice son anchors nativos href="#slug", asi que el comportamiento es CSS puro.
+  - D-302: En modo print/proof, cada capitulo es su propia hoja (sheetStyle) apilada verticalmente, preservando la estetica de hoja impresa. En modo draft los capitulos se apilan a ancho completo sin hoja.
+- Tests: tsc --noEmit limpio. npm test: 413 pasan, 12 fallan (3 archivos, preexistentes al cambio).
+- Bugs encontrados: 12 tests rotos preexistentes (registrados como regresiones de features previos, ver notas abajo). Ninguno introducido por esta feature.
 
 ### 2026-09-14 - Writing Streaks + Custom Fonts + Paragraph Counter (3 sub-tareas)
 - Que se hizo:
