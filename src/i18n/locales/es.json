@@ -132,6 +132,7 @@
   "topbar": {
     "closeProject": "Cerrar proyecto",
     "export": "Exportar",
+    "exportAll": "Exportar todo",
     "shortcuts": "Atajos de teclado",
     "about": "Acerca de",
     "writing": "Escritura",
@@ -269,6 +270,13 @@
       "export": "Exportar",
       "exporting": "Exportando…"
     },
+    "exportAll": {
+      "title": "Exportar todos los formatos",
+      "description": "Exporta markdown, Word (.docx) y EPUB juntos a una misma carpeta.",
+      "cancel": "Cancelar",
+      "export": "Exportar todo",
+      "exporting": "Exportando…"
+    },
     "preExportCheck": {
       "title": "Revisar antes de exportar",
       "description": "Se encontraron los siguientes problemas en tu libro. Puedes continuar de todas formas o volver para corregirlos.",
@@ -366,6 +374,13 @@
       "progressWriting": "Escribiendo archivo",
       "progressBackup": "Creando respaldo",
       "progressDone": "Listo"
+    },
+    "exportAll": {
+      "folderTitle": "Elige la carpeta de destino",
+      "successTitle": "Exportación completada",
+      "successBody": "Libro exportado en:\n{{folder}}",
+      "errorTitle": "Error de exportación",
+      "errorBody": "Error al exportar: {{error}}"
     }
   },
   "editor": {
@@ -470,6 +485,7 @@
     "showShortcuts": "Mostrar atajos",
     "exportBook": "Exportar libro",
     "focusMode": "Modo enfoque",
+    "globalSearch": "Busqueda global",
     "commandPalette": "Paleta de comandos"
   },
   "writingToolbar": {
@@ -524,6 +540,11 @@
     "actionTabFinished": "Ir al tab Terminados",
     "actionTabStats": "Ir al tab Estadisticas"
   },
+  "globalSearch": {
+    "placeholder": "Buscar en todos los capitulos...",
+    "noResults": "Sin coincidencias",
+    "resultCount": "{{count}} coincidencias"
+  },
   "stats": {
     "title": "Estadisticas",
     "totalWords": "Total de palabras",
@@ -542,6 +563,16 @@
     "currentStreak": "Racha actual (dias)",
     "maxStreak": "Mejor racha (dias)",
     "last30Days": "Ultimos 30 dias",
-    "streakHint": "Un dia cuenta cuando guardas al menos 100 palabras"
+    "streakHint": "Un dia cuenta cuando guardas al menos 100 palabras",
+    "health": {
+      "title": "Salud del proyecto",
+      "emptyChapter": "Capitulo sin contenido: {{title}}",
+      "shortChapter": "Capitulo muy corto ({{count}} palabras): {{title}}",
+      "missingTitle": "El libro no tiene titulo",
+      "missingAuthor": "El libro no tiene autor",
+      "missingDescription": "Falta la descripcion (sinopsis)",
+      "missingGenre": "Falta el genero",
+      "allGood": "Todo en orden, sin alertas"
+    }
   }
 }

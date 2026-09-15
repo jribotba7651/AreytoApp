@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { save, message } from '@tauri-apps/plugin-dialog';
+import { save, message, open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
@@ -17,6 +17,7 @@ import PreExportCheckModal from '@/components/book/PreExportCheckModal';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
+import ExportAllDialog from '@/components/book/ExportAllDialog';
 import ThemeGallery from '@/components/book/ThemeGallery';
 import ThemeControls from '@/components/book/ThemeControls';
 import BookSettings from '@/components/book/BookSettings';
@@ -42,6 +43,8 @@ function BookTabContent() {
   const [loading, setLoading] = useState(false);
   const showExportDialog = useLayoutStore((s) => s.showExportDialog);
   const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
+  const showExportAllDialog = useLayoutStore((s) => s.showExportAllDialog);
+  const setShowExportAllDialog = useLayoutStore((s) => s.setShowExportAllDialog);
   const bookViewMode = useLayoutStore((s) => s.bookViewMode);
   const setBookViewMode = useLayoutStore((s) => s.setBookViewMode);
   const previewMode = useLayoutStore((s) => s.previewMode);
@@ -51,6 +54,7 @@ function BookTabContent() {
   const [docxLoading, setDocxLoading] = useState(false);
   const [showEpubDialog, setShowEpubDialog] = useState(false);
   const [epubLoading, setEpubLoading] = useState(false);
+  const [exportAllLoading, setExportAllLoading] = useState(false);
   const [preExportProblems, setPreExportProblems] = useState<string[]>([]);
   const [pendingExportTarget, setPendingExportTarget] = useState<ExportTarget | null>(null);
   const [exportProgress, setExportProgress] = useState<ExportStep | null>(null);
@@ -111,13 +115,17 @@ function BookTabContent() {
     });
   }, [activeTab, currentProject, sectionVersion]);
 
-  function exportBaseName(ext: string): string {
+function exportBaseNameNoExt(): string {
     const title = bookData?.frontmatter.titulo?.titulo?.trim();
     const base = title
       ? title.replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '-')
       : currentProject!.nombre;
     const today = new Date().toISOString().slice(0, 10);
-    return `${base}-${today}.${ext}`;
+    return `${base}-${today}`;
+  }
+
+  function exportBaseName(ext: string): string {
+    return `${exportBaseNameNoExt()}.${ext}`;
   }
 
   async function backupExportedFile(exportedPath: string) {
@@ -285,6 +293,71 @@ function BookTabContent() {
       setEpubLoading(false);
       await message(t('book.export.errorBody', { error: String(err) }), {
         title: t('book.export.errorTitle'),
+        kind: 'error',
+      });
+    }
+  }
+
+  async function handleExportAll(scope: ExportScope) {
+    if (!currentProject) return;
+    setExportAllLoading(true);
+
+    try {
+      const baseDir = exportFolder || currentProject.rootPath;
+
+      const folder = await open({
+        directory: true,
+        defaultPath: baseDir,
+        title: t('book.exportAll.folderTitle'),
+      });
+
+      if (typeof folder !== 'string') {
+        setExportAllLoading(false);
+        return;
+      }
+
+      setShowExportAllDialog(false);
+      setExportProgress('assembling');
+
+      const base = exportBaseNameNoExt();
+      const opts = { scope, excludedFilenames: currentProject.excludedFromExport };
+
+      setExportProgress('writing');
+      const mdPath = `${folder}/${base}.md`;
+      await exportBookMarkdown(currentProject.rootPath, opts, mdPath, currentProject.nombre);
+      await backupExportedFile(mdPath);
+
+      const docxPath = `${folder}/${base}.docx`;
+      await exportBookDocx(currentProject.rootPath, opts, docxPath, currentProject.nombre);
+      await backupExportedFile(docxPath);
+
+      const epubPath = `${folder}/${base}.epub`;
+      await exportBookEpub(
+        currentProject.rootPath,
+        opts,
+        epubPath,
+        currentProject.tema,
+        currentProject.temaOverrides,
+        currentProject.nombre,
+      );
+      await backupExportedFile(epubPath);
+
+      void setExportFolder(folder);
+
+      setExportProgress('done');
+      await new Promise((r) => setTimeout(r, 600));
+      setExportProgress(null);
+      setExportAllLoading(false);
+
+      await message(t('book.exportAll.successBody', { folder }), {
+        title: t('book.exportAll.successTitle'),
+        kind: 'info',
+      });
+    } catch (err) {
+      setExportProgress(null);
+      setExportAllLoading(false);
+      await message(t('book.exportAll.errorBody', { error: String(err) }), {
+        title: t('book.exportAll.errorTitle'),
         kind: 'error',
       });
     }
@@ -474,6 +547,13 @@ function BookTabContent() {
           onClose={() => { if (!epubLoading) setShowEpubDialog(false); }}
           onExport={handleExportEpub}
           loading={epubLoading}
+        />
+      )}
+      {showExportAllDialog && (
+        <ExportAllDialog
+          onClose={() => { if (!exportAllLoading) setShowExportAllDialog(false); }}
+          onExport={handleExportAll}
+          loading={exportAllLoading}
         />
       )}
       {exportProgress && <ExportProgressBar step={exportProgress} />}

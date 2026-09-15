@@ -10,6 +10,7 @@ import StatsTabContent from '@/components/layout/StatsTabContent';
 import EditorPanel from '@/components/panels/EditorPanel';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import CommandPalette from '@/components/command-palette/CommandPalette';
+import GlobalSearch from '@/components/global-search/GlobalSearch';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
@@ -26,6 +27,7 @@ function App() {
   const focusMode = useLayoutStore((s) => s.focusMode);
   const toggleFocusMode = useLayoutStore((s) => s.toggleFocusMode);
   const showCommandPalette = useLayoutStore((s) => s.showCommandPalette);
+  const showGlobalSearch = useLayoutStore((s) => s.showGlobalSearch);
   const currentProject = useProjectStore((s) => s.currentProject);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -109,12 +111,13 @@ function App() {
           <EditorPanel />
           <button
             onClick={toggleFocusMode}
-            title={`${t('shortcuts.focusMode')} (\u2318\u21e7F)`}
+            title={`${t('shortcuts.focusMode')} (\u2318\u21e7D)`}
             className="absolute top-2 right-2 z-10 flex items-center justify-center w-7 h-7 rounded bg-bg-secondary/80 border border-border-subtle text-text-tertiary hover:text-text-primary transition-colors duration-150"
           >
             <Minimize2 size={14} />
           </button>
         {showCommandPalette && <CommandPalette />}
+        {showGlobalSearch && <GlobalSearch />}
         </div>
       </div>
     );
@@ -131,6 +134,7 @@ function App() {
         {activeTab === 'stats' && <StatsTabContent />}
       </main>
       {showCommandPalette && <CommandPalette />}
+      {showGlobalSearch && <GlobalSearch />}
     </div>
   );
 }

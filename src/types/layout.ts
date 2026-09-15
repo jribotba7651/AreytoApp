@@ -24,11 +24,13 @@ export interface LayoutState {
   showCloseChapterModal: boolean;
   editorViewMode: EditorViewMode;
   showExportDialog: boolean;
+  showExportAllDialog: boolean;
   showShortcutsModal: boolean;
   bookViewMode: BookViewMode;
   deviceFrame: DeviceFrame;
   previewMode: PreviewMode;
   focusMode: boolean;
   showCommandPalette: boolean;
+  showGlobalSearch: boolean;
   splitView: SplitViewState;
 }

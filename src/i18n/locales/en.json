@@ -132,6 +132,7 @@
   "topbar": {
     "closeProject": "Close project",
     "export": "Export",
+    "exportAll": "Export all",
     "shortcuts": "Keyboard shortcuts",
     "about": "About",
     "writing": "Writing",
@@ -269,6 +270,13 @@
       "export": "Export",
       "exporting": "Exporting…"
     },
+    "exportAll": {
+      "title": "Export all formats",
+      "description": "Exports markdown, Word (.docx) and EPUB together into a single folder.",
+      "cancel": "Cancel",
+      "export": "Export all",
+      "exporting": "Exporting…"
+    },
     "preExportCheck": {
       "title": "Review before exporting",
       "description": "The following issues were found in your book. You can continue anyway or go back to fix them.",
@@ -366,6 +374,13 @@
       "progressWriting": "Writing file",
       "progressBackup": "Creating backup",
       "progressDone": "Done"
+    },
+    "exportAll": {
+      "folderTitle": "Choose destination folder",
+      "successTitle": "Export complete",
+      "successBody": "Book exported to:\n{{folder}}",
+      "errorTitle": "Export error",
+      "errorBody": "Export error: {{error}}"
     }
   },
   "editor": {
@@ -470,6 +485,7 @@
     "showShortcuts": "Show shortcuts",
     "exportBook": "Export book",
     "focusMode": "Focus mode",
+    "globalSearch": "Global search",
     "commandPalette": "Command palette"
   },
   "writingToolbar": {
@@ -524,6 +540,11 @@
     "actionTabFinished": "Go to Finished tab",
     "actionTabStats": "Go to Stats tab"
   },
+  "globalSearch": {
+    "placeholder": "Search all chapters...",
+    "noResults": "No matches",
+    "resultCount": "{{count}} matches"
+  },
   "stats": {
     "title": "Statistics",
     "totalWords": "Total words",
@@ -542,6 +563,16 @@
     "currentStreak": "Current streak (days)",
     "maxStreak": "Best streak (days)",
     "last30Days": "Last 30 days",
-    "streakHint": "A day counts when you save at least 100 words"
+    "streakHint": "A day counts when you save at least 100 words",
+    "health": {
+      "title": "Project health",
+      "emptyChapter": "Chapter without content: {{title}}",
+      "shortChapter": "Very short chapter ({{count}} words): {{title}}",
+      "missingTitle": "The book has no title",
+      "missingAuthor": "The book has no author",
+      "missingDescription": "Missing description (synopsis)",
+      "missingGenre": "Missing genre",
+      "allGood": "All good, no alerts"
+    }
   }
 }

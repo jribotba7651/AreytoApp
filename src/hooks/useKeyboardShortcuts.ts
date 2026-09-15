@@ -25,10 +25,19 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // Cmd+Shift+F: toggle focus mode (always-on)
+      // Cmd+Shift+D: toggle focus mode (always-on)
       if (matchShortcut(e, SHORTCUTS.FOCUS_MODE)) {
         e.preventDefault();
         layout.toggleFocusMode();
+        return;
+      }
+
+      // Cmd+Shift+F: toggle global search (always-on)
+      if (matchShortcut(e, SHORTCUTS.GLOBAL_SEARCH)) {
+        e.preventDefault();
+        if (project.currentProject) {
+          layout.setShowGlobalSearch(!layout.showGlobalSearch);
+        }
         return;
       }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Info, Upload, Keyboard, Settings, Archive, Check, BarChart3 } from 'lucide-react';
+import { X, Info, Upload, Download, Keyboard, Settings, Archive, Check, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
@@ -14,6 +14,7 @@ function TopTabs() {
   const closeProject = useProjectStore((s) => s.closeProject);
   const saveStatus = useProjectStore((s) => s.saveStatus);
   const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
+  const setShowExportAllDialog = useLayoutStore((s) => s.setShowExportAllDialog);
   const showShortcutsModal = useLayoutStore((s) => s.showShortcutsModal);
   const setShowShortcutsModal = useLayoutStore((s) => s.setShowShortcutsModal);
   const [showAbout, setShowAbout] = useState(false);
@@ -121,6 +122,18 @@ function TopTabs() {
             >
               <Upload size={14} />
               <span>{t('topbar.export')}</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('libro');
+                setShowExportAllDialog(true);
+              }}
+              aria-label={t('topbar.exportAll')}
+              title={t('topbar.exportAll')}
+              className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
+            >
+              <Download size={14} />
+              <span>{t('topbar.exportAll')}</span>
             </button>
             <button
               onClick={closeProject}

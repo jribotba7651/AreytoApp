@@ -5,10 +5,41 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Correccion de 12 tests rotos preexistentes
+- Ultima feature completada: Global Search + Export All + Project Health Check
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Global Search + Export All + Project Health Check (3 sub-tareas)
+- Que se hizo:
+  1. Global Search: Cmd+Shift+F abre un panel flotante que busca texto en todos los capitulos del proyecto (in-progress y terminados). Lee los capitulos con listChapters + readChapter al abrir el panel y busca case-insensitive por linea. Los resultados muestran el nombre del capitulo (header clickeable), numero de linea y la linea con contexto (recortada) con el match resaltado con <mark>. Click en un resultado abre el capitulo en el editor (setActiveChapter + updateProjectMeta + setActiveTab('capitulo') + cierra el panel). Escape o click fuera cierra. Focus Mode cambia de Cmd+Shift+F a Cmd+Shift+D (el hint del boton de salida del focus mode y el ShortcutsDialog se actualizaron).
+  2. Export All: boton "Exportar todo" en la barra superior (icono Download) junto a Exportar. Abre ExportAllDialog con selector de scope (reutiliza modal.exportScope) y luego un folder picker nativo (open directory) una sola vez. Exporta markdown, docx y epub a esa misma carpeta con el mismo nombre base (exportBaseNameNoExt). Cada formato hace backup automatico y el folder elegido se persiste en exportFolder. Una sola barra de progreso compartida (assembling -> writing -> done).
+  3. Project Health Check: en el tab Stats se agrega una seccion de alertas de salud del proyecto. Detecta capitulos sin contenido (0 palabras), capitulos muy cortos (<100 palabras, constante MIN_CHAPTER_WORDS) y metadata incompleta (titulo, autor, descripcion o genero vacios via readTitulo/readMetadata). Cuando no hay alertas muestra un estado "todo en orden" con CheckCircle2 verde.
+- Archivos creados:
+  - src/components/global-search/GlobalSearch.tsx (panel de busqueda global)
+  - src/components/book/ExportAllDialog.tsx (dialogo de exportar todos los formatos)
+- Archivos modificados:
+  - src/lib/keyboard-shortcuts.ts (+GLOBAL_SEARCH Cmd+Shift+F, FOCUS_MODE -> Cmd+Shift+D)
+  - src/types/layout.ts (+showGlobalSearch, +showExportAllDialog)
+  - src/stores/layoutStore.ts (+estado y setter de showGlobalSearch y showExportAllDialog)
+  - src/hooks/useKeyboardShortcuts.ts (+handler GLOBAL_SEARCH always-on con guard de proyecto abierto)
+  - src/App.tsx (+render GlobalSearch en modo normal y focus mode, hint boton de salida -> ⌘⇧D)
+  - src/components/shortcuts/ShortcutsDialog.tsx (+fila globalSearch, focusMode ahora usa SHORTCUTS.FOCUS_MODE)
+  - src/components/layout/BookTabContent.tsx (+ExportAllDialog, +handleExportAll, +exportBaseNameNoExt, +import open)
+  - src/components/layout/TopTabs.tsx (+boton Exportar todo)
+  - src/components/layout/StatsTabContent.tsx (+health check con tipos HealthIssue, helper healthMessage/healthMeta)
+  - src/i18n/locales/en.json (+shortcuts.globalSearch, +globalSearch.*, +topbar.exportAll, +modal.exportAll.*, +book.exportAll.*, +stats.health.*)
+  - src/i18n/locales/es.json (+idem en espanol)
+- Decisiones tomadas:
+  - D-304: Global Search lee todos los capitulos al abrir el panel (in-progress y terminados) y busca por linea con match case-insensitive. Los indices del resaltado se calculan sobre la linea ya recortada (trim) para que el highlight quede alineado. Resultados agrupados por capitulo mostrando el titulo como header clickeable.
+  - D-305: FOCUS_MODE pasa de Cmd+Shift+F a Cmd+Shift+D porque Cmd+Shift+F ahora es Global Search. Ningun otro shortcut usa Cmd+Shift+D, no hay conflicto.
+  - D-306: GLOBAL_SEARCH se registra always-on (antes del guard de modales) igual que FOCUS_MODE y COMMAND_PALETTE, pero solo actua si hay proyecto abierto.
+  - D-307: Export All usa un folder picker (open directory) una sola vez y escribe los 3 archivos ahi con el mismo base name. El scope se elige en ExportAllDialog reutilizando modal.exportScope para no duplicar labels.
+  - D-308: El export all comparte la barra de progreso existente (ExportProgressBar) con pasos assembling/writing/done. Cada formato se escribe y respalda en secuencia (md -> docx -> epub).
+  - D-309: El Health Check reutiliza chapterStats (wordCount ya calculado) para vacios (<1 palabra) y cortos (<100 palabras). La metadata se lee con readTitulo/readMetadata de frontmatter-fs. No se agrego dependencia nueva.
+  - D-310: Las alertas del health check usan tokens existentes (text-error para vacios, text-warning para cortos, text-info para metadata) e iconos lucide (AlertTriangle, Info, CheckCircle2). Estado "todo en orden" solo cuando hay capitulos y cero alertas.
+- Tests: npm test: 425 pasan, 0 fallan. tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Correccion de 12 tests rotos preexistentes
 - Que se hizo: Se corrigieron los 12 tests rotos documentados como regresiones de features previos. Eran mocks desactualizados respecto al codigo fuente actual, no bugs de produccion:

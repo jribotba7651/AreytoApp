@@ -54,7 +54,8 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
   {
     titleKey: 'shortcuts.categories.view',
     rows: [
-      { labelKey: 'shortcuts.focusMode', display: '\u2318\u21e7F' },
+      { labelKey: 'shortcuts.focusMode', shortcut: SHORTCUTS.FOCUS_MODE },
+      { labelKey: 'shortcuts.globalSearch', shortcut: SHORTCUTS.GLOBAL_SEARCH },
       { labelKey: 'shortcuts.showShortcuts', shortcut: SHORTCUTS.SHOW_SHORTCUTS },
     ],
   },

@@ -18,7 +18,8 @@ export const SHORTCUTS = {
   CLOSE_PROJECT:       { key: 'w', mod: true, shift: true },
   TOGGLE_EDITOR_VIEW:  { key: 'e', mod: true },
   SHOW_SHORTCUTS:      { key: '/', mod: true, shift: true },
-  FOCUS_MODE:          { key: 'f', mod: true, shift: true },
+  FOCUS_MODE:          { key: 'd', mod: true, shift: true },
+  GLOBAL_SEARCH:       { key: 'f', mod: true, shift: true },
   COMMAND_PALETTE:     { key: 'k', mod: true, alwaysOn: true },
 } as const satisfies Record<string, ShortcutDef>;
 

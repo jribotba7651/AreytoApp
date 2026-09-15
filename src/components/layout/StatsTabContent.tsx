@@ -1,8 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { listChapters, readChapter } from '@/lib/project-fs';
+import { readTitulo, readMetadata } from '@/lib/frontmatter-fs';
 import type { Chapter } from '@/types/project';
 
 interface ChapterStat {
@@ -16,7 +18,16 @@ interface DailyCount {
   count: number;
 }
 
+type HealthIssue =
+  | { kind: 'empty'; title: string }
+  | { kind: 'short'; title: string; wordCount: number }
+  | { kind: 'missingTitle' }
+  | { kind: 'missingAuthor' }
+  | { kind: 'missingDescription' }
+  | { kind: 'missingGenre' };
+
 const WORDS_PER_PAGE = 250;
+const MIN_CHAPTER_WORDS = 100;
 
 function countWords(text: string): number {
   const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
@@ -74,6 +85,7 @@ function StatsTabContent() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const bookWordGoal = useSettingsStore((s) => s.bookWordGoal);
   const [chapterStats, setChapterStats] = useState<ChapterStat[]>([]);
+  const [healthIssues, setHealthIssues] = useState<HealthIssue[]>([]);
   const [dailyCounts, setDailyCounts] = useState<DailyCount[]>([]);
   const [projectStartDate, setProjectStartDate] = useState<string | null>(null);
   const writingDays = useSettingsStore((s) => s.writingDays);
@@ -120,6 +132,26 @@ function StatsTabContent() {
       }
 
       setChapterStats(stats);
+
+      const [titulo, metadata] = await Promise.all([
+        readTitulo(currentProject!.rootPath),
+        readMetadata(currentProject!.rootPath),
+      ]);
+
+      const issues: HealthIssue[] = [];
+      for (const st of stats) {
+        if (st.wordCount === 0) {
+          issues.push({ kind: 'empty', title: st.title });
+        } else if (st.wordCount < MIN_CHAPTER_WORDS) {
+          issues.push({ kind: 'short', title: st.title, wordCount: st.wordCount });
+        }
+      }
+      if (!titulo?.titulo?.trim()) issues.push({ kind: 'missingTitle' });
+      if (!titulo?.autor?.trim()) issues.push({ kind: 'missingAuthor' });
+      if (!metadata?.descripcion?.trim()) issues.push({ kind: 'missingDescription' });
+      if (!metadata?.genero?.trim()) issues.push({ kind: 'missingGenre' });
+
+      setHealthIssues(issues);
       setLoading(false);
     }
 
@@ -205,6 +237,34 @@ function StatsTabContent() {
 
   const maxDaily = Math.max(...dailyCounts.map((d) => d.count), 1);
 
+  function healthMessage(issue: HealthIssue): string {
+    switch (issue.kind) {
+      case 'empty':
+        return t('stats.health.emptyChapter', { title: issue.title });
+      case 'short':
+        return t('stats.health.shortChapter', { title: issue.title, count: issue.wordCount });
+      case 'missingTitle':
+        return t('stats.health.missingTitle');
+      case 'missingAuthor':
+        return t('stats.health.missingAuthor');
+      case 'missingDescription':
+        return t('stats.health.missingDescription');
+      case 'missingGenre':
+        return t('stats.health.missingGenre');
+    }
+  }
+
+  function healthMeta(kind: HealthIssue['kind']): { icon: React.ReactNode; colorClass: string } {
+    switch (kind) {
+      case 'empty':
+        return { icon: <AlertTriangle size={14} />, colorClass: 'text-error' };
+      case 'short':
+        return { icon: <AlertTriangle size={14} />, colorClass: 'text-warning' };
+      default:
+        return { icon: <Info size={14} />, colorClass: 'text-info' };
+    }
+  }
+
   return (
     <div className="h-full overflow-y-auto bg-bg-primary">
       <div className="max-w-2xl mx-auto py-8 px-6 space-y-8">
@@ -247,6 +307,31 @@ function StatsTabContent() {
           </div>
         ) : (
           <>
+            {/* Health check */}
+            {healthIssues.length > 0 ? (
+              <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
+                <p className="text-[11px] text-text-tertiary uppercase tracking-wide mb-3">
+                  {t('stats.health.title')}
+                </p>
+                <ul className="space-y-1.5">
+                  {healthIssues.map((issue, idx) => {
+                    const meta = healthMeta(issue.kind);
+                    return (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <span className={`shrink-0 mt-px ${meta.colorClass}`}>{meta.icon}</span>
+                        <span className="text-text-primary leading-snug">{healthMessage(issue)}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : (
+              <div className="p-4 bg-bg-secondary rounded border border-border-subtle flex items-center gap-2">
+                <CheckCircle2 size={14} className="text-success shrink-0" />
+                <p className="text-sm text-text-secondary">{t('stats.health.allGood')}</p>
+              </div>
+            )}
+
             {/* Summary cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
