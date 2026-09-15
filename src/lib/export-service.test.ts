@@ -52,6 +52,7 @@ describe('exportBookMarkdown', () => {
       indiceContent: null,
       chapterSlugs: {},
       chapterHeadings: {},
+      excludedFilenames: [],
     });
   });
 
@@ -68,6 +69,7 @@ describe('exportBookMarkdown', () => {
       indiceContent: null,
       chapterSlugs: {},
       chapterHeadings: {},
+      excludedFilenames: [],
     });
   });
 
@@ -84,6 +86,7 @@ describe('exportBookMarkdown', () => {
       indiceContent: null,
       chapterSlugs: {},
       chapterHeadings: {},
+      excludedFilenames: [],
     });
   });
 
@@ -297,6 +300,7 @@ describe('exportBookDocx', () => {
       indiceContent: null,
       chapterSlugs: {},
       chapterHeadings: {},
+      excludedFilenames: [],
     });
   });
 
@@ -313,6 +317,7 @@ describe('exportBookDocx', () => {
       indiceContent: null,
       chapterSlugs: {},
       chapterHeadings: {},
+      excludedFilenames: [],
     });
   });
 
@@ -329,6 +334,7 @@ describe('exportBookDocx', () => {
       indiceContent: null,
       chapterSlugs: {},
       chapterHeadings: {},
+      excludedFilenames: [],
     });
   });
 

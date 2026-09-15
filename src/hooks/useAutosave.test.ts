@@ -29,7 +29,7 @@ const PATH = '/tmp/mi-libro/capitulos/cap-01.md';
 beforeEach(() => {
   vi.clearAllMocks();
   vi.useFakeTimers();
-  mockGetState.mockReturnValue({ autoCommit: true, autosaveIntervalMs: 500, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
+  mockGetState.mockReturnValue({ autoCommit: true, autosaveIntervalMs: 500, loaded: true, recordWritingDay: vi.fn() } as unknown as ReturnType<typeof useSettingsStore.getState>);
 });
 
 afterEach(() => {
@@ -150,7 +150,7 @@ describe('useAutosave - integración con autoCommit', () => {
   const PROJECT = '/tmp/mi-libro';
 
   it('no invoca commitChanges si autoCommit es false', async () => {
-    mockGetState.mockReturnValue({ autoCommit: false, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
+    mockGetState.mockReturnValue({ autoCommit: false, loaded: true, recordWritingDay: vi.fn() } as unknown as ReturnType<typeof useSettingsStore.getState>);
     mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
     const onStatusChange = vi.fn();
 
@@ -168,7 +168,7 @@ describe('useAutosave - integración con autoCommit', () => {
   });
 
   it('invoca commitChanges si autoCommit es true', async () => {
-    mockGetState.mockReturnValue({ autoCommit: true, loaded: true } as ReturnType<typeof useSettingsStore.getState>);
+    mockGetState.mockReturnValue({ autoCommit: true, loaded: true, recordWritingDay: vi.fn() } as unknown as ReturnType<typeof useSettingsStore.getState>);
     mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
     mockCommitChanges.mockResolvedValue({ ok: true, value: 'abc1234' });
     const onStatusChange = vi.fn();
@@ -187,7 +187,7 @@ describe('useAutosave - integración con autoCommit', () => {
   });
 
   it('invoca commitChanges si settings no está cargado (loaded=false)', async () => {
-    mockGetState.mockReturnValue({ autoCommit: true, autosaveIntervalMs: 500, loaded: false } as ReturnType<typeof useSettingsStore.getState>);
+    mockGetState.mockReturnValue({ autoCommit: true, autosaveIntervalMs: 500, loaded: false, recordWritingDay: vi.fn() } as unknown as ReturnType<typeof useSettingsStore.getState>);
     mockWriteChapter.mockResolvedValue({ ok: true, value: undefined });
     mockCommitChanges.mockResolvedValue({ ok: true, value: 'abc1234' });
     const onStatusChange = vi.fn();

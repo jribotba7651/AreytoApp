@@ -5,10 +5,24 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Table of Contents interactivo en tab Libro
+- Ultima feature completada: Correccion de 12 tests rotos preexistentes
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Correccion de 12 tests rotos preexistentes
+- Que se hizo: Se corrigieron los 12 tests rotos documentados como regresiones de features previos. Eran mocks desactualizados respecto al codigo fuente actual, no bugs de produccion:
+  1. useAutosave.test.ts (4): el hook ahora llama useSettingsStore.recordWritingDay (feature Writing Streaks) y useProjectStore.setLastSavedContent/prependCommit. El mock de settingsStore no exponia recordWritingDay, lo que lanzaba TypeError y cortaba el flujo antes de commitChanges. Se agrego recordWritingDay: vi.fn() a los mocks de getState.
+  2. export-service.test.ts (6): exportBookMarkdown y exportBookDocx ahora pasan excludedFilenames al command Tauri. Las 6 aserciones toHaveBeenCalledWith no incluian ese campo. Se agrego excludedFilenames: [] a cada una.
+  3. TopTabs.test.tsx (2): tras el rediseno visual, Terminados/Ajustes son iconos y Capitulo/Libro es el toggle Escribir/Formatear; el texto visible "Libro" ya no existe. Se actualizaron las aserciones para buscar por title (tooltips) en vez de texto.
+- Archivos modificados:
+  - src/hooks/useAutosave.test.ts
+  - src/lib/export-service.test.ts
+  - src/components/layout/TopTabs.test.tsx
+- Decisiones tomadas:
+  - D-303: Los mocks parciales de stores se castean con as unknown as ReturnType<...> (patron ya usado en close-chapter-flow.test.ts y refresh-chapters.test.ts), evitando el error TS2352 al incluir funciones mock como recordWritingDay.
+- Tests: npm test: 425 pasan, 0 fallan. tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Table of Contents interactivo en tab Libro
 - Que se hizo: El tab Libro en modo Escribir ahora muestra el libro completo en scroll continuo con un indice automatico al inicio del preview. El indice lista todos los capitulos in-progress con links de ancla (href="#slug") que hacen scroll suave al capitulo correspondiente. Cada capitulo renderiza su propia hoja segun el modo de preview (draft, print, proof) y conserva el id del slug para el ancla. Se reemplazo la navegacion por paginas (un capitulo a la vez, botones prev/siguiente) por el scroll continuo, y se removieron el contador "Capitulo X de Y" y el tiempo de lectura asociados a la paginacion. El scroll suave es CSS puro via la utilidad Tailwind scroll-smooth sobre el contenedor, sin dependencias nuevas ni JavaScript.

@@ -90,22 +90,22 @@ describe('TopTabs - botón Acerca de', () => {
 });
 
 describe('TopTabs - tabs de navegación', () => {
-  it('renderiza los 4 tabs', () => {
+  it('renderiza los tabs de navegación', () => {
     render(<TopTabs />);
-    expect(screen.getByText('Capítulo Activo')).toBeDefined();
-    expect(screen.getByText('Libro')).toBeDefined();
-    expect(screen.getByText('Terminados')).toBeDefined();
-    expect(screen.getByText('Ajustes')).toBeDefined();
+    expect(screen.getByTitle('Capítulo Activo (⌘1)')).toBeDefined();
+    expect(screen.getByTitle('Libro (⌘2)')).toBeDefined();
+    expect(screen.getByTitle('Terminados (⌘3)')).toBeDefined();
+    expect(screen.getByTitle('Ajustes (⌘4)')).toBeDefined();
   });
 
-  it('el tab activo llama a setActiveTab al hacer click', () => {
+  it('el toggle Formatear llama a setActiveTab con libro al hacer click', () => {
     const setActiveTab = vi.fn();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseLayoutStore.mockImplementation((selector: any) =>
       selector(makeLayoutState({ setActiveTab }))
     );
     render(<TopTabs />);
-    fireEvent.click(screen.getByText('Libro'));
+    fireEvent.click(screen.getByTitle('Libro (⌘2)'));
     expect(setActiveTab).toHaveBeenCalledWith('libro');
   });
 });
