@@ -34,6 +34,7 @@ export interface GlobalSettings {
   customBookFont?: string;
   readingGoalMinutes?: number;
   readingSecondsByDay?: Record<string, number>;
+  chapterTemplates?: ChapterTemplate[];
 }
 
 export interface RecentProject {
@@ -41,6 +42,11 @@ export interface RecentProject {
   name: string;
   lastOpened: string;
   chapterCount: number;
+}
+
+export interface ChapterTemplate {
+  name: string;
+  content: string;
 }
 
 export interface ProjectState {

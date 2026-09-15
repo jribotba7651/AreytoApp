@@ -131,6 +131,15 @@
       },
       "browse": "Examinar…",
       "reset": "Restablecer"
+    },
+    "chapterTemplates": {
+      "sectionTitle": "Plantillas de capitulo",
+      "description": "Crea tus propias plantillas de capitulo. Apareceran en el menu del boton + del sidebar.",
+      "namePlaceholder": "Nombre de la plantilla",
+      "contentPlaceholder": "Contenido markdown ({{title}} se reemplaza por el titulo)",
+      "add": "Agregar plantilla",
+      "empty": "Sin plantillas personalizadas aun.",
+      "delete": "Eliminar"
     }
   },
   "topbar": {
@@ -395,6 +404,7 @@
     "noActiveChapter": "No hay capítulo activo",
     "wordCount": "{{count}} palabras",
     "paragraphCount": "{{count}} parrafos",
+    "characterCount": "{{count}} caracteres",
     "bookWordCount": "Libro: {{count}} palabras",
     "projectLanguage": "Idioma del proyecto",
     "splitView": "Vista dividida",

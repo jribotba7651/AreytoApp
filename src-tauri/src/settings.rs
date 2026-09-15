@@ -26,6 +26,12 @@ pub struct RecentProject {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct ChapterTemplate {
+    pub name: String,
+    pub content: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GlobalSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -66,6 +72,8 @@ pub struct GlobalSettings {
     pub writing_days: Vec<String>,
     #[serde(default)]
     pub recent_projects: Vec<RecentProject>,
+    #[serde(default)]
+    pub chapter_templates: Vec<ChapterTemplate>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -525,5 +533,29 @@ mod tests {
         assert_eq!(parsed.recent_projects.len(), 1);
         assert_eq!(parsed.recent_projects[0].name, "Mi Libro");
         assert_eq!(parsed.recent_projects[0].chapter_count, 12);
+    }
+
+    #[test]
+    fn default_chapter_templates_es_vacio_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert!(s.chapter_templates.is_empty(), "chapter_templates debe ser vacío cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_chapter_templates() {
+        let original = GlobalSettings {
+            version: 1,
+            chapter_templates: vec![ChapterTemplate {
+                name: "Con escenas".to_string(),
+                content: "# {{title}}\n\n## Escena 1\n".to_string(),
+            }],
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.chapter_templates.len(), 1);
+        assert_eq!(parsed.chapter_templates[0].name, "Con escenas");
+        assert_eq!(parsed.chapter_templates[0].content.contains("Escena 1"), true);
     }
 }

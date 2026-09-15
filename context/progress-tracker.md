@@ -5,10 +5,34 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Print Button + Chapter Links + Word Frequency (3 sub-tareas)
+- Ultima feature completada: Distraction-free Writing + Character Count + Chapter Templates Personalizados (3 sub-tareas)
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Distraction-free Writing + Character Count + Chapter Templates Personalizados (3 sub-tareas)
+- Que se hizo:
+  1. Distraction-free Writing: se mejoro el Focus Mode existente. El cursor ahora se mantiene siempre centrado verticalmente (se fuerza el modo maquina de escribir cuando focusMode esta activo, sin importar el setting typewriterMode). Se agrego un fade de los primeros y ultimos parrafos: dos overlays de 60px en el top y el bottom del area del editor que desvanecen el texto hacia el fondo del editor (gradiente CSS con color-mix sobre --bg-editor, compatible con light y dark). Se agrego un contador minimalista de palabras centrado en la parte inferior del editor. En focus mode tambien se ocultan la toolbar de formato, el banner de cambio externo y la barra inferior de stats, dejando solo el editor.
+  2. Character Count: en la barra inferior del editor se agrego el conteo de caracteres junto a palabras y parrafos. Los caracteres se cuentan con text.length (incluye espacios y saltos, super simple).
+  3. Chapter Templates Personalizados: en Settings (nueva seccion "Plantillas de capitulo") el usuario puede crear sus propios templates con nombre y contenido markdown ({{title}} se reemplaza por el titulo). Se guardan en GlobalSettings. Aparecen en el dropdown del boton + del sidebar, debajo de los 3 templates built-in.
+- Archivos modificados:
+  - src/components/editor/ChapterEditor.tsx (lee focusMode y fuerza typewriter centrado: typewriterEnabled = typewriterSetting || focusMode)
+  - src/components/panels/EditorPanel.tsx (focusMode en ChapterView; header/footer condicionales; overlays de fade top/bottom y contador minimalista en focus mode; +countCharacters)
+  - src/styles/globals.css (+.focus-mode-fade-top y .focus-mode-fade-bottom con gradient sobre --bg-editor)
+  - src/lib/settings.ts (+ChapterTemplate interface, +chapterTemplates en GlobalSettings)
+  - src/stores/settingsStore.ts (+chapterTemplates state, +addChapterTemplate, +removeChapterTemplate, carga en load())
+  - src/components/settings/SettingsTabContent.tsx (+seccion Plantillas de capitulo con form name/content, lista y boton eliminar)
+  - src/components/sidebar/NewChapterButton.tsx (+render de templates personalizados en el dropdown, handler handleCreateWithContent)
+  - src-tauri/src/settings.rs (+struct ChapterTemplate, +chapter_templates en GlobalSettings con default vacio, +2 tests)
+  - src/i18n/locales/es.json y en.json (+editor.characterCount, +settings.chapterTemplates.*)
+  - src/components/settings/SettingsTabContent.test.tsx (+chapterTemplates/addChapterTemplate/removeChapterTemplate en el mock del store)
+- Decisiones tomadas:
+  - D-322: El fade de parrafos usa gradient sobre --bg-editor con color-mix(in srgb, var(--bg-editor) 0%, transparent) en el extremo para que la transicion desvanezca hacia el mismo tono del fondo del editor en light y dark, sin tinte gris (evitando el problema clasico de usar "transparent" = rgba(0,0,0,0)).
+  - D-323: El cursor centrado en focus mode se logra forzando el typewriter mode existente (no una extension nueva): ChapterEditor lee focusMode del layoutStore y hace OR con typewriterMode. Se acepta el remount del editor al cambiar focusMode (mismo tradeoff ya documentado en D-294).
+  - D-324: chapterTemplates usa Vec con serde default vacio en Rust (mismo patron que writing_days y recent_projects, D-316) para que settings.json viejo sin el campo deserialice a lista vacia sin fallar.
+  - D-325: El conteo de caracteres usa text.length (sin normalizar whitespace). Es la opcion mas simple y predecible para el usuario; si se necesita "caracteres sin espacios" se puede agregar despues.
+- Tests: tsc --noEmit limpio. npm test: 431 pasan, 0 fallan. cargo check limpio. cargo test: 49 pasan, 0 fallan, 1 ignorado (2 nuevos tests de chapter_templates en settings.rs).
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Print Button + Chapter Links + Word Frequency (3 sub-tareas)
 - Que se hizo:

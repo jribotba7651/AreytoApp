@@ -131,6 +131,15 @@
       },
       "browse": "Browse…",
       "reset": "Reset"
+    },
+    "chapterTemplates": {
+      "sectionTitle": "Chapter templates",
+      "description": "Create your own chapter templates. They will appear in the + button menu in the sidebar.",
+      "namePlaceholder": "Template name",
+      "contentPlaceholder": "Markdown content ({{title}} is replaced by the title)",
+      "add": "Add template",
+      "empty": "No custom templates yet.",
+      "delete": "Delete"
     }
   },
   "topbar": {
@@ -395,6 +404,7 @@
     "noActiveChapter": "No active chapter",
     "wordCount": "{{count}} words",
     "paragraphCount": "{{count}} paragraphs",
+    "characterCount": "{{count}} characters",
     "bookWordCount": "Book: {{count}} words",
     "projectLanguage": "Project language",
     "splitView": "Split view",

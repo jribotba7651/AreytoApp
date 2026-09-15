@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore, type ThemeMode, type EditorFontFamily, type BookFontFamily } from '@/stores/settingsStore';
@@ -85,6 +86,12 @@ function SettingsTabContent() {
   const setCustomEditorFont = useSettingsStore((s) => s.setCustomEditorFont);
   const customBookFont = useSettingsStore((s) => s.customBookFont);
   const setCustomBookFont = useSettingsStore((s) => s.setCustomBookFont);
+  const chapterTemplates = useSettingsStore((s) => s.chapterTemplates);
+  const addChapterTemplate = useSettingsStore((s) => s.addChapterTemplate);
+  const removeChapterTemplate = useSettingsStore((s) => s.removeChapterTemplate);
+
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateContent, setNewTemplateContent] = useState('');
 
   const displayMs = PRESET_VALUES.includes(autosaveIntervalMs) ? autosaveIntervalMs : 2000;
 
@@ -562,6 +569,75 @@ function SettingsTabContent() {
                 )}
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">
+            {t('settings.chapterTemplates.sectionTitle')}
+          </h2>
+
+          <div className="bg-bg-secondary border border-border-subtle rounded-lg p-5">
+            <p className="text-xs text-text-tertiary leading-relaxed mb-4">
+              {t('settings.chapterTemplates.description')}
+            </p>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+                placeholder={t('settings.chapterTemplates.namePlaceholder')}
+                className="w-full bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              />
+              <textarea
+                value={newTemplateContent}
+                onChange={(e) => setNewTemplateContent(e.target.value)}
+                placeholder={t('settings.chapterTemplates.contentPlaceholder')}
+                rows={4}
+                className="w-full bg-bg-tertiary border border-border-default text-text-primary text-sm rounded px-2 py-1.5 font-mono focus:outline-none focus-visible:ring-2 focus-visible:ring-accent resize-y"
+              />
+              <button
+                onClick={() => {
+                  const name = newTemplateName.trim();
+                  if (!name) return;
+                  void addChapterTemplate({ name, content: newTemplateContent });
+                  setNewTemplateName('');
+                  setNewTemplateContent('');
+                }}
+                className="px-3 py-1 text-sm bg-bg-tertiary border border-border-default text-text-primary rounded hover:bg-bg-primary transition-colors duration-150"
+              >
+                {t('settings.chapterTemplates.add')}
+              </button>
+            </div>
+
+            {chapterTemplates.length === 0 ? (
+              <p className="mt-4 text-xs text-text-tertiary">
+                {t('settings.chapterTemplates.empty')}
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {chapterTemplates.map((tpl, i) => (
+                  <li
+                    key={`${tpl.name}-${i}`}
+                    className="flex items-center justify-between gap-4 px-3 py-2 bg-bg-tertiary rounded"
+                  >
+                    <div className="min-w-0">
+                      <span className="block text-sm text-text-primary truncate">{tpl.name}</span>
+                      <span className="block text-xs text-text-tertiary truncate font-mono">
+                        {tpl.content.split('\n')[0] ?? ''}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => void removeChapterTemplate(i)}
+                      className="shrink-0 px-2 py-1 text-xs text-text-tertiary hover:text-error transition-colors duration-150"
+                    >
+                      {t('settings.chapterTemplates.delete')}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
 

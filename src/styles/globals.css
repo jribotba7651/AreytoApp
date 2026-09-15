@@ -273,6 +273,23 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Focus mode: fade the first and last paragraphs at the edges of the viewport */
+.focus-mode-fade-top {
+  background: linear-gradient(
+    to bottom,
+    var(--bg-editor),
+    color-mix(in srgb, var(--bg-editor) 0%, transparent)
+  );
+}
+
+.focus-mode-fade-bottom {
+  background: linear-gradient(
+    to top,
+    var(--bg-editor),
+    color-mix(in srgb, var(--bg-editor) 0%, transparent)
+  );
+}
+
 /* Print: hide the app shell, show only the book content */
 #print-book {
   display: none;

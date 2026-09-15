@@ -7,6 +7,7 @@ import { createEditorTheme } from './editor-theme';
 import { markdownFormatKeymap } from './markdown-format';
 import { typewriterMode, sentenceHighlight } from './editor-extensions';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useLayoutStore } from '@/stores/layoutStore';
 
 interface ChapterEditorProps {
   initialContent: string;
@@ -23,8 +24,10 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   const onScrollRef = useRef(onScroll);
-  const typewriterEnabled = useSettingsStore((s) => s.typewriterMode);
+  const typewriterSetting = useSettingsStore((s) => s.typewriterMode);
   const sentenceHighlightEnabled = useSettingsStore((s) => s.sentenceHighlight);
+  const focusMode = useLayoutStore((s) => s.focusMode);
+  const typewriterEnabled = typewriterSetting || focusMode;
 
   useImperativeHandle(ref, () => ({
     getView: () => viewRef.current,

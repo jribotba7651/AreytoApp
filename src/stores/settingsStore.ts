@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { readGlobalSettings, writeGlobalSettings } from '@/lib/settings';
-import type { RecentProject } from '@/lib/settings';
+import type { RecentProject, ChapterTemplate } from '@/lib/settings';
 import i18n from '@/i18n/i18n';
 import type { Theme } from '@/lib/theme';
 
@@ -68,6 +68,7 @@ interface SettingsState {
   customBookFont: string;
   readingGoalMinutes: number;
   readingSecondsByDay: Record<string, number>;
+  chapterTemplates: ChapterTemplate[];
   loaded: boolean;
   load: () => Promise<void>;
   addRecentProject: (project: RecentProject) => Promise<void>;
@@ -92,6 +93,8 @@ interface SettingsState {
   setCustomBookFont: (font: string) => Promise<void>;
   setReadingGoalMinutes: (goal: number) => Promise<void>;
   addReadingSeconds: (seconds: number) => Promise<void>;
+  addChapterTemplate: (template: ChapterTemplate) => Promise<void>;
+  removeChapterTemplate: (index: number) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -117,6 +120,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   customBookFont: '',
   readingGoalMinutes: 30,
   readingSecondsByDay: {},
+  chapterTemplates: [],
   loaded: false,
 
   load: async () => {
@@ -151,6 +155,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         customBookFont: settings.customBookFont ?? '',
         readingGoalMinutes: settings.readingGoalMinutes ?? 30,
         readingSecondsByDay: settings.readingSecondsByDay ?? {},
+        chapterTemplates: (settings.chapterTemplates ?? []) as ChapterTemplate[],
         loaded: true,
       });
       const customEditorFont = settings.customEditorFont ?? '';
@@ -411,6 +416,28 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, readingSecondsByDay: updated });
     } catch (err) {
       console.warn('[areyto] Failed to persist readingSecondsByDay:', err);
+    }
+  },
+
+  addChapterTemplate: async (template: ChapterTemplate) => {
+    const updated = [...useSettingsStore.getState().chapterTemplates, template];
+    set({ chapterTemplates: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, chapterTemplates: updated });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist chapterTemplates:', err);
+    }
+  },
+
+  removeChapterTemplate: async (index: number) => {
+    const updated = useSettingsStore.getState().chapterTemplates.filter((_, i) => i !== index);
+    set({ chapterTemplates: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, chapterTemplates: updated });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist chapterTemplates:', err);
     }
   },
 }));

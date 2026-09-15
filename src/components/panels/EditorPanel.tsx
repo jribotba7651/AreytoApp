@@ -34,6 +34,10 @@ function countParagraphs(text: string): number {
   return text.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length;
 }
 
+function countCharacters(text: string): number {
+  return text.length;
+}
+
 function useBookWordCount(): number {
   const chapters = useProjectStore((s) => s.chapters);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
@@ -84,6 +88,7 @@ function ChapterView() {
   const setEditorViewMode = useLayoutStore((s) => s.setEditorViewMode);
   const splitView = useLayoutStore((s) => s.splitView);
   const toggleSplitView = useLayoutStore((s) => s.toggleSplitView);
+  const focusMode = useLayoutStore((s) => s.focusMode);
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
 
@@ -188,44 +193,47 @@ function ChapterView() {
     );
   const chapterWords = countWords(activeChapterContent);
   const chapterParagraphs = countParagraphs(activeChapterContent);
+  const chapterCharacters = countCharacters(activeChapterContent);
   const bookWords = useBookWordCount();
   const sessionTime = useSessionTimer(!!currentProject);
 
   return (
-    <div className="h-full flex flex-col bg-bg-editor">
-      <ExternalChangeBanner />
-      <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle shrink-0">
-        {!isPreview ? (
-          <FormatToolbar editorRef={editorRef} />
-        ) : (
-          <div />
-        )}
-        <div className="relative flex items-center gap-1">
-          <button
-            onClick={toggleSplitView}
-            className={[
-              'flex items-center gap-1.5 px-2 py-1 text-xs rounded transition-colors duration-150',
-              splitView.active
-                ? 'text-text-primary bg-bg-tertiary'
-                : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary',
-            ].join(' ')}
-            title={t('editor.splitView')}
-          >
-            <Columns2 size={14} />
-          </button>
-          <button
-            onClick={handleToggle}
-            className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
-            title={viewModeNextLabel}
-          >
-            {viewModeNextIcon}
-            <span>{viewModeNextLabel}</span>
-          </button>
-          <div className="pl-1.5">
-            <ShortcutHint text="⌘E" />
+    <div className="relative h-full flex flex-col bg-bg-editor">
+      {!focusMode && <ExternalChangeBanner />}
+      {!focusMode && (
+        <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle shrink-0">
+          {!isPreview ? (
+            <FormatToolbar editorRef={editorRef} />
+          ) : (
+            <div />
+          )}
+          <div className="relative flex items-center gap-1">
+            <button
+              onClick={toggleSplitView}
+              className={[
+                'flex items-center gap-1.5 px-2 py-1 text-xs rounded transition-colors duration-150',
+                splitView.active
+                  ? 'text-text-primary bg-bg-tertiary'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary',
+              ].join(' ')}
+              title={t('editor.splitView')}
+            >
+              <Columns2 size={14} />
+            </button>
+            <button
+              onClick={handleToggle}
+              className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
+              title={viewModeNextLabel}
+            >
+              {viewModeNextIcon}
+              <span>{viewModeNextLabel}</span>
+            </button>
+            <div className="pl-1.5">
+              <ShortcutHint text="⌘E" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="flex-1 min-h-0 flex">
         {isSplit ? (
@@ -291,39 +299,54 @@ function ChapterView() {
         )}
       </div>
 
-      <div className="flex items-center justify-between px-3 py-1 border-t border-border-subtle shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] text-text-tertiary">
-            {t('editor.wordCount', { count: chapterWords })}
-          </span>
-          <span className="text-[11px] text-text-tertiary">
-            {t('editor.paragraphCount', { count: chapterParagraphs })}
-          </span>
-          <div className="flex items-center gap-1">
-            <Languages size={12} className="text-text-tertiary" />
-            <select
-              value={projectLang}
-              onChange={(e) => void handleLanguageChange(e.target.value)}
-              title={t('editor.projectLanguage')}
-              className="text-[11px] text-text-tertiary bg-transparent border-none outline-none cursor-pointer hover:text-text-primary transition-colors duration-150 py-0 px-0.5"
-            >
-              <option value="es">ES</option>
-              <option value="en">EN</option>
-              <option value="pt">PT</option>
-              <option value="fr">FR</option>
-              <option value="de">DE</option>
-              <option value="it">IT</option>
-            </select>
+      {focusMode ? (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[60px] focus-mode-fade-top" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60px] focus-mode-fade-bottom" />
+          <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2">
+            <span className="text-[11px] text-text-tertiary">
+              {t('editor.wordCount', { count: chapterWords })}
+            </span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock size={11} className="text-text-tertiary" />
-            <span className="text-[11px] text-text-tertiary">{sessionTime}</span>
+        </>
+      ) : (
+        <div className="flex items-center justify-between px-3 py-1 border-t border-border-subtle shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-text-tertiary">
+              {t('editor.wordCount', { count: chapterWords })}
+            </span>
+            <span className="text-[11px] text-text-tertiary">
+              {t('editor.paragraphCount', { count: chapterParagraphs })}
+            </span>
+            <span className="text-[11px] text-text-tertiary">
+              {t('editor.characterCount', { count: chapterCharacters })}
+            </span>
+            <div className="flex items-center gap-1">
+              <Languages size={12} className="text-text-tertiary" />
+              <select
+                value={projectLang}
+                onChange={(e) => void handleLanguageChange(e.target.value)}
+                title={t('editor.projectLanguage')}
+                className="text-[11px] text-text-tertiary bg-transparent border-none outline-none cursor-pointer hover:text-text-primary transition-colors duration-150 py-0 px-0.5"
+              >
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+                <option value="pt">PT</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="it">IT</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock size={11} className="text-text-tertiary" />
+              <span className="text-[11px] text-text-tertiary">{sessionTime}</span>
+            </div>
           </div>
+          <span className="text-[11px] text-text-tertiary">
+            {t('editor.bookWordCount', { count: bookWords })}
+          </span>
         </div>
-        <span className="text-[11px] text-text-tertiary">
-          {t('editor.bookWordCount', { count: bookWords })}
-        </span>
-      </div>
+      )}
     </div>
   );
 }

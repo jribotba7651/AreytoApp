@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, FileText, MessageSquare, Film } from 'lucide-react';
+import { Plus, FileText, MessageSquare, Film, FilePlus2 } from 'lucide-react';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { createChapter, updateProjectMeta, readChapter } from '@/lib/project-fs';
 import ShortcutHint from '@/components/shared/ShortcutHint';
 
@@ -52,6 +53,7 @@ function NewChapterButton() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const addChapter = useProjectStore((s) => s.addChapter);
   const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
+  const chapterTemplates = useSettingsStore((s) => s.chapterTemplates);
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -67,12 +69,12 @@ function NewChapterButton() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
-  async function handleCreate(template: ChapterTemplate) {
+  async function handleCreateWithContent(content: string) {
     if (!currentProject || loading) return;
     setShowMenu(false);
     setLoading(true);
 
-    const result = await createChapter(currentProject, undefined, TEMPLATE_CONTENT[template]);
+    const result = await createChapter(currentProject, undefined, content);
     if (!result.ok) {
       console.error('Error al crear capitulo:', result.error);
       setLoading(false);
@@ -83,10 +85,14 @@ function NewChapterButton() {
     await updateProjectMeta(currentProject, { capituloActivo: result.value.filename });
 
     const read = await readChapter(result.value.path);
-    const content = read.ok ? read.value : `# ${result.value.title}\n\n`;
-    setActiveChapter(result.value.path, content);
+    const contentRead = read.ok ? read.value : `# ${result.value.title}\n\n`;
+    setActiveChapter(result.value.path, contentRead);
 
     setLoading(false);
+  }
+
+  async function handleCreate(template: ChapterTemplate) {
+    await handleCreateWithContent(TEMPLATE_CONTENT[template]);
   }
 
   return (
@@ -119,11 +125,27 @@ function NewChapterButton() {
           </button>
           <button
             onClick={() => handleCreate('dialogue')}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-bg-secondary transition-colors duration-150 rounded-b"
+            className={[
+              'w-full flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-bg-secondary transition-colors duration-150',
+              chapterTemplates.length === 0 ? 'rounded-b' : '',
+            ].join(' ')}
           >
             <MessageSquare size={14} className="text-text-tertiary" />
             {t('sidebar.templateDialogue')}
           </button>
+          {chapterTemplates.map((tpl, i) => (
+            <button
+              key={`${tpl.name}-${i}`}
+              onClick={() => handleCreateWithContent(tpl.content)}
+              className={[
+                'w-full flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-bg-secondary transition-colors duration-150',
+                i === chapterTemplates.length - 1 ? 'rounded-b' : '',
+              ].join(' ')}
+            >
+              <FilePlus2 size={14} className="text-text-tertiary" />
+              <span className="truncate">{tpl.name}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>
