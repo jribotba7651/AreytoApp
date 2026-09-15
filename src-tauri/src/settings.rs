@@ -18,6 +18,15 @@ pub struct PanelSizes {
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct RecentProject {
+    pub path: String,
+    pub name: String,
+    pub last_opened: String,
+    pub chapter_count: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct GlobalSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_project_path: Option<String>,
@@ -53,6 +62,10 @@ pub struct GlobalSettings {
     pub reading_goal_minutes: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reading_seconds_by_day: Option<std::collections::HashMap<String, u32>>,
+    #[serde(default)]
+    pub writing_days: Vec<String>,
+    #[serde(default)]
+    pub recent_projects: Vec<RecentProject>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -465,5 +478,52 @@ mod tests {
             Some(&120),
             "reading_seconds_by_day debe preservarse en roundtrip"
         );
+    }
+
+    #[test]
+    fn default_writing_days_es_vacio_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert!(s.writing_days.is_empty(), "writing_days debe ser vacío cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_writing_days() {
+        let original = GlobalSettings {
+            version: 1,
+            writing_days: vec!["2026-09-13".to_string(), "2026-09-14".to_string()],
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.writing_days.len(), 2, "writing_days debe preservarse en roundtrip");
+        assert_eq!(parsed.writing_days[0], "2026-09-13");
+        assert_eq!(parsed.writing_days[1], "2026-09-14");
+    }
+
+    #[test]
+    fn default_recent_projects_es_vacio_al_deserializar() {
+        let json = r#"{"version": 1, "panels": {}}"#;
+        let s: GlobalSettings = serde_json::from_str(json).unwrap();
+        assert!(s.recent_projects.is_empty(), "recent_projects debe ser vacío cuando falta en el JSON");
+    }
+
+    #[test]
+    fn roundtrip_recent_projects() {
+        let original = GlobalSettings {
+            version: 1,
+            recent_projects: vec![RecentProject {
+                path: "/Users/juan/libros/mi-libro".to_string(),
+                name: "Mi Libro".to_string(),
+                last_opened: "2026-09-15T10:00:00Z".to_string(),
+                chapter_count: 12,
+            }],
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let parsed: GlobalSettings = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.recent_projects.len(), 1);
+        assert_eq!(parsed.recent_projects[0].name, "Mi Libro");
+        assert_eq!(parsed.recent_projects[0].chapter_count, 12);
     }
 }

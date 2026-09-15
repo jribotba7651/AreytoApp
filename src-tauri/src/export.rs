@@ -362,6 +362,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         )
     }
 
@@ -503,6 +504,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -527,6 +529,7 @@ mod tests {
             None,
             None,
             Some("## Agradecimientos\n\nGracias a todos.".to_string()),
+            None,
             None,
             None,
             None,
@@ -557,6 +560,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -580,6 +584,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -597,6 +602,7 @@ mod tests {
             false,
             true,
             out.to_str().unwrap().to_string(),
+            None,
             None,
             None,
             None,
@@ -627,6 +633,7 @@ mod tests {
             Some("# Mi libro".to_string()),
             None,
             Some("## Índice\n\n- [Capítulo 1](#cap-01)".to_string()),
+            None,
             None,
             None,
         ).unwrap();
@@ -663,6 +670,7 @@ mod tests {
             None,
             Some(slugs),
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -694,6 +702,7 @@ mod tests {
             None,
             Some(slugs),
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -721,6 +730,7 @@ mod tests {
             None,
             None,
             None,
+            None,
         ).unwrap();
 
         let content = fs::read_to_string(&out).unwrap();
@@ -744,6 +754,7 @@ mod tests {
             project.to_str().unwrap(),
             false,
             true,
+            None,
             None,
             None,
             None,

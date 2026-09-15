@@ -5,10 +5,23 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Markdown Preview Sync + Chapter Summary + Reading Goals
+- Ultima feature completada: Correccion de bugs de tests Rust y persistencia de settings
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Correccion de bugs: tests Rust y persistencia de settings
+- Que se hizo:
+  1. cargo test fallaba con 11 errores de compilacion en src-tauri/src/export.rs: los tests llamaban a export_book_markdown y build_full_markdown sin el parametro excluded_filenames que se agrego recientemente en la feature Export All. Se agrego el argumento None final en los 11 call sites (el helper export_simple y los tests directos de prepend/append/indice/anchor/pandoc frontmatter/docx).
+  2. Persistencia de settings: el struct Rust GlobalSettings en settings.rs no tenia writingDays ni recentProjects, por lo que serde los descartaba al escribir settings.json y esos valores no sobrevivian los reinicios. Se agregaron writing_days (Vec<String>) y recent_projects (Vec<RecentProject>) con serde default vacio, mas un struct RecentProject (path, name, lastOpened, chapterCount) en camelCase. readingGoalMinutes y readingSecondsByDay ya estaban presentes desde la feature de Reading Goals (D-315), asi que no fue necesario tocarlos.
+- Archivos modificados:
+  - src-tauri/src/export.rs (11 call sites de tests ahora pasan excluded_filenames)
+  - src-tauri/src/settings.rs (+struct RecentProject, +writing_days, +recent_projects en GlobalSettings, +4 tests)
+- Decisiones tomadas:
+  - D-316: writing_days y recent_projects usan Vec con serde default vacio (no Option) porque el store TS siempre los envia como array; la deserializacion de JSON viejo sin esos campos produce array vacio sin fallar.
+  - D-317: RecentProject es un struct camelCase con chapter_count como u32, espejo del tipo TS (path, name, lastOpened, chapterCount). No se usa Option porque estos campos siempre vienen completos.
+- Tests: cargo check limpio. cargo test: 47 pasan, 0 fallan, 1 ignorado (docx basico requiere runtime Tauri).
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Markdown Preview Sync + Chapter Summary + Reading Goals (3 sub-tareas)
 - Que se hizo:
