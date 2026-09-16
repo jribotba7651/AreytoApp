@@ -5,10 +5,22 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Epic5 S1 - Browser embebido en TerminalPanel
+- Ultima feature completada: Epic5 S2 - URLs rapidas y Copiar capitulo en BrowserPanel
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Epic5 S2 - URLs rapidas y Copiar capitulo en BrowserPanel
+- Que se hizo: en BrowserPanel se agrego una fila de chips debajo de la barra de URL con accesos rapidos a Claude (https://claude.ai), Spiral (https://spiralwriting.com), ChatGPT (https://chatgpt.com) y Perplexity (https://perplexity.ai). Cada chip navega el iframe a esa URL (setea input + url + remonta el iframe via frameKey). En la misma fila, alineado a la derecha, se agrego el boton "Copiar capitulo" que copia el contenido del capitulo activo (projectStore.activeChapterContent) al clipboard. El boton muestra feedback "Copiado" con icono Check durante 2s.
+- Archivos creados: ninguno.
+- Archivos modificados:
+  - src/components/browser/BrowserPanel.tsx (constante QUICK_LINKS con las 4 URLs, helper copyText con fallback legacy, handler goTo para chips, estado copied y fila de chips con boton Copiar capitulo)
+  - src/i18n/locales/es.json y en.json (+browser.copyChapter, +browser.copied)
+- Decisiones tomadas:
+  - D-329: el copiado usa navigator.clipboard.writeText con fallback a un textarea oculto + document.execCommand('copy') porque en el webview de Tauri (contexto no seguro) la API async de clipboard puede fallar. Se devuelve un boolean para activar el feedback "Copiado".
+  - D-330: los labels de los chips son nombres de marca (Claude, Spiral, ChatGPT, Perplexity) y no se i18n-izan. El boton Copiar capitulo si usa i18n. La fila de chips usa tonos stone fijos por la misma excepcion D-058 (el browser es siempre oscuro).
+- Tests: tsc --noEmit limpio. npm test: 431 pasan, 0 fallan.
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Epic5 S1 - Browser embebido en TerminalPanel
 - Que se hizo: se agrego un tab "Browser" junto al tab "Terminal" en TerminalPanel. Al activarlo se monta BrowserPanel, que carga https://claude.ai por defecto dentro de un iframe con allow permissivo. Como claude.ai (y otros sitios) bloquean el iframe con su propia CSP/frame-ancestors, se sumo un boton "Abrir en ventana" que crea una ventana secundaria nativa con WebviewWindow de @tauri-apps/api/webviewWindow (sin plugin nuevo, usando el WebView nativo de Tauri 2). Barra de URL editable (Enter o boton Ir), boton de recargar, y acceso a la ventana externa.

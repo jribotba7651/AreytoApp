@@ -14,7 +14,9 @@
     "title": "Browser",
     "reload": "Reload",
     "go": "Go",
-    "openInWindow": "Open in window"
+    "openInWindow": "Open in window",
+    "copyChapter": "Copy chapter",
+    "copied": "Copied"
   },
   "common": {
     "saving": "Saving…",
