@@ -184,6 +184,7 @@ function ChapterList() {
           wordGoal={chapterWordGoal}
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
+          lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
         />
       ))}
       {finishedChapters.map((chapter, i) => (
@@ -204,6 +205,7 @@ function ChapterList() {
           wordGoal={chapterWordGoal}
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
+          lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
         />
       ))}
     </div>

@@ -64,6 +64,17 @@ function BookTabContent() {
   const skipPreCheck = useRef(false);
   const sectionVersion = useProjectStore((s) => s.sectionVersion);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
+  const chapters = useProjectStore((s) => s.chapters);
+
+  function getFilesToExport(scope: ExportScope): string[] {
+    const excluded = currentProject?.excludedFromExport ?? [];
+    return chapters.filter(ch => {
+      if (scope === 'terminados' && ch.status !== 'finished') return false;
+      if (scope === 'en-progreso' && ch.status !== 'in-progress') return false;
+      if (excluded.includes(ch.filename)) return false;
+      return true;
+    }).map(ch => ch.filename);
+  }
 
   function computePreExportProblems(): string[] {
     const problems: string[] = [];
@@ -175,6 +186,11 @@ function exportBaseNameNoExt(): string {
       setExportProgress('writing');
       await exportBookMarkdown(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
 
+      const now = new Date().toISOString();
+      const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
+      getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
+      await updateProjectMeta({ lastExportTimestamps: newTimestamps });
+
       setExportProgress('backup');
       await backupExportedFile(outputPath);
 
@@ -223,6 +239,11 @@ function exportBaseNameNoExt(): string {
 
       setExportProgress('writing');
       await exportBookDocx(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
+
+      const now = new Date().toISOString();
+      const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
+      getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
+      await updateProjectMeta({ lastExportTimestamps: newTimestamps });
 
       setExportProgress('backup');
       await backupExportedFile(outputPath);
@@ -279,6 +300,11 @@ function exportBaseNameNoExt(): string {
         currentProject.temaOverrides,
         currentProject.nombre,
       );
+
+      const now = new Date().toISOString();
+      const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
+      getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
+      await updateProjectMeta({ lastExportTimestamps: newTimestamps });
 
       setExportProgress('backup');
       await backupExportedFile(outputPath);
@@ -348,6 +374,11 @@ function exportBaseNameNoExt(): string {
         currentProject.nombre,
       );
       await backupExportedFile(epubPath);
+
+      const now = new Date().toISOString();
+      const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
+      getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
+      await updateProjectMeta({ lastExportTimestamps: newTimestamps });
 
       void setExportFolder(folder);
 

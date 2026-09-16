@@ -57,7 +57,7 @@ interface ProjectState {
   setTriggerOpenProject: (fn: (() => void) | null) => void;
   setTriggerNewProject: (fn: (() => void) | null) => void;
   setPendingMenuAction: (action: 'open' | 'new' | null) => void;
-  updateProjectMeta: (updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors'>>) => Promise<void>;
+  updateProjectMeta: (updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors' | 'bookmarks' | 'lastExportTimestamps'>>) => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({

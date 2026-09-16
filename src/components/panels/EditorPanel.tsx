@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Eye, Pencil, Languages, Columns2, Clock } from 'lucide-react';
+import { Eye, Pencil, Languages, Columns2, Clock, Bookmark } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
@@ -24,6 +24,7 @@ import SplitReadPanel from '@/components/editor/SplitReadPanel';
 import AmbientSoundButton from '@/components/editor/AmbientSoundButton';
 import PomodoroButton from '@/components/editor/PomodoroButton';
 import { useSessionTimer } from '@/hooks/useSessionTimer';
+import { createBookmark } from '@/lib/bookmarks';
 
 function countWords(text: string): number {
   const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
@@ -201,6 +202,14 @@ function ChapterView() {
   const chapterCharacters = countCharacters(activeChapterContent);
   const bookWords = useBookWordCount();
   const sessionTime = useSessionTimer(!!currentProject);
+  const updateProjectMeta = useProjectStore((s) => s.updateProjectMeta);
+  const bookmarks = currentProject?.bookmarks ?? [];
+
+  async function handleAddBookmark() {
+    const pos = editorRef.current?.getCursor() ?? 0;
+    const newBookmark = createBookmark(bookmarks, pos);
+    await updateProjectMeta({ bookmarks: [...bookmarks, newBookmark] });
+  }
 
   return (
     <div className="relative h-full flex flex-col bg-bg-editor">
@@ -350,6 +359,13 @@ function ChapterView() {
           <div className="flex items-center gap-3">
             <AmbientSoundButton />
             <PomodoroButton />
+            <button
+              onClick={handleAddBookmark}
+              className="p-1 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded transition-colors duration-150"
+              title={t('editor.addBookmark')}
+            >
+              <Bookmark size={14} />
+            </button>
             <span className="text-[11px] text-text-tertiary">
               {t('editor.bookWordCount', { count: bookWords })}
             </span>

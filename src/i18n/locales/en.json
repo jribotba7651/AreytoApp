@@ -424,6 +424,7 @@
     "splitSelectChapter": "Select a chapter...",
     "splitEmpty": "Select a chapter to reference",
     "sessionTime": "{{time}}",
+    "addBookmark": "Add bookmark",
     "ambient": {
       "title": "Ambient sound",
       "rain": "Rain",

@@ -36,6 +36,12 @@ export const DEFAULT_BOOK_SETTINGS: BookSettings = {
   marginOuter: 1,
 };
 
+export interface Bookmark {
+  name: string;
+  pos: number;
+  createdAt: string;
+}
+
 export interface Project {
   rootPath: string;
   nombre: string;
@@ -46,6 +52,8 @@ export interface Project {
   bookSettings?: BookSettings;
   excludedFromExport?: string[];
   chapterColors?: Record<string, ChapterColor>;
+  bookmarks?: Bookmark[];
+  lastExportTimestamps?: Record<string, string>;
 }
 
 export type ProjectFsError =

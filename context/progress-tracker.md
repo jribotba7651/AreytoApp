@@ -10,13 +10,26 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Features completadas
 
-### 2026-09-16 - BookmarksPanel en WritingToolbar
-- Que se hizo: Se conectó BookmarksPanel.tsx en la barra de herramientas del editor (WritingToolbar) como el quinto icono. Se reordenaron los iconos del toolbar para incluir los marcadores en la quinta posición, moviendo los iconos subsiguientes.
+### 2026-09-16 - Bookmarks + Chapter Export Status
+- Que se hizo:
+  1. Bookmarks: añadido botón en la barra inferior del editor para guardar la posición actual del cursor. Se usa la lógica en `lib/bookmarks.ts` para generar un nombre automático ("Marca 1", etc.). Los marcadores se persisten en `proyecto.json` (actualizado esquema `Project` y `updateProjectMeta`).
+  2. Chapter Export Status: añadido soporte en `proyecto.json` para rastrear la fecha del último export por capítulo (`lastExportTimestamps`). En `BookTabContent.tsx` se actualiza este campo al exportar. En el sidebar (`ChapterListItem.tsx`), los capítulos exportados en las últimas 24h muestran un icono `UploadCloud`.
+- Archivos creados:
+  - `src/lib/bookmarks.ts`
 - Archivos modificados:
-  - src/components/panels/WritingToolbar.tsx (import, actualización de ToolPanel, reordenamiento de TOOL_ICONS, conexión del componente)
+  - `src/types/project.ts` (esquema `Project`)
+  - `src/lib/project-fs.ts` (update `updateProjectMeta` to handle new fields)
+  - `src/stores/projectStore.ts` (signature update for `updateProjectMeta`)
+  - `src/components/editor/ChapterEditor.tsx` (added `getCursor`)
+  - `src/components/panels/EditorPanel.tsx` (bookmark button)
+  - `src/components/sidebar/ChapterListItem.tsx` (export icon)
+  - `src/components/sidebar/ChapterList.tsx` (passing `lastExportTimestamp`)
+  - `src/components/layout/BookTabContent.tsx` (updating `lastExportTimestamps` on export)
+  - `src/i18n/locales/es.json` y `en.json` (added `addBookmark` translation)
 - Decisiones tomadas:
-  - Se movió el icono de marcadores a la quinta posición para mejorar el acceso, cumpliendo con la solicitud. Se preservaron los iconos existentes reordenándolos adecuadamente.
-- Tests: tsc --noEmit limpio. npm test: 457 pasan, 0 fallan.
+  - Se decidió persistir los marcadores y los timestamps en `proyecto.json` para garantizar la persistencia junto al proyecto y facilitar la portabilidad.
+  - El ícono de exportación usa `UploadCloud` (lucide) y se calcula en tiempo real comparando la fecha de exportación con `Date.now() - 24h`.
+- Tests: `tsc --noEmit` limpio.
 - Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Timeline / Plot Tracker + Ambient Sound (2 sub-tareas)

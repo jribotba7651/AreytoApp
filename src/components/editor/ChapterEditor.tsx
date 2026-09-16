@@ -19,6 +19,7 @@ interface ChapterEditorProps {
 export interface ChapterEditorHandle {
   getView: () => EditorView | null;
   insertText: (text: string) => void;
+  getCursor: () => number;
 }
 
 const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange, onScroll }, ref) {
@@ -43,6 +44,7 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
       });
       view.focus();
     },
+    getCursor: () => viewRef.current?.state.selection.main.head ?? 0,
   }));
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { UploadCloud } from 'lucide-react';
 import type { Chapter, ChapterColor } from '@/types/project';
 import { CHAPTER_COLORS, CHAPTER_COLOR_MAP } from '@/types/project';
 
@@ -19,9 +20,10 @@ interface ChapterListItemProps {
   wordGoal: number;
   chapterColor?: ChapterColor;
   onColorChange: (color: ChapterColor | null) => void;
+  lastExportTimestamp?: string;
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterColor, onColorChange }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterColor, onColorChange, lastExportTimestamp }: ChapterListItemProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
@@ -94,6 +96,10 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
   const chapterNum = index + 1;
   const isFinished = chapter.status === 'finished';
   const progress = wordGoal > 0 ? Math.min(100, Math.round((wordCount / wordGoal) * 100)) : 0;
+  
+  const isRecentlyExported = lastExportTimestamp 
+    ? new Date(lastExportTimestamp).getTime() > Date.now() - 24 * 60 * 60 * 1000 
+    : false;
 
   return (
     <div className="relative">
@@ -130,8 +136,11 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
             />
           )}
           <span className="truncate">{chapter.title}</span>
+          {isRecentlyExported && (
+            <UploadCloud size={12} className="ml-auto text-text-tertiary shrink-0" />
+          )}
           {isFinished && (
-            <span className="ml-auto text-success shrink-0 text-[10px]">&#10003;</span>
+            <span className={['text-success shrink-0 text-[10px]', isRecentlyExported ? 'ml-1' : 'ml-auto'].join(' ')}>&#10003;</span>
           )}
         </div>
         {wordGoal > 0 && !isFinished && (

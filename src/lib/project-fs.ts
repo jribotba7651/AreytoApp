@@ -11,6 +11,8 @@ interface ProyectoJson {
   bookSettings?: BookSettings;
   excludedFromExport?: string[];
   chapterColors?: Record<string, ChapterColor>;
+  bookmarks?: Bookmark[];
+  lastExportTimestamps?: Record<string, string>;
 }
 
 interface RawDirEntry {
@@ -232,7 +234,7 @@ export async function createChapter(
 
 export async function updateProjectMeta(
   project: Project,
-  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors'>>
+  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors' | 'bookmarks' | 'lastExportTimestamps'>>
 ): Promise<ProjectResult<Project>> {
   const updated: Project = { ...project, ...updates };
   const meta: ProyectoJson = {
@@ -245,6 +247,8 @@ export async function updateProjectMeta(
   if (updated.bookSettings !== undefined) meta.bookSettings = updated.bookSettings;
   if (updated.excludedFromExport !== undefined && updated.excludedFromExport.length > 0) meta.excludedFromExport = updated.excludedFromExport;
   if (updated.chapterColors !== undefined && Object.keys(updated.chapterColors).length > 0) meta.chapterColors = updated.chapterColors;
+  if (updated.bookmarks !== undefined && updated.bookmarks.length > 0) meta.bookmarks = updated.bookmarks;
+  if (updated.lastExportTimestamps !== undefined && Object.keys(updated.lastExportTimestamps).length > 0) meta.lastExportTimestamps = updated.lastExportTimestamps;
 
   const jsonPath = `${project.rootPath}/proyecto.json`;
   const write = await writeFile(jsonPath, JSON.stringify(meta, null, 2));

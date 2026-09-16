@@ -424,6 +424,7 @@
     "splitSelectChapter": "Seleccionar capitulo...",
     "splitEmpty": "Selecciona un capitulo de referencia",
     "sessionTime": "{{time}}",
+    "addBookmark": "Añadir marcador",
     "ambient": {
       "title": "Sonido ambiente",
       "rain": "Lluvia",
