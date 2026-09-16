@@ -420,6 +420,7 @@
     "readingMode": "Reading Mode",
     "noActiveChapter": "No active chapter",
     "wordCount": "{{count}} words",
+    "sentenceCount": "{{count}} sentences",
     "paragraphCount": "{{count}} paragraphs",
     "characterCount": "{{count}} characters",
     "bookWordCount": "Book: {{count}} words",

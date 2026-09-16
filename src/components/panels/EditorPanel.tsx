@@ -26,6 +26,12 @@ import PomodoroButton from '@/components/editor/PomodoroButton';
 import { useSessionTimer } from '@/hooks/useSessionTimer';
 import { createBookmark } from '@/lib/bookmarks';
 
+function countSentences(text: string): number {
+  const cleanedText = text.replace(/—/g, '');
+  const sentences = cleanedText.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  return sentences.length;
+}
+
 function countWords(text: string): number {
   const stripped = text.replace(/^#+\s.*/gm, '').replace(/[*_~`>#\-\[\]()!]/g, '');
   const words = stripped.match(/\S+/g);
@@ -200,6 +206,7 @@ function ChapterView() {
       <Pencil size={14} />
     );
   const chapterWords = countWords(activeChapterContent);
+  const chapterSentences = countSentences(activeChapterContent);
   const chapterParagraphs = countParagraphs(activeChapterContent);
   const chapterCharacters = countCharacters(activeChapterContent);
   const bookWords = useBookWordCount();
@@ -362,6 +369,9 @@ function ChapterView() {
           <div className="flex items-center gap-3">
             <span className="text-[11px] text-text-tertiary">
               {t('editor.wordCount', { count: chapterWords })}
+            </span>
+            <span className="text-[11px] text-text-tertiary">
+              {t('editor.sentenceCount', { count: chapterSentences })}
             </span>
             <span className="text-[11px] text-text-tertiary">
               {t('editor.paragraphCount', { count: chapterParagraphs })}

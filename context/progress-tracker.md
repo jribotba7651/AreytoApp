@@ -2,11 +2,21 @@
 
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
-## Estado actual
-- Fase activa: Visual Redesign (Atticus-inspired)
-- Feature en progreso: ninguna
-- Ultima feature completada: Chapter Status Badge, Last Edited Date, Scroll to Top
-- Fecha de ultima actualizacion: 2026-09-16
+### 2026-09-16 - Sentence Count in Editor
+- Que se hizo:
+  1. Implementado conteo de oraciones en `EditorPanel.tsx`.
+  2. La logica `countSentences` limpia el texto de em-dashes (`—`) antes de contar oraciones basadas en los terminadores `.`, `!`, `?`.
+  3. Actualizada la UI de la barra inferior del editor para mostrar el conteo de oraciones junto a palabras, parrafos y caracteres.
+  4. Agregadas traducciones `sentenceCount` en `es.json` y `en.json`.
+- Archivos modificados:
+  - `src/components/panels/EditorPanel.tsx`
+  - `src/i18n/locales/es.json`
+  - `src/i18n/locales/en.json`
+- Decisiones tomadas:
+  - D-355: La lógica de conteo de oraciones utiliza `split(/[.!?]+/)` para separar y filtra los resultados vacíos para obtener un conteo preciso.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
+
 
 ### 2026-09-16 - Chapter Outline View (Bugfix)
 - Que se hizo:
