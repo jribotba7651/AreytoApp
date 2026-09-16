@@ -165,10 +165,12 @@ function ChapterNoteField({
   filePath,
   dirPath,
   placeholder,
+  trigger,
 }: {
   filePath: string | null;
   dirPath: string | null;
   placeholder: string;
+  trigger?: number;
 }) {
   const [content, setContent] = useState('');
   const [loaded, setLoaded] = useState(false);
@@ -190,7 +192,7 @@ function ChapterNoteField({
         setContent('');
         setLoaded(true);
       });
-  }, [filePath]);
+  }, [filePath, trigger]);
 
   useEffect(() => {
     return () => {
@@ -227,14 +229,31 @@ function ChapterNotesPanel() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
   const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
+  const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
   const chapters = useProjectStore((s) => s.chapters);
   const activeChapter = chapters.find((c) => c.path === activeChapterPath) ?? null;
   const [activeTab, setActiveTab] = useState<'notes' | 'summary'>('notes');
+  const [trigger, setTrigger] = useState(0);
 
   const baseName = activeChapter ? activeChapter.filename.replace(/\.md$/, '') : null;
   const notesDirPath = currentProject ? `${currentProject.rootPath}/.notes` : null;
   const notePath = currentProject && baseName ? `${notesDirPath}/${baseName}.md` : null;
   const summaryPath = currentProject && baseName ? `${notesDirPath}/${baseName}-summary.md` : null;
+
+  async function handleAutoGenerateSummary() {
+    if (!summaryPath || !notesDirPath || !activeChapterContent) return;
+    
+    const sentences = activeChapterContent.split(/(?<=[.!?])\s+/);
+    const summary = sentences.slice(0, 3).join(' ');
+
+    try {
+      await invoke('ensure_dir', { path: notesDirPath });
+      await invoke('write_text_file', { path: summaryPath, contents: summary });
+      setTrigger((prev) => prev + 1);
+    } catch (err) {
+      console.error('Failed to generate summary:', err);
+    }
+  }
 
   if (!activeChapter) {
     return (
@@ -277,7 +296,14 @@ function ChapterNotesPanel() {
           filePath={summaryPath}
           dirPath={notesDirPath}
           placeholder={t('writingToolbar.summaryPlaceholder')}
+          trigger={trigger}
         />
+        <button
+          onClick={handleAutoGenerateSummary}
+          className="text-[10px] text-text-secondary hover:text-text-primary px-2 py-1 border border-border-subtle rounded mt-2"
+        >
+          {t('writingToolbar.autoSummary')}
+        </button>
       </div>
     </div>
   );

@@ -20,6 +20,7 @@ import PreExportCheckModal from '@/components/book/PreExportCheckModal';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
 import ExportBookDocxDialog from '@/components/book/ExportBookDocxDialog';
 import ExportBookEpubDialog from '@/components/book/ExportBookEpubDialog';
+import ExportBookKindleDialog from '@/components/book/ExportBookKindleDialog';
 import ExportAllDialog from '@/components/book/ExportAllDialog';
 import ThemeGallery from '@/components/book/ThemeGallery';
 import ThemeControls from '@/components/book/ThemeControls';
@@ -50,6 +51,8 @@ function BookTabContent() {
   const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
   const showExportAllDialog = useLayoutStore((s) => s.showExportAllDialog);
   const setShowExportAllDialog = useLayoutStore((s) => s.setShowExportAllDialog);
+  const showKindleDialog = useLayoutStore((s) => s.showExportKindleDialog);
+  const setShowExportKindleDialog = useLayoutStore((s) => s.setShowExportKindleDialog);
   const bookViewMode = useLayoutStore((s) => s.bookViewMode);
   const setBookViewMode = useLayoutStore((s) => s.setBookViewMode);
   const previewMode = useLayoutStore((s) => s.previewMode);
@@ -639,6 +642,13 @@ function exportBaseNameNoExt(): string {
         <ExportBookEpubDialog
           onClose={() => { if (!epubLoading) setShowEpubDialog(false); }}
           onExport={handleExportEpub}
+          loading={epubLoading}
+        />
+      )}
+      {showKindleDialog && (
+        <ExportBookKindleDialog
+          onClose={() => { if (!epubLoading) setShowExportKindleDialog(false); }}
+          onExport={handleExportKindle}
           loading={epubLoading}
         />
       )}

@@ -16,6 +16,7 @@ function TopTabs() {
   const saveStatus = useProjectStore((s) => s.saveStatus);
   const setShowExportDialog = useLayoutStore((s) => s.setShowExportDialog);
   const setShowExportAllDialog = useLayoutStore((s) => s.setShowExportAllDialog);
+  const setShowExportKindleDialog = useLayoutStore((s) => s.setShowExportKindleDialog);
   const showShortcutsModal = useLayoutStore((s) => s.showShortcutsModal);
   const setShowShortcutsModal = useLayoutStore((s) => s.setShowShortcutsModal);
   const themeMode = useSettingsStore((s) => s.themeMode);
@@ -137,6 +138,18 @@ function TopTabs() {
             >
               <Download size={14} />
               <span>{t('topbar.exportAll')}</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('libro');
+                setShowExportKindleDialog(true);
+              }}
+              aria-label={t('topbar.exportKindle')}
+              title={t('topbar.exportKindle')}
+              className="flex items-center gap-1 px-2 py-1 text-xs text-text-secondary hover:text-text-primary rounded hover:bg-bg-tertiary transition-colors duration-150"
+            >
+              <Archive size={14} />
+              <span>Kindle</span>
             </button>
             <button
               onClick={closeProject}

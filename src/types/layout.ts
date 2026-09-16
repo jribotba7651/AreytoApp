@@ -25,6 +25,7 @@ export interface LayoutState {
   editorViewMode: EditorViewMode;
   showExportDialog: boolean;
   showExportAllDialog: boolean;
+  showExportKindleDialog: boolean;
   showShortcutsModal: boolean;
   bookViewMode: BookViewMode;
   deviceFrame: DeviceFrame;
@@ -33,4 +34,5 @@ export interface LayoutState {
   showCommandPalette: boolean;
   showGlobalSearch: boolean;
   splitView: SplitViewState;
+  isReadingMode: boolean;
 }

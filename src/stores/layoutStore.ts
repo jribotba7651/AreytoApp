@@ -10,6 +10,7 @@ interface LayoutActions {
   toggleEditorViewMode: () => void;
   setShowExportDialog: (show: boolean) => void;
   setShowExportAllDialog: (show: boolean) => void;
+  setShowExportKindleDialog: (show: boolean) => void;
   setShowShortcutsModal: (show: boolean) => void;
   setBookViewMode: (mode: BookViewMode) => void;
   setDeviceFrame: (frame: DeviceFrame) => void;
@@ -19,6 +20,7 @@ interface LayoutActions {
   setShowGlobalSearch: (show: boolean) => void;
   setSplitView: (splitView: Partial<SplitViewState>) => void;
   toggleSplitView: () => void;
+  toggleReadingMode: () => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -38,6 +40,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   editorViewMode: 'edit',
   showExportDialog: false,
   showExportAllDialog: false,
+  showExportKindleDialog: false,
   showShortcutsModal: false,
   bookViewMode: 'write',
   deviceFrame: 'none',
@@ -46,6 +49,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   showCommandPalette: false,
   showGlobalSearch: false,
   splitView: { active: false, chapterPath: null },
+  isReadingMode: false,
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -67,8 +71,9 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   setShowExportDialog: (show: boolean) => set({ showExportDialog: show }),
 
   setShowExportAllDialog: (show: boolean) => set({ showExportAllDialog: show }),
-
+  setShowExportKindleDialog: (show: boolean) => set({ showExportKindleDialog: show }),
   setShowShortcutsModal: (show: boolean) => set({ showShortcutsModal: show }),
+
 
   setBookViewMode: (mode: BookViewMode) => set({ bookViewMode: mode }),
 
@@ -95,4 +100,5 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
         ? { active: false, chapterPath: null }
         : { active: true, chapterPath: null },
     })),
+  toggleReadingMode: () => set((state) => ({ isReadingMode: !state.isReadingMode })),
 }));

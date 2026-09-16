@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Eye, Pencil, Languages, Columns2, Clock, Bookmark, Lock } from 'lucide-react';
+import { Eye, Pencil, Languages, Columns2, Clock, Bookmark, Lock, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
@@ -92,6 +92,8 @@ function ChapterView() {
   const setEditorViewMode = useLayoutStore((s) => s.setEditorViewMode);
   const splitView = useLayoutStore((s) => s.splitView);
   const toggleSplitView = useLayoutStore((s) => s.toggleSplitView);
+  const isReadingMode = useLayoutStore((s) => s.isReadingMode);
+  const toggleReadingMode = useLayoutStore((s) => s.toggleReadingMode);
   const focusMode = useLayoutStore((s) => s.focusMode);
   const flushAutosave = useProjectStore((s) => s.flushAutosave);
   const autosaveIntervalMs = useSettingsStore((s) => s.autosaveIntervalMs);
@@ -231,6 +233,18 @@ function ChapterView() {
           )}
           <div className="relative flex items-center gap-1">
             <button
+              onClick={toggleReadingMode}
+              className={[
+                'flex items-center gap-1.5 px-2 py-1 text-xs rounded transition-colors duration-150',
+                isReadingMode
+                  ? 'text-text-primary bg-bg-tertiary'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary',
+              ].join(' ')}
+              title={t('editor.readingMode')}
+            >
+              <BookOpen size={14} />
+            </button>
+            <button
               onClick={toggleSplitView}
               className={[
                 'flex items-center gap-1.5 px-2 py-1 text-xs rounded transition-colors duration-150',
@@ -258,7 +272,17 @@ function ChapterView() {
       )}
 
       <div className="flex-1 min-h-0 flex">
-        {isSplit ? (
+        {isReadingMode ? (
+          <div className="h-full w-full overflow-y-auto">
+            <BookMarkdown
+              content={activeChapterContent}
+              themeId={currentProject?.tema}
+              themeOverrides={currentProject?.temaOverrides}
+              projectRootPath={currentProject?.rootPath}
+              enableChapterLinks
+            />
+          </div>
+        ) : isSplit ? (
           <>
             <div className="w-1/2 min-w-0 h-full border-r border-border-subtle">
                 <ChapterEditor
