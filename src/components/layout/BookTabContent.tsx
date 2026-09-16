@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { save, message, open } from '@tauri-apps/plugin-dialog';
-import { Printer } from 'lucide-react';
+import { Printer, ArrowUp } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
@@ -61,10 +61,22 @@ function BookTabContent() {
   const [preExportProblems, setPreExportProblems] = useState<string[]>([]);
   const [pendingExportTarget, setPendingExportTarget] = useState<ExportTarget | null>(null);
   const [exportProgress, setExportProgress] = useState<ExportStep | null>(null);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const skipPreCheck = useRef(false);
   const sectionVersion = useProjectStore((s) => s.sectionVersion);
   const activeChapterContent = useProjectStore((s) => s.activeChapterContent);
   const chapters = useProjectStore((s) => s.chapters);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      setShowScrollToTop(el.scrollTop > 300);
+    };
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
 
   function getFilesToExport(scope: ExportScope): string[] {
     const excluded = currentProject?.excludedFromExport ?? [];
@@ -520,7 +532,7 @@ function exportBaseNameNoExt(): string {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto scroll-smooth">
+      <div className="flex-1 overflow-y-auto scroll-smooth relative" ref={scrollRef}>
         {bookViewMode === 'format' ? (
           <>
             <ThemeGallery
@@ -566,6 +578,15 @@ function exportBaseNameNoExt(): string {
               );
             })}
           </div>
+        )}
+        {showScrollToTop && (
+          <button
+            onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="absolute bottom-6 right-6 p-2 bg-bg-tertiary border border-border-default rounded-full shadow-sm text-text-secondary hover:text-text-primary transition-colors"
+            title={t('book.scrollToTop')}
+          >
+            <ArrowUp size={16} />
+          </button>
         )}
       </div>
 

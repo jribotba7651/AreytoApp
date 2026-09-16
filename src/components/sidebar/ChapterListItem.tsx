@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { UploadCloud } from 'lucide-react';
 import type { Chapter, ChapterColor } from '@/types/project';
 import { CHAPTER_COLORS, CHAPTER_COLOR_MAP } from '@/types/project';
+import { listCommitsForFile } from '@/lib/versioning';
+import { useProjectStore } from '@/stores/projectStore';
+import { formatDate } from '@/lib/date-utils';
 
 interface ChapterListItemProps {
   chapter: Chapter;
@@ -28,8 +31,19 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const project = useProjectStore((s) => s.currentProject);
+  const [lastCommitDate, setLastCommitDate] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!project) return;
+    listCommitsForFile(project.rootPath, chapter.path, 1).then((res) => {
+      if (res.ok && res.value.length > 0) {
+        setLastCommitDate(formatDate(res.value[0].timestamp));
+      }
+    });
+  }, [chapter.path, project]);
 
   useEffect(() => {
     if (editing) {
@@ -125,22 +139,27 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
         ].join(' ')}
         title={`${chapter.title} (${wordCount}/${wordGoal})`}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
-            {chapterNum}
-          </span>
-          {chapterColor && (
-            <span
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: CHAPTER_COLOR_MAP[chapterColor] }}
-            />
-          )}
-          <span className="truncate">{chapter.title}</span>
-          {isRecentlyExported && (
-            <UploadCloud size={12} className="ml-auto text-text-tertiary shrink-0" />
-          )}
-          {isFinished && (
-            <span className={['text-success shrink-0 text-[10px]', isRecentlyExported ? 'ml-1' : 'ml-auto'].join(' ')}>&#10003;</span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-text-tertiary font-medium w-4 text-right shrink-0">
+              {chapterNum}
+            </span>
+            <span className={`w-2 h-2 rounded-full shrink-0 ${chapter.status === 'finished' ? 'bg-success' : 'bg-info'}`} />
+            {chapterColor && (
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: CHAPTER_COLOR_MAP[chapterColor] }}
+              />
+            )}
+            <span className="truncate">{chapter.title}</span>
+            {isRecentlyExported && (
+              <UploadCloud size={12} className="ml-auto text-text-tertiary shrink-0" />
+            )}
+          </div>
+          {lastCommitDate && (
+            <div className="text-[10px] text-text-tertiary ml-6">
+              {lastCommitDate}
+            </div>
           )}
         </div>
         {wordGoal > 0 && !isFinished && (

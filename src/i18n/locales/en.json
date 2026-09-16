@@ -323,6 +323,7 @@
     "emptyTitle": "The book is empty",
     "emptyBody": "Create your first chapter from the Active Chapter view",
     "indice": "Table of Contents",
+    "scrollToTop": "Scroll to top",
     "chapterLoadError": "Could not load {{filename}}",
     "writeMode": "Write",
     "formatMode": "Format",

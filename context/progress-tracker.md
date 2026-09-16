@@ -5,10 +5,28 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Dark Mode Toggle + Version Tag
+- Ultima feature completada: Chapter Status Badge, Last Edited Date, Scroll to Top
 - Fecha de ultima actualizacion: 2026-09-16
 
 ## Features completadas
+
+### 2026-09-16 - Chapter Status Badge, Last Edited Date, Scroll to Top (3 sub-tareas)
+- Que se hizo:
+  1. Chapter Status Badge: en el sidebar, junto al número de capítulo, se agregó un badge de color para indicar el estado (azul para 'in-progress', verde para 'finished').
+  2. Last Edited Date: en el sidebar, debajo del título del capítulo, se agregó la fecha del último commit de git. Usa `git_log_file` (Rust) para obtener la fecha del último commit por archivo y una utilidad `formatDate` para mostrarlo en formato amigable ("hoy", "hace X días").
+  3. Scroll to Top: en el tab Libro, se agregó un botón flotante con el icono ArrowUp que aparece al hacer scroll más de 300px. Al hacer click, el contenedor realiza un scroll suave hacia el inicio del libro.
+- Archivos creados:
+  - `src/lib/date-utils.ts` (helper formatDate)
+- Archivos modificados:
+  - `src/components/sidebar/ChapterListItem.tsx` (+fetch commit date via useEffect+listCommitsForFile, +badge de estado, +render de fecha)
+  - `src/components/layout/BookTabContent.tsx` (+hook de scroll, +botón ScrollToTop)
+  - `src/i18n/locales/es.json` y `en.json` (+book.scrollToTop)
+- Decisiones tomadas:
+  - D-344: El estado del capítulo se muestra con un punto coloreado (`bg-info` para in-progress, `bg-success` para finished) en lugar de una etiqueta de texto, para mantener el sidebar limpio y compacto.
+  - D-345: La fecha de edición se calcula en el cliente usando `listCommitsForFile` con límite 1. Se aceptó el costo de renderizado adicional por simplicidad, dado que la lista de capítulos no suele tener cientos de elementos.
+  - D-346: El botón Scroll to Top usa `fixed` (dentro de un contenedor `relative`) para posicionarse en la esquina inferior derecha del tab Libro.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
 
 ### 2026-09-16 - Dark Mode Toggle + Version Tag (2 sub-tareas)
 - Que se hizo:
