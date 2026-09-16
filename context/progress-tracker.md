@@ -5,10 +5,25 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Distraction-free Writing + Character Count + Chapter Templates Personalizados (3 sub-tareas)
+- Ultima feature completada: Epic5 S1 - Browser embebido en TerminalPanel
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Epic5 S1 - Browser embebido en TerminalPanel
+- Que se hizo: se agrego un tab "Browser" junto al tab "Terminal" en TerminalPanel. Al activarlo se monta BrowserPanel, que carga https://claude.ai por defecto dentro de un iframe con allow permissivo. Como claude.ai (y otros sitios) bloquean el iframe con su propia CSP/frame-ancestors, se sumo un boton "Abrir en ventana" que crea una ventana secundaria nativa con WebviewWindow de @tauri-apps/api/webviewWindow (sin plugin nuevo, usando el WebView nativo de Tauri 2). Barra de URL editable (Enter o boton Ir), boton de recargar, y acceso a la ventana externa.
+- Archivos creados:
+  - src/components/browser/BrowserPanel.tsx (barra de URL, recargar, iframe embebido y fallback WebviewWindow)
+- Archivos modificados:
+  - src/components/panels/TerminalPanel.tsx (tab bar Terminal/Browser, estado local de tab)
+  - src-tauri/capabilities/default.json (+core:webview:allow-create-webview-window)
+  - src/i18n/locales/es.json y en.json (+terminal.tab/browserTab, +browser.title/reload/go/openInWindow)
+- Decisiones tomadas:
+  - D-326: iframe es el embebido primario y WebviewWindow el fallback a ventana secundaria. No se puede embeber claude.ai en iframe por su propia CSP (frame-ancestors), asi que "abrir en ventana" es el camino fiable. El WebView nativo de Tauri requiere el permiso core:webview:allow-create-webview-window (no viene en core:default), por eso se agrego a capabilities.
+  - D-327: cambiar de tab desmonta TerminalView, lo que mata el pty y lo re-spawnea al volver. Aceptable para Slice 1; mantener la sesion de shell viva obligaria a mantener ambos paneles montados (trabajo futuro).
+  - D-328: el tab bar del terminal usa tonos stone fijos (no tokens claro/oscuro) por la excepcion D-058: el terminal es siempre oscuro, independiente del theme de la app.
+- Tests: tsc --noEmit limpio. npm test: 431 pasan, 0 fallan.
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Distraction-free Writing + Character Count + Chapter Templates Personalizados (3 sub-tareas)
 - Que se hizo:

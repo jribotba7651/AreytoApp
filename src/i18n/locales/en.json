@@ -6,6 +6,16 @@
     "ajustes": "Settings",
     "stats": "Stats"
   },
+  "terminal": {
+    "tab": "Terminal",
+    "browserTab": "Browser"
+  },
+  "browser": {
+    "title": "Browser",
+    "reload": "Reload",
+    "go": "Go",
+    "openInWindow": "Open in window"
+  },
   "common": {
     "saving": "Saving…",
     "saved": "Saved",
