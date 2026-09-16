@@ -8,7 +8,18 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Ultima feature completada: Chapter Status Badge, Last Edited Date, Scroll to Top
 - Fecha de ultima actualizacion: 2026-09-16
 
-## Features completadas
+### 2026-09-16 - Chapter Outline View (Bugfix)
+- Que se hizo:
+  1. Corregidos errores TS en `ChapterList.tsx` y `ChapterListItem.tsx` relacionados con la vista de esquema (outline view).
+  2. Conectada la lógica de `isChapterOutlineView` y `outlines` pasando los props correctos de `ChapterList` a `ChapterListItem`.
+  3. Corregido el error de definición de `showOutline` en `ChapterListItem.tsx` y el error TS2532 (Object is possibly undefined) al acceder a `outline[0].text`.
+- Archivos modificados:
+  - `src/components/sidebar/ChapterList.tsx`
+  - `src/components/sidebar/ChapterListItem.tsx`
+- Decisiones tomadas:
+  - Se agregó `outline` prop a `ChapterListItem` para recibir el esquema del capítulo.
+- Tests: `tsc --noEmit` limpio.
+- Bugs encontrados: errores TS en la implementación de la vista de esquema.
 
 ### 2026-09-16 - Chapter Notes Search, ThemeGallery thumbnails, TopTabs tooltips
 - Que se hizo:

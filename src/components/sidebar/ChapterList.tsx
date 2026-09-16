@@ -230,37 +230,42 @@ function ChapterList() {
           onWordGoalChange={(goal) => handleWordGoalChange(chapter.filename, goal)}
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
-          lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
-          isLocked={currentProject?.lockedChapters?.includes(chapter.filename)}
-        />
-      ))}
-      {finishedChapters.map((chapter, i) => (
-        <ChapterListItem
-          key={chapter.path}
-          chapter={chapter}
-          index={inProgressChapters.length + i}
-          isActive={chapter.path === activeChapterPath}
-          onClick={() => handleSelect(chapter.path, chapter.filename)}
-          onRename={(newTitle) => handleRename(chapter, newTitle)}
-          onDragStart={() => {}}
-          onDragOver={() => {}}
-          onDrop={() => {}}
-          onDragEnd={() => {}}
-          isDragOver={false}
-          draggable={false}
-          wordCount={wordCounts[chapter.path] ?? 0}
-          wordGoal={currentProject?.chapterWordGoals?.[chapter.filename] ?? chapterWordGoal}
-          chapterTags={currentProject?.chapterTags?.[chapter.filename]}
-          onTagsChange={(tags) => handleTagsChange(chapter.filename, tags)}
-          onWordGoalChange={(goal) => handleWordGoalChange(chapter.filename, goal)}
-          chapterColor={currentProject?.chapterColors?.[chapter.filename]}
-          onColorChange={(color) => handleColorChange(chapter.filename, color)}
-          lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
-          isLocked={currentProject?.lockedChapters?.includes(chapter.filename)}
-        />
-      ))}
-    </div>
-  );
-}
+           lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
+           isLocked={currentProject?.lockedChapters?.includes(chapter.filename)}
+           showOutline={isChapterOutlineView}
+           outline={outlines[chapter.path]}
+         />
+       ))}
+       {finishedChapters.map((chapter, i) => (
+         <ChapterListItem
+           key={chapter.path}
+           chapter={chapter}
+           index={inProgressChapters.length + i}
+           isActive={chapter.path === activeChapterPath}
+           onClick={() => handleSelect(chapter.path, chapter.filename)}
+           onRename={(newTitle) => handleRename(chapter, newTitle)}
+           onDragStart={() => {}}
+           onDragOver={() => {}}
+           onDrop={() => {}}
+           onDragEnd={() => {}}
+           isDragOver={false}
+           draggable={false}
+           wordCount={wordCounts[chapter.path] ?? 0}
+           wordGoal={currentProject?.chapterWordGoals?.[chapter.filename] ?? chapterWordGoal}
+           chapterTags={currentProject?.chapterTags?.[chapter.filename]}
+           onTagsChange={(tags) => handleTagsChange(chapter.filename, tags)}
+           onWordGoalChange={(goal) => handleWordGoalChange(chapter.filename, goal)}
+           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
+           onColorChange={(color) => handleColorChange(chapter.filename, color)}
+           lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
+           isLocked={currentProject?.lockedChapters?.includes(chapter.filename)}
+           showOutline={isChapterOutlineView}
+           outline={outlines[chapter.path]}
+         />
+       ))}
+     </div>
+   );
+ }
+
 
 export default ChapterList;

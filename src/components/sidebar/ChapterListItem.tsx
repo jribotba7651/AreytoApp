@@ -29,10 +29,12 @@ interface ChapterListItemProps {
   lastExportTimestamp?: string;
   isLocked?: boolean;
   showOutline?: boolean;
+  outline?: { level: number; text: string }[];
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterTags, onTagsChange, onWordGoalChange, chapterColor, onColorChange, lastExportTimestamp, isLocked }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterTags, onTagsChange, onWordGoalChange, chapterColor, onColorChange, lastExportTimestamp, isLocked, showOutline, outline }: ChapterListItemProps) {
   const { t } = useTranslation();
+
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -163,12 +165,15 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
             )}
             {showOutline && outline && outline.length > 0 ? (
                 <div className="flex flex-col w-full text-left truncate">
-                    <span className="truncate text-text-primary font-bold">{outline[0].text}</span>
-                    {outline.slice(1).map((item, i) => (
-                        <span key={i} className={`truncate text-text-secondary text-[10px] ${item.level === 2 ? 'pl-2' : ''}`}>
-                            {item.text}
-                        </span>
-                    ))}
+                    <span className="truncate text-text-primary font-bold">{outline[0]?.text}</span>
+                    {outline.slice(1).map((item, i) => {
+                        if (!item) return null;
+                        return (
+                            <span key={i} className={`truncate text-text-secondary text-[10px] ${item.level === 2 ? 'pl-2' : ''}`}>
+                                {item.text}
+                            </span>
+                        );
+                    })}
                 </div>
             ) : (
                 <span className="truncate">{chapter.title}</span>
