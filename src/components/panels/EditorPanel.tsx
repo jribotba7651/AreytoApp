@@ -83,6 +83,7 @@ function ChapterView() {
   const saveStatus = useProjectStore((s) => s.saveStatus);
   const setFlushAutosave = useProjectStore((s) => s.setFlushAutosave);
   const setSyncAutosaveSaved = useProjectStore((s) => s.setSyncAutosaveSaved);
+  const setInsertTextAtCursor = useProjectStore((s) => s.setInsertTextAtCursor);
 
   const editorViewMode = useLayoutStore((s) => s.editorViewMode);
   const setEditorViewMode = useLayoutStore((s) => s.setEditorViewMode);
@@ -108,11 +109,13 @@ function ChapterView() {
   useEffect(() => {
     setFlushAutosave(flush);
     setSyncAutosaveSaved(syncSaved);
+    setInsertTextAtCursor((text) => editorRef.current?.insertText(text));
     return () => {
       setFlushAutosave(null);
       setSyncAutosaveSaved(null);
+      setInsertTextAtCursor(null);
     };
-  }, [flush, syncSaved, setFlushAutosave, setSyncAutosaveSaved]);
+  }, [flush, syncSaved, setFlushAutosave, setSyncAutosaveSaved, setInsertTextAtCursor]);
 
   useEffect(() => {
     if (saveStatus !== 'saved') return;

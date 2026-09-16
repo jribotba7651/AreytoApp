@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Chapter, ClosedChapter, Project } from '@/types/project';
 import type { Commit } from '@/types/git';
 import { updateProjectMeta as updateMeta } from '@/lib/project-fs';
+import { useCharacterStore } from '@/stores/characterStore';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export type ActiveView =
@@ -30,6 +31,7 @@ interface ProjectState {
   sectionVersion: number;
   flushAutosave: (() => Promise<void>) | null;
   syncAutosaveSaved: ((content: string) => void) | null;
+  insertTextAtCursor: ((text: string) => void) | null;
   triggerOpenProject: (() => void) | null;
   triggerNewProject: (() => void) | null;
   pendingMenuAction: 'open' | 'new' | null;
@@ -49,6 +51,7 @@ interface ProjectState {
   incrementSectionVersion: () => void;
   setFlushAutosave: (fn: (() => Promise<void>) | null) => void;
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) => void;
+  setInsertTextAtCursor: (fn: ((text: string) => void) | null) => void;
   setLastSavedContent: (content: string) => void;
   setExternalChangePending: (pending: { path: string; diskContent: string } | null) => void;
   setTriggerOpenProject: (fn: (() => void) | null) => void;
@@ -72,13 +75,15 @@ export const useProjectStore = create<ProjectState>((set) => ({
   sectionVersion: 0,
   flushAutosave: null,
   syncAutosaveSaved: null,
+  insertTextAtCursor: null,
   triggerOpenProject: null,
   triggerNewProject: null,
   pendingMenuAction: null,
 
   setCurrentProject: (project: Project | null) => set({ currentProject: project }),
 
-  closeProject: () =>
+  closeProject: () => {
+    useCharacterStore.getState().reset();
     set({
       currentProject: null,
       activeChapterPath: null,
@@ -92,8 +97,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
       externalChangePending: null,
       editorVersion: 0,
       sectionVersion: 0,
-    }),
-
+      insertTextAtCursor: null,
+    });
+  },
   setActiveChapter: (path: string, content: string) =>
     set({ activeChapterPath: path, activeChapterContent: content, lastSavedContent: content, externalChangePending: null, activeView: 'chapter', saveStatus: 'idle', commits: [] }),
 
@@ -133,6 +139,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   setSyncAutosaveSaved: (fn: ((content: string) => void) | null) =>
     set({ syncAutosaveSaved: fn }),
+
+  setInsertTextAtCursor: (fn: ((text: string) => void) | null) =>
+    set({ insertTextAtCursor: fn }),
 
   setLastSavedContent: (content: string) => set({ lastSavedContent: content }),
 

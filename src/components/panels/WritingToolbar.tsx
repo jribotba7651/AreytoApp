@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Type, Search, BookOpen, MessageSquare, Bookmark } from 'lucide-react';
+import { Type, Search, BookOpen, MessageSquare, Bookmark, Library, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { invoke } from '@tauri-apps/api/core';
 import { useProjectStore } from '@/stores/projectStore';
+import SnippetLibraryPanel from '@/components/panels/SnippetLibraryPanel';
+import CharacterTrackerPanel from '@/components/panels/CharacterTrackerPanel';
 
-type ToolPanel = 'editor-settings' | 'find-replace' | 'notes' | null;
+type ToolPanel = 'editor-settings' | 'find-replace' | 'notes' | 'snippets' | 'characters' | null;
 
 function EditorSettingsPanel() {
   const { t } = useTranslation();
@@ -282,6 +284,8 @@ const TOOL_ICONS = [
   { id: 'editor-settings' as const, Icon: Type, labelKey: 'writingToolbar.editorSettings.title' },
   { id: 'find-replace' as const, Icon: Search, labelKey: 'writingToolbar.findReplace.title' },
   { id: 'notes' as const, Icon: BookOpen, labelKey: 'writingToolbar.notes' },
+  { id: 'snippets' as const, Icon: Library, labelKey: 'writingToolbar.snippets' },
+  { id: 'characters' as const, Icon: Users, labelKey: 'writingToolbar.characters' },
   { id: 'stub-2' as const, Icon: MessageSquare, labelKey: 'writingToolbar.comments' },
   { id: 'stub-3' as const, Icon: Bookmark, labelKey: 'writingToolbar.bookmarks' },
 ] as const;
@@ -293,7 +297,7 @@ function WritingToolbar() {
   const [activePanel, setActivePanel] = useState<ToolPanel>(null);
 
   function handleIconClick(id: ToolId) {
-    if (id === 'editor-settings' || id === 'find-replace' || id === 'notes') {
+    if (id === 'editor-settings' || id === 'find-replace' || id === 'notes' || id === 'snippets' || id === 'characters') {
       setActivePanel((prev) => (prev === id ? null : id));
     }
   }
@@ -305,6 +309,8 @@ function WritingToolbar() {
           {activePanel === 'editor-settings' && <EditorSettingsPanel />}
           {activePanel === 'find-replace' && <FindReplacePanel />}
           {activePanel === 'notes' && <ChapterNotesPanel />}
+          {activePanel === 'snippets' && <SnippetLibraryPanel />}
+          {activePanel === 'characters' && <CharacterTrackerPanel />}
         </div>
       )}
       <div className="flex flex-col items-center gap-1 py-2 px-1 border-l border-border-subtle bg-bg-secondary">

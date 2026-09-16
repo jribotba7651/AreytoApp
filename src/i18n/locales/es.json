@@ -542,7 +542,20 @@
     "summary": "Resumen",
     "summaryPlaceholder": "Escribe un resumen corto del capitulo...",
     "comments": "Comentarios",
-    "bookmarks": "Marcadores"
+    "bookmarks": "Marcadores",
+    "snippets": "Fragmentos",
+    "snippetsLabelPlaceholder": "Nombre (opcional)",
+    "snippetsTextPlaceholder": "Fragmento de texto reutilizable...",
+    "snippetsAdd": "Guardar fragmento",
+    "snippetsEmpty": "Sin fragmentos aun.",
+    "snippetsDelete": "Eliminar fragmento",
+    "snippetsInsertHint": "Clic para insertar en el editor",
+    "characters": "Personajes",
+    "charactersNamePlaceholder": "Nombre del personaje",
+    "charactersDescriptionPlaceholder": "Descripcion corta",
+    "charactersAdd": "Agregar personaje",
+    "charactersEmpty": "Sin personajes aun.",
+    "charactersDelete": "Eliminar personaje"
   },
   "onboarding": {
     "step1Title": "Escribe por capitulos",

@@ -9,6 +9,8 @@ import { readChapter, updateProjectMeta } from '@/lib/project-fs';
 import { slugify } from '@/lib/export-composer';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
+import { useCharacterStore } from '@/stores/characterStore';
+import { CHAPTER_COLOR_MAP } from '@/types/project';
 import { Info, AlertTriangle, Quote } from 'lucide-react';
 
 type CalloutType = 'nota' | 'aviso' | 'cita';
@@ -207,6 +209,79 @@ function applyChapterLinks(children: React.ReactNode): React.ReactNode {
   });
 }
 
+function hexToRgba(hex: string | undefined, alpha: number): string {
+  if (!hex) return `rgba(148, 163, 184, ${alpha})`;
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+interface CharacterMatch {
+  regex: RegExp | null;
+  colorByName: Map<string, string>;
+}
+
+function buildCharacterMatcher(
+  characters: { name: string; color: string }[],
+): CharacterMatch {
+  const colorByName = new Map<string, string>();
+  const names: string[] = [];
+  for (const c of characters) {
+    const n = c.name.trim();
+    const key = n.toLowerCase();
+    if (!n || colorByName.has(key)) continue;
+    colorByName.set(key, c.color);
+    names.push(n);
+  }
+  if (names.length === 0) return { regex: null, colorByName };
+  const escaped = names
+    .sort((a, b) => b.length - a.length)
+    .map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const regex = new RegExp(`(${escaped.join('|')})`, 'giu');
+  return { regex, colorByName };
+}
+
+function splitCharacterNames(text: string, match: CharacterMatch): React.ReactNode[] {
+  const { regex, colorByName } = match;
+  if (!regex) return [text];
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  for (const m of text.matchAll(regex)) {
+    const idx = m.index ?? 0;
+    if (idx > lastIndex) parts.push(text.slice(lastIndex, idx));
+    const matched = m[0];
+    const hex = colorByName.get(matched.toLowerCase());
+    parts.push(
+      <span
+        key={`char-${idx}`}
+        style={{ backgroundColor: hexToRgba(hex, 0.16), borderRadius: '2px', padding: '0 1px' }}
+      >
+        {matched}
+      </span>,
+    );
+    lastIndex = idx + matched.length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts;
+}
+
+function applyCharacterHighlights(children: React.ReactNode, match: CharacterMatch): React.ReactNode {
+  if (!match.regex) return children;
+  return React.Children.map(children, (child) => {
+    if (typeof child === 'string') return splitCharacterNames(child, match);
+    if (React.isValidElement(child)) {
+      const el = child as React.ReactElement<{ children?: React.ReactNode }>;
+      return el.props.children != null
+        ? React.cloneElement(el, {}, applyCharacterHighlights(el.props.children, match))
+        : child;
+    }
+    return child;
+  });
+}
+
 function buildComponents(
   renderInline: (children: React.ReactNode) => React.ReactNode,
   projectRootPath?: string,
@@ -374,12 +449,23 @@ function BookMarkdown({ content, themeId, themeOverrides, bookSettings, projectR
   const cssVars = themeToCssVars(theme);
   const bs = bookSettings ?? DEFAULT_BOOK_SETTINGS;
   const trimStyle = bookSettingsToStyle(bs);
+  const characters = useCharacterStore((s) => s.characters);
+
+  const characterMatch = useMemo<CharacterMatch>(() => {
+    return buildCharacterMatcher(
+      characters.map((c) => ({ name: c.name, color: CHAPTER_COLOR_MAP[c.color] })),
+    );
+  }, [characters]);
 
   const components = useMemo<Components>(() => {
-    const renderInline = (children: React.ReactNode) =>
-      enableChapterLinks ? applyChapterLinks(children) : children;
+    const renderInline = (children: React.ReactNode) => {
+      let result = children;
+      if (enableChapterLinks) result = applyChapterLinks(result);
+      result = applyCharacterHighlights(result, characterMatch);
+      return result;
+    };
     return buildComponents(renderInline, projectRootPath);
-  }, [projectRootPath, enableChapterLinks]);
+  }, [projectRootPath, enableChapterLinks, characterMatch]);
 
   return (
     <div

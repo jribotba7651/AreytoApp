@@ -5,10 +5,39 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Epic5 S2 - URLs rapidas y Copiar capitulo en BrowserPanel
+- Ultima feature completada: Snippet Library + Character Tracker
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Snippet Library + Character Tracker (2 sub-tareas)
+- Que se hizo:
+  1. Snippet Library: nuevo panel en el sidebar derecho (WritingToolbar) con icono Library. El usuario guarda fragmentos de texto reutilizables (frases, descripciones de personajes, lugares) con nombre opcional y texto. Se guardan en .notes/snippets.json. Click en un snippet inserta el texto en el editor en la posicion del cursor.
+  2. Character Tracker: nuevo panel en el sidebar derecho con icono Users. Lista de personajes del libro con nombre, descripcion corta y color (reutiliza los 5 colores del design system). Se guardan en .notes/characters.json. En el preview del libro (BookMarkdown), los nombres de personajes se resaltan sutilmente con el color asignado (fondo translucido del color).
+- Archivos creados:
+  - src/lib/snippets.ts (readSnippets/writeSnippets/createSnippetId + interface Snippet)
+  - src/lib/characters.ts (readCharacters/writeCharacters/createCharacterId + interface Character)
+  - src/lib/snippets.test.ts (6 tests)
+  - src/lib/characters.test.ts (6 tests)
+  - src/stores/characterStore.ts (loadCharacters/addCharacter/removeCharacter/reset)
+  - src/components/panels/SnippetLibraryPanel.tsx (form nombre+texto, lista, insertar al cursor, eliminar)
+  - src/components/panels/CharacterTrackerPanel.tsx (form nombre+descripcion+color, lista, eliminar)
+- Archivos modificados:
+  - src/components/editor/ChapterEditor.tsx (+insertText en ChapterEditorHandle via useImperativeHandle, inserta en la posicion del cursor con EditorSelection.cursor)
+  - src/stores/projectStore.ts (+insertTextAtCursor state y setter, reset en closeProject, reset de characterStore en closeProject)
+  - src/components/panels/EditorPanel.tsx (ChapterView registra setInsertTextAtCursor apuntando a editorRef.current.insertText)
+  - src/components/panels/WritingToolbar.tsx (+panels snippets y characters con iconos Library y Users)
+  - src/components/book/BookMarkdown.tsx (+buildCharacterMatcher/splitCharacterNames/applyCharacterHighlights/hexToRgba, aplica highlight de personajes en renderInline ademas de chapter links)
+  - src/lib/open-project-flow.ts (+loadCharacters al abrir proyecto)
+  - src/i18n/locales/es.json y en.json (+writingToolbar.snippets.*, +writingToolbar.characters.*)
+- Decisiones tomadas:
+  - D-331: La insercion de snippet en el editor se hace via un bridge en projectStore (insertTextAtCursor) que ChapterView registra apuntando a editorRef.current.insertText, siguiendo el mismo patron que flushAutosave/syncAutosaveSaved. Evita acoplar el panel del toolbar al editor directamente.
+  - D-332: Los personajes viven en un store propio (characterStore) porque el highlight en BookMarkdown necesita leerlos reactivamente sin prop drilling. Se cargan en setupProjectInStores y se resetean en closeProject.
+  - D-333: El highlight de personajes usa un fondo translucido del color asignado (hexToRgba con alpha 0.16) sobre los nombres en el preview, para que sea sutil y no rompa la lectura. Se aplica sobre los mismos nodos de texto que los chapter links (renderInline), asi conviven ambas features.
+  - D-334: El matcher de personajes ordena los nombres por largo descendente y los escapa en un unico regex case-insensitive con flag u, para que nombres con acentos y subcadenas (ej. "Ana" vs "Mariana") resalten correctamente sin solaparse.
+  - D-335: snippets.json y characters.json se guardan en .notes/ junto a las notas existentes. No se incluyen en el export (consistente con las notas, D-267).
+- Tests: tsc --noEmit limpio. npm test: 441 pasan, 0 fallan (10 nuevos: 5 en snippets.test.ts + 5 en characters.test.ts).
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Epic5 S2 - URLs rapidas y Copiar capitulo en BrowserPanel
 - Que se hizo: en BrowserPanel se agrego una fila de chips debajo de la barra de URL con accesos rapidos a Claude (https://claude.ai), Spiral (https://spiralwriting.com), ChatGPT (https://chatgpt.com) y Perplexity (https://perplexity.ai). Cada chip navega el iframe a esa URL (setea input + url + remonta el iframe via frameKey). En la misma fila, alineado a la derecha, se agrego el boton "Copiar capitulo" que copia el contenido del capitulo activo (projectStore.activeChapterContent) al clipboard. El boton muestra feedback "Copiado" con icono Check durante 2s.

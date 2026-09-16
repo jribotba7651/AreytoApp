@@ -542,7 +542,20 @@
     "summary": "Summary",
     "summaryPlaceholder": "Write a short summary of the chapter...",
     "comments": "Comments",
-    "bookmarks": "Bookmarks"
+    "bookmarks": "Bookmarks",
+    "snippets": "Snippets",
+    "snippetsLabelPlaceholder": "Name (optional)",
+    "snippetsTextPlaceholder": "Reusable text fragment...",
+    "snippetsAdd": "Save snippet",
+    "snippetsEmpty": "No snippets yet.",
+    "snippetsDelete": "Delete snippet",
+    "snippetsInsertHint": "Click to insert in the editor",
+    "characters": "Characters",
+    "charactersNamePlaceholder": "Character name",
+    "charactersDescriptionPlaceholder": "Short description",
+    "charactersAdd": "Add character",
+    "charactersEmpty": "No characters yet.",
+    "charactersDelete": "Delete character"
   },
   "onboarding": {
     "step1Title": "Write by chapters",

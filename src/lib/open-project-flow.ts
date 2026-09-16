@@ -8,6 +8,7 @@ import { ensureFrontmatterFiles } from './frontmatter-fs';
 import { ensureBackmatterFiles } from './backmatter-fs';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useCharacterStore } from '@/stores/characterStore';
 
 export type OpenProjectResult =
   | { ok: true }
@@ -21,6 +22,8 @@ export async function setupProjectInStores(project: Project): Promise<void> {
   store.setActiveChapter(chapter.value.activeChapter.path, chapter.value.activeChapter.content);
   store.setChapters(chapter.value.allChapters);
   store.setCurrentProject(project);
+
+  void useCharacterStore.getState().loadCharacters(project.rootPath);
 
   const gitInit = await ensureGitInit(project.rootPath);
   if (!gitInit.ok) console.warn('Git init warning:', gitInit.error);

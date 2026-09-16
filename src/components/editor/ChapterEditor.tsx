@@ -1,6 +1,7 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, highlightActiveLine } from '@codemirror/view';
+import { EditorSelection } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { createEditorTheme } from './editor-theme';
@@ -17,6 +18,7 @@ interface ChapterEditorProps {
 
 export interface ChapterEditorHandle {
   getView: () => EditorView | null;
+  insertText: (text: string) => void;
 }
 
 const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange, onScroll }, ref) {
@@ -31,6 +33,16 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
 
   useImperativeHandle(ref, () => ({
     getView: () => viewRef.current,
+    insertText: (text: string) => {
+      const view = viewRef.current;
+      if (!view) return;
+      const { head } = view.state.selection.main;
+      view.dispatch({
+        changes: { from: head, to: head, insert: text },
+        selection: EditorSelection.cursor(head + text.length),
+      });
+      view.focus();
+    },
   }));
 
   useEffect(() => {
