@@ -5,10 +5,35 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Snippet Library + Character Tracker
+- Ultima feature completada: Timeline / Plot Tracker + Ambient Sound
 - Fecha de ultima actualizacion: 2026-09-15
 
 ## Features completadas
+
+### 2026-09-15 - Timeline / Plot Tracker + Ambient Sound (2 sub-tareas)
+- Que se hizo:
+  1. Timeline / Plot Tracker: nuevo panel en el sidebar derecho (WritingToolbar) con icono List. El usuario crea una linea de tiempo del libro con eventos. Cada evento tiene titulo, capitulo asociado (dropdown de los capitulos del proyecto) y descripcion corta. Se guardan en .notes/timeline.json. Se visualizan como lista ordenada con un dot timeline CSS puro (puntos de acento conectados por una linea vertical sutil).
+  2. Ambient Sound: en la barra inferior del editor, boton de musica (icono Music) que abre un popover con tres sonidos de ambiente para escribir: lluvia, cafeteria y bosque. Usa HTML5 Audio (new Audio(url)) con loop, un solo sonido a la vez, sin dependencias. Los archivos son MP3 libres de derechos servidos desde archive.org.
+- Archivos creados:
+  - src/lib/timeline.ts (readTimeline/writeTimeline/createTimelineEventId + interface TimelineEvent)
+  - src/lib/timeline.test.ts (5 tests)
+  - src/components/panels/TimelinePanel.tsx (form titulo+capitulo+descripcion, dot timeline CSS puro, eliminar)
+  - src/lib/ambient-sound.ts (AMBIENT_SOUNDS catalogo de 3 sonidos + AMBIENT_DEFAULT_VOLUME)
+  - src/hooks/useAmbientSound.ts (maneja un Audio ref, play/stop/toggle, limpieza al desmontar)
+  - src/components/editor/AmbientSoundButton.tsx (boton musica + popover con los 3 sonidos, click-outside)
+- Archivos modificados:
+  - src/components/panels/WritingToolbar.tsx (+panel timeline con icono List)
+  - src/components/panels/EditorPanel.tsx (+AmbientSoundButton en la barra inferior)
+  - src/i18n/locales/es.json y en.json (+writingToolbar.timeline.*, +editor.ambient.*)
+- Decisiones tomadas:
+  - D-336: Los eventos del timeline viven en estado local del panel (igual que snippets), no en un store, porque ningun otro componente los lee reactivamente. La asociacion de capitulo guarda el filename (no el path completo) por portabilidad, consistente con chapterColors (D-286). El dropdown resuelve el titulo del capitulo al render.
+  - D-337: El dot timeline es CSS puro: cada evento tiene un punto (rounded-full bg-accent) alineado a una columna izquierda y una linea vertical (w-px bg-border-default) que conecta eventos consecutivos. Sin librerias.
+  - D-338: El ambient sound usa HTML5 Audio nativo (new Audio(url)) con loop = true y volumen fijo 0.4. Solo suena un sonido a la vez: el hook guarda una unica referencia Audio y llama stop antes de reproducir el siguiente.
+  - D-339: Las URLs de audio son MP3 libres de derechos servidos desde archive.org (verificadas con HTTP 200, content-type audio/mpeg y access-control-allow-origin *). Se eligio MP3 sobre OGG porque WKWebView (motor Safari) tiene soporte inestable de Ogg Vorbis segun caniuse (parcial hasta Safari 18.3).
+  - D-340: El boton de musica vive en la barra inferior del editor (modo no-focus). En focus mode se oculta junto con el resto del footer, consistente con la escritura sin distracciones.
+  - D-341: El volumen queda fijo en 0.4 via AMBIENT_DEFAULT_VOLUME. No hay control de volumen aun; si se necesita se agrega un slider como trabajo futuro.
+- Tests: tsc --noEmit limpio. npm test: 446 pasan, 0 fallan (5 nuevos en timeline.test.ts).
+- Bugs encontrados: ninguno.
 
 ### 2026-09-15 - Snippet Library + Character Tracker (2 sub-tareas)
 - Que se hizo:

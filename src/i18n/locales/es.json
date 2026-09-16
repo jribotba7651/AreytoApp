@@ -423,7 +423,13 @@
     "closeSplit": "Cerrar vista dividida",
     "splitSelectChapter": "Seleccionar capitulo...",
     "splitEmpty": "Selecciona un capitulo de referencia",
-    "sessionTime": "{{time}}"
+    "sessionTime": "{{time}}",
+    "ambient": {
+      "title": "Sonido ambiente",
+      "rain": "Lluvia",
+      "cafe": "Cafeteria",
+      "forest": "Bosque"
+    }
   },
   "versions": {
     "title": "Versiones",
@@ -555,7 +561,14 @@
     "charactersDescriptionPlaceholder": "Descripcion corta",
     "charactersAdd": "Agregar personaje",
     "charactersEmpty": "Sin personajes aun.",
-    "charactersDelete": "Eliminar personaje"
+    "charactersDelete": "Eliminar personaje",
+    "timeline": "Linea de tiempo",
+    "timelineTitlePlaceholder": "Titulo del evento",
+    "timelineNoChapter": "Sin capitulo asociado",
+    "timelineDescriptionPlaceholder": "Descripcion corta",
+    "timelineAdd": "Agregar evento",
+    "timelineEmpty": "Sin eventos aun.",
+    "timelineDelete": "Eliminar evento"
   },
   "onboarding": {
     "step1Title": "Escribe por capitulos",
