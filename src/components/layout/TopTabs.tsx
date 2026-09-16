@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { X, Info, Upload, Download, Keyboard, Settings, Archive, Check, BarChart3 } from 'lucide-react';
+import { X, Info, Upload, Download, Keyboard, Settings, Archive, Check, BarChart3, Sun, Moon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import AboutDialog from '@/components/about/AboutDialog';
 import ShortcutsDialog from '@/components/shortcuts/ShortcutsDialog';
 
@@ -17,6 +18,8 @@ function TopTabs() {
   const setShowExportAllDialog = useLayoutStore((s) => s.setShowExportAllDialog);
   const showShortcutsModal = useLayoutStore((s) => s.showShortcutsModal);
   const setShowShortcutsModal = useLayoutStore((s) => s.setShowShortcutsModal);
+  const themeMode = useSettingsStore((s) => s.themeMode);
+  const setThemeMode = useSettingsStore((s) => s.setThemeMode);
   const [showAbout, setShowAbout] = useState(false);
 
   const isWriting = activeTab === 'capitulo';
@@ -153,6 +156,18 @@ function TopTabs() {
           className="flex items-center justify-center w-7 h-7 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
         >
           <Keyboard size={14} />
+        </button>
+
+        <button
+          onClick={() => {
+            const next = themeMode === 'dark' ? 'light' : 'dark';
+            setThemeMode(next);
+          }}
+          aria-label={t('topbar.toggleTheme')}
+          title={t('topbar.toggleTheme')}
+          className="flex items-center justify-center w-7 h-7 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+        >
+          {themeMode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
 
         <button

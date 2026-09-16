@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Minimize2 } from 'lucide-react';
+import pkg from '../package.json';
 import TopTabs from '@/components/layout/TopTabs';
 import ChapterTabContent from '@/components/layout/ChapterTabContent';
 import BookTabContent from '@/components/layout/BookTabContent';
@@ -32,6 +33,10 @@ function App() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
+
+  useEffect(() => {
+    document.title = `Areyto ${pkg.version}`;
+  }, []);
 
   useKeyboardShortcuts();
   useMenuEvents();

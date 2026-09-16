@@ -5,10 +5,25 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 ## Estado actual
 - Fase activa: Visual Redesign (Atticus-inspired)
 - Feature en progreso: ninguna
-- Ultima feature completada: Timeline / Plot Tracker + Ambient Sound
-- Fecha de ultima actualizacion: 2026-09-15
+- Ultima feature completada: Dark Mode Toggle + Version Tag
+- Fecha de ultima actualizacion: 2026-09-16
 
 ## Features completadas
+
+### 2026-09-16 - Dark Mode Toggle + Version Tag (2 sub-tareas)
+- Que se hizo:
+  1. Dark Mode Toggle: añadido botón en la barra superior (TopTabs) que alterna entre los modos 'light' y 'dark' usando settingsStore.themeMode. Se añadieron iconos Sun/Moon (lucide-react).
+  2. Version Tag: se añadió el número de versión del `package.json` en el título de la ventana de la app (`document.title`) al cargar App.tsx.
+- Archivos modificados:
+  - `src/components/layout/TopTabs.tsx`
+  - `src/App.tsx`
+  - `src/i18n/locales/es.json`
+  - `src/i18n/locales/en.json`
+- Decisiones tomadas:
+  - D-342: El toggle de tema alterna específicamente entre 'light' y 'dark'. Si el modo actual es 'auto', el primer click lo fija en el opuesto (si sistema es light, cambia a dark).
+  - D-343: El título de la ventana usa `document.title` por simplicidad, siendo suficiente para apps Tauri.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
 
 ### 2026-09-16 - Bookmarks + Chapter Export Status
 - Que se hizo:
