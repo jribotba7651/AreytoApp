@@ -7,8 +7,9 @@ import SnippetLibraryPanel from '@/components/panels/SnippetLibraryPanel';
 import CharacterTrackerPanel from '@/components/panels/CharacterTrackerPanel';
 import TimelinePanel from '@/components/panels/TimelinePanel';
 import WritingPromptsPanel from '@/components/panels/WritingPromptsPanel';
+import BookmarksPanel from '@/components/panels/BookmarksPanel';
 
-type ToolPanel = 'editor-settings' | 'find-replace' | 'notes' | 'snippets' | 'characters' | 'timeline' | 'prompts' | null;
+type ToolPanel = 'editor-settings' | 'find-replace' | 'notes' | 'snippets' | 'bookmarks' | 'characters' | 'timeline' | 'prompts' | 'comments' | null;
 
 function EditorSettingsPanel() {
   const { t } = useTranslation();
@@ -287,11 +288,11 @@ const TOOL_ICONS = [
   { id: 'find-replace' as const, Icon: Search, labelKey: 'writingToolbar.findReplace.title' },
   { id: 'notes' as const, Icon: BookOpen, labelKey: 'writingToolbar.notes' },
   { id: 'snippets' as const, Icon: Library, labelKey: 'writingToolbar.snippets' },
+  { id: 'bookmarks' as const, Icon: Bookmark, labelKey: 'writingToolbar.bookmarks' },
   { id: 'characters' as const, Icon: Users, labelKey: 'writingToolbar.characters' },
   { id: 'timeline' as const, Icon: List, labelKey: 'writingToolbar.timeline' },
   { id: 'prompts' as const, Icon: Lightbulb, labelKey: 'writingToolbar.prompts' },
-  { id: 'stub-2' as const, Icon: MessageSquare, labelKey: 'writingToolbar.comments' },
-  { id: 'stub-3' as const, Icon: Bookmark, labelKey: 'writingToolbar.bookmarks' },
+  { id: 'comments' as const, Icon: MessageSquare, labelKey: 'writingToolbar.comments' },
 ] as const;
 
 type ToolId = (typeof TOOL_ICONS)[number]['id'];
@@ -301,7 +302,7 @@ function WritingToolbar() {
   const [activePanel, setActivePanel] = useState<ToolPanel>(null);
 
   function handleIconClick(id: ToolId) {
-    if (id === 'editor-settings' || id === 'find-replace' || id === 'notes' || id === 'snippets' || id === 'characters' || id === 'timeline' || id === 'prompts') {
+    if (id === 'editor-settings' || id === 'find-replace' || id === 'notes' || id === 'snippets' || id === 'bookmarks' || id === 'characters' || id === 'timeline' || id === 'prompts' || id === 'comments') {
       setActivePanel((prev) => (prev === id ? null : id));
     }
   }
@@ -314,6 +315,7 @@ function WritingToolbar() {
           {activePanel === 'find-replace' && <FindReplacePanel />}
           {activePanel === 'notes' && <ChapterNotesPanel />}
           {activePanel === 'snippets' && <SnippetLibraryPanel />}
+          {activePanel === 'bookmarks' && <BookmarksPanel />}
           {activePanel === 'characters' && <CharacterTrackerPanel />}
           {activePanel === 'timeline' && <TimelinePanel />}
           {activePanel === 'prompts' && <WritingPromptsPanel />}

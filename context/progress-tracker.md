@@ -10,6 +10,15 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Features completadas
 
+### 2026-09-16 - BookmarksPanel en WritingToolbar
+- Que se hizo: Se conectó BookmarksPanel.tsx en la barra de herramientas del editor (WritingToolbar) como el quinto icono. Se reordenaron los iconos del toolbar para incluir los marcadores en la quinta posición, moviendo los iconos subsiguientes.
+- Archivos modificados:
+  - src/components/panels/WritingToolbar.tsx (import, actualización de ToolPanel, reordenamiento de TOOL_ICONS, conexión del componente)
+- Decisiones tomadas:
+  - Se movió el icono de marcadores a la quinta posición para mejorar el acceso, cumpliendo con la solicitud. Se preservaron los iconos existentes reordenándolos adecuadamente.
+- Tests: tsc --noEmit limpio. npm test: 457 pasan, 0 fallan.
+- Bugs encontrados: ninguno.
+
 ### 2026-09-15 - Timeline / Plot Tracker + Ambient Sound (2 sub-tareas)
 - Que se hizo:
   1. Timeline / Plot Tracker: nuevo panel en el sidebar derecho (WritingToolbar) con icono List. El usuario crea una linea de tiempo del libro con eventos. Cada evento tiene titulo, capitulo asociado (dropdown de los capitulos del proyecto) y descripcion corta. Se guardan en .notes/timeline.json. Se visualizan como lista ordenada con un dot timeline CSS puro (puntos de acento conectados por una linea vertical sutil).
