@@ -10,6 +10,25 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Features completadas
 
+### 2026-09-16 - Export History, Chapter Lock, Full Screen (3 sub-tareas)
+- Que se hizo:
+  1. Export History: Verificado, se añade automáticamente al exportar.
+  2. Chapter Lock: Icono de candado en el sidebar para capítulos bloqueados (`lockedChapters` en `proyecto.json`) y banner de solo lectura en el editor.
+  3. Full Screen: Botón de pantalla completa en el tab Libro usando `getCurrentWindow().setFullscreen()`.
+- Archivos modificados:
+  - `src/components/layout/BookTabContent.tsx`
+  - `src/i18n/locales/en.json`
+  - `src/i18n/locales/es.json`
+  - `src/components/sidebar/ChapterListItem.tsx`
+  - `src/components/sidebar/ChapterList.tsx`
+  - `src/components/editor/ChapterEditor.tsx`
+  - `src/components/panels/EditorPanel.tsx`
+- Decisiones tomadas:
+  - D-347: El botón de pantalla completa alterna el estado (toggle) usando `getCurrentWindow().setFullscreen(!await win.isFullscreen())`.
+  - D-348: Se reutiliza `Lock` de `lucide-react` para el icono del sidebar.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
+
 ### 2026-09-16 - Chapter Status Badge, Last Edited Date, Scroll to Top (3 sub-tareas)
 - Que se hizo:
   1. Chapter Status Badge: en el sidebar, junto al número de capítulo, se agregó un badge de color para indicar el estado (azul para 'in-progress', verde para 'finished').

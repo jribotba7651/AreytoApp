@@ -345,6 +345,7 @@
     },
     "readingTime": "Tiempo de lectura estimado: {{minutes}} min",
     "print": "Imprimir",
+    "fullScreen": "Pantalla completa",
     "themeGallery": {
       "title": "Temas del libro",
       "activeLabel": "Activo"

@@ -185,6 +185,7 @@ function ChapterList() {
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
           lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
+          isLocked={currentProject?.lockedChapters?.includes(chapter.filename)}
         />
       ))}
       {finishedChapters.map((chapter, i) => (
@@ -206,6 +207,7 @@ function ChapterList() {
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
           lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
+          isLocked={currentProject?.lockedChapters?.includes(chapter.filename)}
         />
       ))}
     </div>

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { save, message, open } from '@tauri-apps/plugin-dialog';
-import { Printer, ArrowUp } from 'lucide-react';
+import { Printer, ArrowUp, Maximize2 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { useLayoutStore } from '@/stores/layoutStore';
@@ -529,14 +530,27 @@ function exportBaseNameNoExt(): string {
               </button>
             ))}
             {bookData && totalChapters > 0 && (
-              <button
-                onClick={handlePrint}
-                className="ml-auto flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded transition-colors duration-150"
-                title={t('book.print')}
-              >
-                <Printer size={14} />
-                <span>{t('book.print')}</span>
-              </button>
+              <>
+                <button
+                  onClick={async () => {
+                    const win = getCurrentWindow();
+                    const isFullscreen = await win.isFullscreen();
+                    await win.setFullscreen(!isFullscreen);
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded transition-colors duration-150"
+                  title={t('book.fullScreen')}
+                >
+                  <Maximize2 size={14} />
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-2 py-1 text-xs text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded transition-colors duration-150"
+                  title={t('book.print')}
+                >
+                  <Printer size={14} />
+                  <span>{t('book.print')}</span>
+                </button>
+              </>
             )}
           </>
         )}

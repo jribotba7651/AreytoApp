@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Eye, Pencil, Languages, Columns2, Clock, Bookmark } from 'lucide-react';
+import { Eye, Pencil, Languages, Columns2, Clock, Bookmark, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChapterEditor from '@/components/editor/ChapterEditor';
 import type { ChapterEditorHandle } from '@/components/editor/ChapterEditor';
@@ -204,6 +204,8 @@ function ChapterView() {
   const sessionTime = useSessionTimer(!!currentProject);
   const updateProjectMeta = useProjectStore((s) => s.updateProjectMeta);
   const bookmarks = currentProject?.bookmarks ?? [];
+  const activeChapterFilename = activeChapterPath?.split('/').pop();
+  const isLocked = currentProject?.lockedChapters?.includes(activeChapterFilename || '');
 
   async function handleAddBookmark() {
     const pos = editorRef.current?.getCursor() ?? 0;
@@ -214,6 +216,12 @@ function ChapterView() {
   return (
     <div className="relative h-full flex flex-col bg-bg-editor">
       {!focusMode && <ExternalChangeBanner />}
+      {!focusMode && isLocked && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-tertiary border-b border-border-default text-xs text-text-secondary">
+          <Lock size={12} />
+          <span className="flex-1">Este capítulo está bloqueado</span>
+        </div>
+      )}
       {!focusMode && (
         <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle shrink-0">
           {!isPreview ? (
@@ -253,13 +261,14 @@ function ChapterView() {
         {isSplit ? (
           <>
             <div className="w-1/2 min-w-0 h-full border-r border-border-subtle">
-              <ChapterEditor
-                ref={editorRef}
-                key={`${activeChapterPath}:${editorVersion}`}
-                initialContent={activeChapterContent}
-                onChange={updateContent}
-                onScroll={handleEditorScroll}
-              />
+                <ChapterEditor
+                  ref={editorRef}
+                  key={`${activeChapterPath}:${editorVersion}`}
+                  initialContent={activeChapterContent}
+                  onChange={updateContent}
+                  onScroll={handleEditorScroll}
+                  readOnly={isLocked}
+                />
             </div>
             <div
               ref={splitPreviewRef}
@@ -284,6 +293,7 @@ function ChapterView() {
                   key={`${activeChapterPath}:${editorVersion}`}
                   initialContent={activeChapterContent}
                   onChange={updateContent}
+                  readOnly={isLocked}
                 />
               </div>
 

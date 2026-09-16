@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, Lock } from 'lucide-react';
 import type { Chapter, ChapterColor } from '@/types/project';
 import { CHAPTER_COLORS, CHAPTER_COLOR_MAP } from '@/types/project';
 import { listCommitsForFile } from '@/lib/versioning';
@@ -24,9 +24,10 @@ interface ChapterListItemProps {
   chapterColor?: ChapterColor;
   onColorChange: (color: ChapterColor | null) => void;
   lastExportTimestamp?: string;
+  isLocked?: boolean;
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterColor, onColorChange, lastExportTimestamp }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterColor, onColorChange, lastExportTimestamp, isLocked }: ChapterListItemProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
@@ -150,6 +151,9 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: CHAPTER_COLOR_MAP[chapterColor] }}
               />
+            )}
+            {isLocked && (
+              <Lock size={12} className="text-text-tertiary shrink-0" />
             )}
             <span className="truncate">{chapter.title}</span>
             {isRecentlyExported && (

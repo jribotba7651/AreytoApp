@@ -345,6 +345,7 @@
     },
     "readingTime": "Estimated reading time: {{minutes}} min",
     "print": "Print",
+    "fullScreen": "Full screen",
     "themeGallery": {
       "title": "Book themes",
       "activeLabel": "Active"

@@ -14,6 +14,7 @@ interface ChapterEditorProps {
   initialContent: string;
   onChange?: (content: string) => void;
   onScroll?: (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
+  readOnly?: boolean;
 }
 
 export interface ChapterEditorHandle {
@@ -22,7 +23,7 @@ export interface ChapterEditorHandle {
   getCursor: () => number;
 }
 
-const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange, onScroll }, ref) {
+const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(function ChapterEditor({ initialContent, onChange, onScroll, readOnly }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
@@ -74,6 +75,7 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
         }),
         typewriterMode(typewriterEnabled),
         sentenceHighlight(sentenceHighlightEnabled),
+        EditorState.readOnly.of(readOnly ?? false),
       ],
     });
 
