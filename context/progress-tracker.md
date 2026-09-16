@@ -10,7 +10,27 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Features completadas
 
-### 2026-09-16 - Handle Export Kindle
+### 2026-09-16 - Chapter Notes Search, ThemeGallery thumbnails, TopTabs tooltips
+- Que se hizo:
+  1. CHAPTER NOTES SEARCH: Nuevo panel de búsqueda (`ChapterNotesSearch.tsx`) para buscar texto en todas las notas (`.notes/*.md`). Integrado en `CommandPalette` con "Buscar en notas de capítulos" (FileSearch icon).
+  2. Mejora thumbnails ThemeGallery: Estilo refinado para los thumbnails en `ThemeGallery.tsx` con sombras sutiles, bordes más claros y color acento en la letra capital (drop caps).
+  3. Tooltip shortcuts TopTabs: Actualizados los tooltips de los botones en `TopTabs.tsx` para incluir explícitamente el atajo de teclado cuando está disponible.
+- Archivos creados:
+  - `src/components/global-search/ChapterNotesSearch.tsx`
+- Archivos modificados:
+  - `src/lib/project-fs.ts` (añadidas `listNotes`, `readNote`)
+  - `src/types/layout.ts` (+`showChapterNotesSearch`)
+  - `src/stores/layoutStore.ts` (+`showChapterNotesSearch` state y setter)
+  - `src/App.tsx` (añadido `ChapterNotesSearch` al render)
+  - `src/i18n/locales/es.json` y `en.json` (+keys de `chapterNotesSearch` y `actionSearchNotes`)
+  - `src/components/command-palette/CommandPalette.tsx` (+`FileSearch` icon y acción búsqueda de notas)
+  - `src/components/book/ThemeGallery.tsx` (estilo refinado de thumbnail)
+  - `src/components/layout/TopTabs.tsx` (actualización de tooltips con shortcuts)
+- Decisiones tomadas:
+  - D-353: La búsqueda de notas se implementa mediante `listNotes` y `readNote` leyendo archivos `.notes/{chapterFilename}.md`.
+  - D-354: El estilo del thumbnail de `ThemeGallery` se refinó con `shadow-sm` y `var(--accent)` para la letra capital para mejor legibilidad visual sin romper el estilo minimalista.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
 - Que se hizo:
   1. Implementada funcion `handleExportKindle` en `src/components/layout/BookTabContent.tsx` para permitir exportar el libro como EPUB con metadata de Kindle (cover, toc, css).
   2. La funcion sigue el patron de `handleExportEpub` y llama a `exportBookEpub`.

@@ -182,6 +182,20 @@ export async function readChapter(chapterPath: string): Promise<ProjectResult<st
   return readFile(chapterPath);
 }
 
+export async function listNotes(project: Project): Promise<ProjectResult<string[]>> {
+  const notesPath = `${project.rootPath}/.notes`;
+  const entries = await listDirEntries(notesPath);
+  if (!entries.ok) {
+    if (entries.error.kind === 'ReadFailed') return ok([]);
+    return entries;
+  }
+  return ok(entries.value.filter((e) => e.is_file && e.name.endsWith('.md')).map((e) => `${notesPath}/${e.name}`));
+}
+
+export async function readNote(notePath: string): Promise<ProjectResult<string>> {
+  return readFile(notePath);
+}
+
 export async function writeChapter(
   chapterPath: string,
   contents: string

@@ -18,6 +18,7 @@ interface LayoutActions {
   toggleFocusMode: () => void;
   setShowCommandPalette: (show: boolean) => void;
   setShowGlobalSearch: (show: boolean) => void;
+  setShowChapterNotesSearch: (show: boolean) => void;
   setSplitView: (splitView: Partial<SplitViewState>) => void;
   toggleSplitView: () => void;
   toggleReadingMode: () => void;
@@ -48,6 +49,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   focusMode: false,
   showCommandPalette: false,
   showGlobalSearch: false,
+  showChapterNotesSearch: false,
   splitView: { active: false, chapterPath: null },
   isReadingMode: false,
 
@@ -90,6 +92,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   setShowCommandPalette: (show: boolean) => set({ showCommandPalette: show }),
 
   setShowGlobalSearch: (show: boolean) => set({ showGlobalSearch: show }),
+  setShowChapterNotesSearch: (show: boolean) => set({ showChapterNotesSearch: show }),
 
   setSplitView: (partial: Partial<SplitViewState>) =>
     set((state) => ({ splitView: { ...state.splitView, ...partial } })),

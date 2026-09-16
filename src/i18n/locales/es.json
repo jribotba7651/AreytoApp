@@ -605,6 +605,7 @@
     "actionNewChapter": "Crear nuevo capitulo",
     "actionExport": "Exportar libro",
     "actionSettings": "Abrir ajustes",
+    "actionSearchNotes": "Buscar en notas de capítulos",
     "actionToggleTheme": "Cambiar tema",
     "actionFocusMode": "Modo enfoque",
     "actionTabBook": "Ir al tab Libro",
@@ -613,10 +614,17 @@
     "actionTabStats": "Ir al tab Estadisticas"
   },
   "globalSearch": {
-    "placeholder": "Buscar en todos los capitulos...",
+    "placeholder": "Buscar en todos los capítulos...",
     "noResults": "Sin coincidencias",
     "resultCount": "{{count}} coincidencias"
   },
+  "chapterNotesSearch": {
+    "placeholder": "Buscar en todas las notas de capítulos...",
+    "hint": "Escribe para buscar texto dentro de las notas",
+    "noResults": "Ninguna nota coincide con la búsqueda",
+    "resultCount": "{{count}} coincidencias encontradas"
+  },
+
   "stats": {
     "title": "Estadisticas",
     "totalWords": "Total de palabras",

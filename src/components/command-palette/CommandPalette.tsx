@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   BarChart3,
   FileText,
+  FileSearch,
 } from 'lucide-react';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
@@ -127,6 +128,17 @@ function CommandPalette() {
       icon: <Maximize2 size={14} />,
       action: () => {
         useLayoutStore.getState().toggleFocusMode();
+        close();
+      },
+    });
+
+    items.push({
+      id: 'action-search-notes',
+      label: t('commandPalette.actionSearchNotes'),
+      category: 'action',
+      icon: <FileSearch size={14} />,
+      action: () => {
+        useLayoutStore.getState().setShowChapterNotesSearch(true);
         close();
       },
     });

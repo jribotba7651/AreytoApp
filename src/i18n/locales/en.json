@@ -601,6 +601,7 @@
     "actionNewChapter": "Create new chapter",
     "actionExport": "Export book",
     "actionSettings": "Open settings",
+    "actionSearchNotes": "Search chapter notes",
     "actionToggleTheme": "Toggle theme",
     "actionFocusMode": "Focus mode",
     "actionTabBook": "Go to Book tab",
@@ -612,6 +613,12 @@
     "placeholder": "Search all chapters...",
     "noResults": "No matches",
     "resultCount": "{{count}} matches"
+  },
+  "chapterNotesSearch": {
+    "placeholder": "Search all chapter notes...",
+    "hint": "Type to search text within notes",
+    "noResults": "No notes match your search",
+    "resultCount": "{{count}} matches found"
   },
   "stats": {
     "title": "Statistics",

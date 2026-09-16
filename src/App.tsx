@@ -12,6 +12,7 @@ import EditorPanel from '@/components/panels/EditorPanel';
 import WelcomeScreen from '@/components/welcome/WelcomeScreen';
 import CommandPalette from '@/components/command-palette/CommandPalette';
 import GlobalSearch from '@/components/global-search/GlobalSearch';
+import ChapterNotesSearch from '@/components/global-search/ChapterNotesSearch';
 import { useLayoutStore } from '@/stores/layoutStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
@@ -30,6 +31,7 @@ function App() {
   const toggleFocusMode = useLayoutStore((s) => s.toggleFocusMode);
   const showCommandPalette = useLayoutStore((s) => s.showCommandPalette);
   const showGlobalSearch = useLayoutStore((s) => s.showGlobalSearch);
+  const showChapterNotesSearch = useLayoutStore((s) => s.showChapterNotesSearch);
   const currentProject = useProjectStore((s) => s.currentProject);
   const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -127,12 +129,14 @@ function App() {
           >
             <Minimize2 size={14} />
           </button>
-        {showCommandPalette && <CommandPalette />}
-        {showGlobalSearch && <GlobalSearch />}
+         {showCommandPalette && <CommandPalette />}
+         {showGlobalSearch && <GlobalSearch />}
+         {showChapterNotesSearch && <ChapterNotesSearch />}
         </div>
       </div>
     );
   }
+
 
   return (
     <div id="app-shell" className="flex flex-col h-screen overflow-hidden bg-bg-primary">
@@ -146,6 +150,7 @@ function App() {
       </main>
       {showCommandPalette && <CommandPalette />}
       {showGlobalSearch && <GlobalSearch />}
+      {showChapterNotesSearch && <ChapterNotesSearch />}
     </div>
   );
 }

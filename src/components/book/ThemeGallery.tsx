@@ -81,36 +81,37 @@ function ThemeThumbnail({
         <Heart size={12} fill={isFavorite ? 'currentColor' : 'none'} />
       </button>
 
-      {/* Mini preview with real book text */}
-      <div className="mb-2 rounded border border-border-subtle bg-bg-editor px-3 py-2 select-none overflow-hidden" style={{ height: '72px' }}>
-        <div
-          className="text-text-editor leading-snug"
-          style={{
-            fontFamily: isSerif
-              ? 'Charter, Georgia, serif'
-              : 'Inter, system-ui, sans-serif',
-            fontSize: '7.5px',
-            lineHeight: '1.45',
-            textAlign: p.justify ? 'justify' : 'left',
-            textIndent: p.indentEm > 0 ? `${p.indentEm * 0.4}em` : undefined,
-            display: '-webkit-box',
-            WebkitLineClamp: 6,
-            WebkitBoxOrient: 'vertical' as const,
-            overflow: 'hidden',
-          }}
-        >
-          {theme.dropCaps && firstLetter ? (
-            <>
-              <span style={{ fontSize: '18px', float: 'left', lineHeight: 0.8, marginRight: '1px', fontWeight: 600 }}>
-                {firstLetter}
-              </span>
-              {restText}
-            </>
-          ) : (
-            displayText
-          )}
+        {/* Mini preview with real book text */}
+        <div className="mb-2 rounded border border-border-default bg-bg-editor px-3 py-2 select-none overflow-hidden shadow-sm" style={{ height: '72px' }}>
+          <div
+            className="text-text-editor leading-snug"
+            style={{
+              fontFamily: isSerif
+                ? 'Charter, Georgia, serif'
+                : 'Inter, system-ui, sans-serif',
+              fontSize: '7.5px',
+              lineHeight: '1.45',
+              textAlign: p.justify ? 'justify' : 'left',
+              textIndent: p.indentEm > 0 ? `${p.indentEm * 0.4}em` : undefined,
+              display: '-webkit-box',
+              WebkitLineClamp: 6,
+              WebkitBoxOrient: 'vertical' as const,
+              overflow: 'hidden',
+            }}
+          >
+            {theme.dropCaps && firstLetter ? (
+              <>
+                <span style={{ fontSize: '18px', float: 'left', lineHeight: 0.8, marginRight: '1px', fontWeight: 600, color: 'var(--accent)' }}>
+                  {firstLetter}
+                </span>
+                {restText}
+              </>
+            ) : (
+              displayText
+            )}
+          </div>
         </div>
-      </div>
+
 
       <span className="text-xs font-medium text-text-primary">{theme.name}</span>
       <span className="text-[10px] text-text-tertiary">

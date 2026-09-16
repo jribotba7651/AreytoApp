@@ -33,6 +33,7 @@ export interface LayoutState {
   focusMode: boolean;
   showCommandPalette: boolean;
   showGlobalSearch: boolean;
+  showChapterNotesSearch: boolean;
   splitView: SplitViewState;
   isReadingMode: boolean;
 }
