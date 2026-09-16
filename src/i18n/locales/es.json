@@ -429,6 +429,11 @@
       "rain": "Lluvia",
       "cafe": "Cafeteria",
       "forest": "Bosque"
+    },
+    "pomodoro": {
+      "title": "Temporizador Pomodoro",
+      "work": "Trabajo",
+      "rest": "Descanso"
     }
   },
   "versions": {
@@ -568,7 +573,11 @@
     "timelineDescriptionPlaceholder": "Descripcion corta",
     "timelineAdd": "Agregar evento",
     "timelineEmpty": "Sin eventos aun.",
-    "timelineDelete": "Eliminar evento"
+    "timelineDelete": "Eliminar evento",
+    "prompts": "Disparadores creativos",
+    "promptsNew": "Otro disparador",
+    "promptsCopyHint": "Clic para copiar",
+    "promptsCopied": "Copiado"
   },
   "onboarding": {
     "step1Title": "Escribe por capitulos",

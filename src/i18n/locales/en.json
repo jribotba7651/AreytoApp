@@ -429,6 +429,11 @@
       "rain": "Rain",
       "cafe": "Coffee shop",
       "forest": "Forest"
+    },
+    "pomodoro": {
+      "title": "Pomodoro timer",
+      "work": "Work",
+      "rest": "Break"
     }
   },
   "versions": {

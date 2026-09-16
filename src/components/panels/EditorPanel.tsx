@@ -22,6 +22,7 @@ import { readMetadata, writeMetadata } from '@/lib/frontmatter-fs';
 import ExternalChangeBanner from '@/components/editor/ExternalChangeBanner';
 import SplitReadPanel from '@/components/editor/SplitReadPanel';
 import AmbientSoundButton from '@/components/editor/AmbientSoundButton';
+import PomodoroButton from '@/components/editor/PomodoroButton';
 import { useSessionTimer } from '@/hooks/useSessionTimer';
 
 function countWords(text: string): number {
@@ -348,6 +349,7 @@ function ChapterView() {
           </div>
           <div className="flex items-center gap-3">
             <AmbientSoundButton />
+            <PomodoroButton />
             <span className="text-[11px] text-text-tertiary">
               {t('editor.bookWordCount', { count: bookWords })}
             </span>
