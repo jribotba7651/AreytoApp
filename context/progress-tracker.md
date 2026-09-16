@@ -10,6 +10,24 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Features completadas
 
+### 2026-09-16 - Chapter Tags and Word Goals per Chapter
+- Que se hizo:
+  1. CHAPTER TAGS: añadido soporte en `proyecto.json` (`chapterTags` Record<string, string[]>) y UI en `ChapterListItem.tsx` para mostrar etiquetas como chips debajo del título del capítulo. El menú de click derecho permite editarlas (csv).
+  2. WORD GOAL PER CHAPTER: añadido soporte en `proyecto.json` (`chapterWordGoals` Record<string, number>) y UI en `ChapterListItem.tsx` para configurar un objetivo de palabras específico por capítulo. La barra de progreso usa este objetivo si existe, sino cae al global.
+  3. Bugfix: corregido warning TS "Object is possibly undefined" en `ChapterListItem.tsx` (linea 44 original) usando optional chaining y chequeo de existencia.
+- Archivos modificados:
+  - `src/components/sidebar/ChapterListItem.tsx`
+  - `src/components/sidebar/ChapterList.tsx`
+  - `src/types/project.ts`
+  - `src/lib/project-fs.ts`
+  - `src/stores/projectStore.ts`
+- Decisiones tomadas:
+  - D-349: Los tags se editan como string CSV en el menu de click derecho.
+  - D-350: El objetivo de palabras por capítulo se guarda en `chapterWordGoals` (filename -> number).
+  - D-351: La barra de progreso prioriza el objetivo por capítulo, cayendo al global si no hay definido uno específico.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
+
 ### 2026-09-16 - Export History, Chapter Lock, Full Screen (3 sub-tareas)
 - Que se hizo:
   1. Export History: Verificado, se añade automáticamente al exportar.

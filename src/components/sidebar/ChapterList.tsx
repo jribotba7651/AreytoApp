@@ -156,6 +156,30 @@ function ChapterList() {
     await useProjectStore.getState().updateProjectMeta({ chapterColors: updated });
   }
 
+  async function handleTagsChange(filename: string, tags: string[]) {
+    if (!currentProject) return;
+    const existing = currentProject.chapterTags ?? {};
+    const updated = { ...existing };
+    if (tags.length > 0) {
+      updated[filename] = tags;
+    } else {
+      delete updated[filename];
+    }
+    await useProjectStore.getState().updateProjectMeta({ chapterTags: updated });
+  }
+
+  async function handleWordGoalChange(filename: string, goal: number | undefined) {
+    if (!currentProject) return;
+    const existing = currentProject.chapterWordGoals ?? {};
+    const updated = { ...existing };
+    if (goal !== undefined) {
+      updated[filename] = goal;
+    } else {
+      delete updated[filename];
+    }
+    await useProjectStore.getState().updateProjectMeta({ chapterWordGoals: updated });
+  }
+
   if (chapters.length === 0) {
     return (
       <div className="px-3 py-2">
@@ -181,7 +205,10 @@ function ChapterList() {
           isDragOver={dragOverIndex === i && dragIndex !== i}
           draggable
           wordCount={wordCounts[chapter.path] ?? 0}
-          wordGoal={chapterWordGoal}
+          wordGoal={currentProject?.chapterWordGoals?.[chapter.filename] ?? chapterWordGoal}
+          chapterTags={currentProject?.chapterTags?.[chapter.filename]}
+          onTagsChange={(tags) => handleTagsChange(chapter.filename, tags)}
+          onWordGoalChange={(goal) => handleWordGoalChange(chapter.filename, goal)}
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
           lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}
@@ -203,7 +230,10 @@ function ChapterList() {
           isDragOver={false}
           draggable={false}
           wordCount={wordCounts[chapter.path] ?? 0}
-          wordGoal={chapterWordGoal}
+          wordGoal={currentProject?.chapterWordGoals?.[chapter.filename] ?? chapterWordGoal}
+          chapterTags={currentProject?.chapterTags?.[chapter.filename]}
+          onTagsChange={(tags) => handleTagsChange(chapter.filename, tags)}
+          onWordGoalChange={(goal) => handleWordGoalChange(chapter.filename, goal)}
           chapterColor={currentProject?.chapterColors?.[chapter.filename]}
           onColorChange={(color) => handleColorChange(chapter.filename, color)}
           lastExportTimestamp={currentProject?.lastExportTimestamps?.[chapter.filename]}

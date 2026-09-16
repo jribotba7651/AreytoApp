@@ -52,6 +52,8 @@ export interface Project {
   bookSettings?: BookSettings;
   excludedFromExport?: string[];
   chapterColors?: Record<string, ChapterColor>;
+  chapterTags?: Record<string, string[]>;
+  chapterWordGoals?: Record<string, number>;
   bookmarks?: Bookmark[];
   lastExportTimestamps?: Record<string, string>;
   lockedChapters?: string[];

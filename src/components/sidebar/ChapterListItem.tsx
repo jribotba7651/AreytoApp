@@ -21,26 +21,31 @@ interface ChapterListItemProps {
   draggable: boolean;
   wordCount: number;
   wordGoal: number;
+  chapterTags?: string[];
+  onTagsChange: (tags: string[]) => void;
+  onWordGoalChange: (goal: number | undefined) => void;
   chapterColor?: ChapterColor;
   onColorChange: (color: ChapterColor | null) => void;
   lastExportTimestamp?: string;
   isLocked?: boolean;
 }
 
-function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterColor, onColorChange, lastExportTimestamp, isLocked }: ChapterListItemProps) {
+function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterTags, onTagsChange, onWordGoalChange, chapterColor, onColorChange, lastExportTimestamp, isLocked }: ChapterListItemProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(chapter.title);
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [tagDraft, setTagDraft] = useState('');
+  const [goalDraft, setGoalDraft] = useState(wordGoal.toString());
   const project = useProjectStore((s) => s.currentProject);
   const [lastCommitDate, setLastCommitDate] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!project) return;
     listCommitsForFile(project.rootPath, chapter.path, 1).then((res) => {
-      if (res.ok && res.value.length > 0) {
+      if (res.ok && res.value && res.value.length > 0 && res.value[0]?.timestamp) {
         setLastCommitDate(formatDate(res.value[0].timestamp));
       }
     });
@@ -54,15 +59,15 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
   }, [editing]);
 
   useEffect(() => {
-    if (!showColorPicker) return;
+    if (!showContextMenu) return;
     function handleClickOutside(e: MouseEvent) {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
-        setShowColorPicker(false);
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setShowContextMenu(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showColorPicker]);
+  }, [showContextMenu]);
 
   function handleDoubleClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -105,7 +110,7 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
 
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
-    setShowColorPicker(true);
+    setShowContextMenu(true);
   }
 
   const chapterNum = index + 1;
@@ -160,6 +165,15 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
               <UploadCloud size={12} className="ml-auto text-text-tertiary shrink-0" />
             )}
           </div>
+          {chapterTags && chapterTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 ml-6">
+              {chapterTags.map(tag => (
+                <span key={tag} className="text-[9px] bg-bg-tertiary text-text-secondary px-1 rounded-sm">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           {lastCommitDate && (
             <div className="text-[10px] text-text-tertiary ml-6">
               {lastCommitDate}
@@ -176,40 +190,51 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
         )}
       </button>
 
-      {showColorPicker && (
+      {showContextMenu && (
         <div
-          ref={colorPickerRef}
-          className="absolute left-8 top-0 z-40 bg-bg-tertiary border border-border-default rounded-lg p-2 shadow-sm"
+          ref={contextMenuRef}
+          className="absolute left-8 top-0 z-40 bg-bg-tertiary border border-border-default rounded-lg p-3 shadow-lg min-w-[200px]"
         >
-          <p className="text-[10px] text-text-tertiary mb-1.5 px-0.5">{t('sidebar.chapterColor')}</p>
-          <div className="flex items-center gap-1.5">
-            {CHAPTER_COLORS.map((color) => (
-              <button
-                key={color}
-                onClick={() => {
-                  onColorChange(chapterColor === color ? null : color);
-                  setShowColorPicker(false);
-                }}
-                className={[
-                  'w-5 h-5 rounded-full border-2 transition-transform duration-150 hover:scale-110',
-                  chapterColor === color ? 'border-text-primary' : 'border-transparent',
-                ].join(' ')}
-                style={{ backgroundColor: CHAPTER_COLOR_MAP[color] }}
-                title={t(`sidebar.colors.${color}`)}
-              />
-            ))}
-            {chapterColor && (
-              <button
-                onClick={() => {
-                  onColorChange(null);
-                  setShowColorPicker(false);
-                }}
-                className="w-5 h-5 rounded-full border border-border-default bg-bg-editor flex items-center justify-center text-text-tertiary hover:text-text-primary transition-colors duration-150"
-                title={t('sidebar.colorNone')}
-              >
-                <span className="text-[10px]">&times;</span>
-              </button>
-            )}
+          <p className="text-[10px] text-text-tertiary mb-2 font-bold uppercase">{t('sidebar.chapterSettings')}</p>
+          
+          <div className="mb-3">
+            <p className="text-[10px] text-text-tertiary mb-1">{t('sidebar.chapterColor')}</p>
+            <div className="flex items-center gap-1.5">
+              {CHAPTER_COLORS.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => onColorChange(chapterColor === color ? null : color)}
+                  className={[
+                    'w-5 h-5 rounded-full border-2 transition-transform duration-150 hover:scale-110',
+                    chapterColor === color ? 'border-text-primary' : 'border-transparent',
+                  ].join(' ')}
+                  style={{ backgroundColor: CHAPTER_COLOR_MAP[color] }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <p className="text-[10px] text-text-tertiary mb-1">Etiquetas (separadas por comas)</p>
+            <input 
+              value={tagDraft}
+              onChange={(e) => setTagDraft(e.target.value)}
+              onBlur={() => onTagsChange(tagDraft.split(',').map(t => t.trim()).filter(t => t !== ''))}
+              className="w-full text-xs p-1 bg-bg-editor rounded border border-border-default"
+              placeholder="accion, drama..."
+            />
+          </div>
+
+          <div>
+            <p className="text-[10px] text-text-tertiary mb-1">Objetivo de palabras</p>
+            <input 
+              type="number"
+              value={goalDraft}
+              onChange={(e) => setGoalDraft(e.target.value)}
+              onBlur={() => onWordGoalChange(parseInt(goalDraft) || undefined)}
+              className="w-full text-xs p-1 bg-bg-editor rounded border border-border-default"
+              placeholder="0"
+            />
           </div>
         </div>
       )}

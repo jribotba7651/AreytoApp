@@ -11,6 +11,8 @@ interface ProyectoJson {
   bookSettings?: BookSettings;
   excludedFromExport?: string[];
   chapterColors?: Record<string, ChapterColor>;
+  chapterTags?: Record<string, string[]>;
+  chapterWordGoals?: Record<string, number>;
   bookmarks?: Bookmark[];
   lastExportTimestamps?: Record<string, string>;
 }
@@ -234,7 +236,7 @@ export async function createChapter(
 
 export async function updateProjectMeta(
   project: Project,
-  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors' | 'bookmarks' | 'lastExportTimestamps'>>
+  updates: Partial<Pick<Project, 'capituloActivo' | 'tema' | 'temaOverrides' | 'bookSettings' | 'excludedFromExport' | 'chapterColors' | 'chapterTags' | 'chapterWordGoals' | 'bookmarks' | 'lastExportTimestamps'>>
 ): Promise<ProjectResult<Project>> {
   const updated: Project = { ...project, ...updates };
   const meta: ProyectoJson = {
@@ -247,6 +249,8 @@ export async function updateProjectMeta(
   if (updated.bookSettings !== undefined) meta.bookSettings = updated.bookSettings;
   if (updated.excludedFromExport !== undefined && updated.excludedFromExport.length > 0) meta.excludedFromExport = updated.excludedFromExport;
   if (updated.chapterColors !== undefined && Object.keys(updated.chapterColors).length > 0) meta.chapterColors = updated.chapterColors;
+  if (updated.chapterTags !== undefined && Object.keys(updated.chapterTags).length > 0) meta.chapterTags = updated.chapterTags;
+  if (updated.chapterWordGoals !== undefined && Object.keys(updated.chapterWordGoals).length > 0) meta.chapterWordGoals = updated.chapterWordGoals;
   if (updated.bookmarks !== undefined && updated.bookmarks.length > 0) meta.bookmarks = updated.bookmarks;
   if (updated.lastExportTimestamps !== undefined && Object.keys(updated.lastExportTimestamps).length > 0) meta.lastExportTimestamps = updated.lastExportTimestamps;
 
