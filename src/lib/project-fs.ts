@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import i18n from '@/i18n/i18n';
-import type { BookSettings, Chapter, ChapterColor, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
+import type { Bookmark, BookSettings, Chapter, ChapterColor, ClosedChapter, Project, ProjectFsError, ProjectResult } from '@/types/project';
 
 interface ProyectoJson {
   nombre: string;

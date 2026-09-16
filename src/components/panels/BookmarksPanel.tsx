@@ -1,201 +1,91 @@
-import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Bookmark as BookmarkIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
-import { useLayoutStore } from '@/stores/layoutStore';
-import { readChapter, updateProjectMeta } from '@/lib/project-fs';
-import { loadCommitsForActiveChapter } from '@/lib/git-service';
-import { readBookmarks, writeBookmarks, createBookmarkId, type Bookmark } from '@/lib/bookmarks';
+import { createBookmark } from '@/lib/bookmarks';
+import type { Bookmark } from '@/types/project';
 
 function BookmarksPanel() {
   const { t } = useTranslation();
   const currentProject = useProjectStore((s) => s.currentProject);
-  const chapters = useProjectStore((s) => s.chapters);
-  const activeChapterPath = useProjectStore((s) => s.activeChapterPath);
-  const setActiveChapter = useProjectStore((s) => s.setActiveChapter);
-  const setCommits = useProjectStore((s) => s.setCommits);
-  const setActiveTab = useLayoutStore((s) => s.setActiveTab);
+  const updateProjectMeta = useProjectStore((s) => s.updateProjectMeta);
 
-  const activeChapter = chapters.find((c) => c.path === activeChapterPath) ?? null;
+  const bookmarks: Bookmark[] = currentProject?.bookmarks ?? [];
+  const [newName, setNewName] = useState('');
 
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [title, setTitle] = useState('');
-  const [chapterFilename, setChapterFilename] = useState('');
-  const [note, setNote] = useState('');
+  function handleAdd() {
+    if (!currentProject) return;
+    const bookmark = createBookmark(bookmarks, 0);
+    if (newName.trim()) bookmark.name = newName.trim();
+    updateProjectMeta({ bookmarks: [...bookmarks, bookmark] });
+    setNewName('');
+  }
 
-  useEffect(() => {
-    if (!currentProject) {
-      setBookmarks([]);
-      return;
-    }
-    let cancelled = false;
-    readBookmarks(currentProject.rootPath).then((bms) => {
-      if (!cancelled) setBookmarks(bms);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [currentProject]);
-
-  useEffect(() => {
-    if (activeChapter?.filename && !chapterFilename) {
-      setChapterFilename(activeChapter.filename);
-    }
-  }, [activeChapter]);
+  function handleDelete(idx: number) {
+    if (!currentProject) return;
+    updateProjectMeta({ bookmarks: bookmarks.filter((_, i) => i !== idx) });
+  }
 
   if (!currentProject) {
     return (
-      <div className="p-3">
-        <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-          {t('writingToolbar.bookmarks')}
-        </h4>
-        <p className="text-[11px] text-text-tertiary mt-2">{t('common.noProjectOpen')}</p>
+      <div className="p-4 text-text-tertiary text-xs text-center">
+        {t('common.noProjectOpen')}
       </div>
     );
   }
 
-  async function handleAdd() {
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) return;
-
-    const newBookmark: Bookmark = {
-      id: createBookmarkId(),
-      title: trimmedTitle,
-      chapterFilename: chapterFilename || null,
-      note: note.trim(),
-      createdAt: new Date().toISOString().slice(0, 10),
-    };
-
-    const next = [...bookmarks, newBookmark];
-    setBookmarks(next);
-    setTitle('');
-    setNote('');
-    await writeBookmarks(currentProject!.rootPath, next);
-  }
-
-  async function handleRemove(id: string) {
-    const next = bookmarks.filter((b) => b.id !== id);
-    setBookmarks(next);
-    await writeBookmarks(currentProject!.rootPath, next);
-  }
-
-  async function handleNavigate(filename: string | null) {
-    if (!filename || !currentProject) return;
-    const target = chapters.find((c) => c.filename === filename);
-    if (!target) return;
-
-    await useProjectStore.getState().flushAutosave?.();
-    const read = await readChapter(target.path);
-    if (!read.ok) {
-      console.error('Failed to read chapter for bookmark navigation:', read.error);
-      return;
-    }
-
-    setActiveChapter(target.path, read.value);
-    await updateProjectMeta(currentProject, { capituloActivo: target.filename });
-    setActiveTab('capitulo');
-    const commitsResult = await loadCommitsForActiveChapter(currentProject.rootPath, target.path);
-    if (commitsResult.ok) setCommits(commitsResult.value);
-  }
-
-  function chapterTitle(filename: string | null): string | null {
-    if (!filename) return null;
-    const chapter = chapters.find((c) => c.filename === filename);
-    return chapter ? chapter.title : null;
-  }
-
   return (
-    <div className="p-3 flex flex-col h-full">
-      <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-        {t('writingToolbar.bookmarks')}
-      </h4>
-
-      <div className="mt-2 space-y-1.5">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder={t('writingToolbar.bookmarksTitlePlaceholder')}
-          className="w-full px-2 py-1.5 text-xs bg-bg-tertiary border border-border-subtle rounded focus:border-accent outline-none placeholder:text-text-tertiary"
-        />
-        <select
-          value={chapterFilename}
-          onChange={(e) => setChapterFilename(e.target.value)}
-          className="w-full px-2 py-1.5 text-xs bg-bg-tertiary border border-border-subtle rounded focus:border-accent outline-none"
-        >
-          <option value="">{t('writingToolbar.bookmarksNoChapter')}</option>
-          {chapters.map((c) => (
-            <option key={c.path} value={c.filename}>
-              {c.title}
-            </option>
-          ))}
-        </select>
-        <textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder={t('writingToolbar.bookmarksNotePlaceholder')}
-          className="w-full px-2 py-1.5 text-xs bg-bg-tertiary border border-border-subtle rounded focus:border-accent outline-none placeholder:text-text-tertiary resize-none min-h-[44px]"
-        />
-        <button
-          onClick={() => void handleAdd()}
-          disabled={!title.trim()}
-          className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] text-text-primary bg-accent-muted rounded hover:bg-accent transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Plus size={12} />
-          {t('writingToolbar.bookmarksAdd')}
-        </button>
+    <div className="flex flex-col h-full">
+      <div className="p-3 border-b border-border-subtle">
+        <p className="text-xs font-medium text-text-secondary mb-2 uppercase tracking-wide">
+          {t('writingToolbar.bookmarks', 'Marcadores')}
+        </p>
+        <div className="flex gap-1.5">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder={t('writingToolbar.bookmarksTitlePlaceholder', 'Nombre...')}
+            className="flex-1 text-xs px-2 py-1 rounded border border-border-subtle bg-bg-editor text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+            onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
+          />
+          <button
+            onClick={handleAdd}
+            className="px-2 py-1 text-xs rounded bg-accent-muted hover:bg-accent text-text-primary transition-colors"
+          >
+            +
+          </button>
+        </div>
       </div>
 
-      <div className="mt-3 flex-1 min-h-0 overflow-y-auto space-y-1.5">
+      <div className="flex-1 overflow-y-auto">
         {bookmarks.length === 0 ? (
-          <p className="text-[11px] text-text-tertiary">{t('writingToolbar.bookmarksEmpty')}</p>
+          <div className="p-4 text-center">
+            <BookmarkIcon size={24} className="mx-auto text-text-tertiary mb-2" />
+            <p className="text-xs text-text-tertiary">
+              {t('writingToolbar.bookmarksEmpty', 'Sin marcadores.')}
+            </p>
+          </div>
         ) : (
-          bookmarks.map((bm) => {
-            const resolvedChapterTitle = chapterTitle(bm.chapterFilename);
-            const canNavigate = Boolean(bm.chapterFilename && resolvedChapterTitle);
-            return (
-              <div
-                key={bm.id}
-                className={`group border border-border-subtle rounded p-2 transition-colors duration-150 ${
-                  canNavigate ? 'hover:border-accent-muted cursor-pointer' : ''
-                }`}
-                onClick={() => {
-                  if (canNavigate) void handleNavigate(bm.chapterFilename);
-                }}
-              >
-                <div className="flex items-start justify-between gap-1">
-                  <p className="text-[11px] font-medium text-text-primary leading-snug break-words">
-                    {bm.title}
+          <ul className="divide-y divide-border-subtle">
+            {bookmarks.map((bm, idx) => (
+              <li key={idx} className="flex items-center gap-2 px-3 py-2 hover:bg-bg-secondary group">
+                <BookmarkIcon size={12} className="text-accent shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-primary truncate">{bm.name}</p>
+                  <p className="text-[10px] text-text-tertiary">
+                    {new Date(bm.createdAt).toLocaleDateString()}
                   </p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void handleRemove(bm.id);
-                    }}
-                    title={t('writingToolbar.bookmarksDelete')}
-                    className="text-text-tertiary hover:text-error transition-colors duration-150 shrink-0 mt-0.5"
-                  >
-                    <Trash2 size={12} />
-                  </button>
                 </div>
-                {resolvedChapterTitle && (
-                  <p className="text-[10px] text-accent truncate mt-0.5">
-                    {resolvedChapterTitle}
-                  </p>
-                )}
-                {bm.note && (
-                  <p className="text-[11px] text-text-secondary line-clamp-2 break-words mt-0.5">
-                    {bm.note}
-                  </p>
-                )}
-                {bm.createdAt && (
-                  <p className="text-[9px] text-text-tertiary mt-1">
-                    {bm.createdAt}
-                  </p>
-                )}
-              </div>
-            );
-          })
+                <button
+                  onClick={() => handleDelete(idx)}
+                  className="opacity-0 group-hover:opacity-100 text-text-tertiary hover:text-error transition-opacity"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
