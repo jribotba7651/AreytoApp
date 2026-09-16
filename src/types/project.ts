@@ -54,6 +54,7 @@ export interface Project {
   chapterColors?: Record<string, ChapterColor>;
   bookmarks?: Bookmark[];
   lastExportTimestamps?: Record<string, string>;
+  lockedChapters?: string[];
 }
 
 export type ProjectFsError =

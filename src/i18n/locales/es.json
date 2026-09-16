@@ -624,6 +624,7 @@
     "projectStarted": "Inicio del proyecto",
     "chapterBreakdown": "Palabras por capitulo",
     "wordFrequency": "Palabras mas frecuentes",
+    "exportHistory": "Historial de exportacion",
     "bookProgress": "Progreso del libro",
     "emptyTitle": "Aun no hay datos",
     "emptyBody": "Las estadisticas apareceran cuando empieces a escribir capitulos. Cada capitulo suma palabras, paginas y actividad al historial.",

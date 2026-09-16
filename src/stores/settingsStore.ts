@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { readGlobalSettings, writeGlobalSettings } from '@/lib/settings';
-import type { RecentProject, ChapterTemplate } from '@/lib/settings';
+import type { RecentProject, ChapterTemplate, ExportEntry } from '@/lib/settings';
 import i18n from '@/i18n/i18n';
 import type { Theme } from '@/lib/theme';
 
@@ -69,6 +69,7 @@ interface SettingsState {
   readingGoalMinutes: number;
   readingSecondsByDay: Record<string, number>;
   chapterTemplates: ChapterTemplate[];
+  exportHistory: ExportEntry[];
   loaded: boolean;
   load: () => Promise<void>;
   addRecentProject: (project: RecentProject) => Promise<void>;
@@ -95,6 +96,7 @@ interface SettingsState {
   addReadingSeconds: (seconds: number) => Promise<void>;
   addChapterTemplate: (template: ChapterTemplate) => Promise<void>;
   removeChapterTemplate: (index: number) => Promise<void>;
+  addExportHistory: (entry: ExportEntry) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -121,6 +123,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   readingGoalMinutes: 30,
   readingSecondsByDay: {},
   chapterTemplates: [],
+  exportHistory: [],
   loaded: false,
 
   load: async () => {
@@ -156,6 +159,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         readingGoalMinutes: settings.readingGoalMinutes ?? 30,
         readingSecondsByDay: settings.readingSecondsByDay ?? {},
         chapterTemplates: (settings.chapterTemplates ?? []) as ChapterTemplate[],
+        exportHistory: (settings.exportHistory ?? []) as ExportEntry[],
         loaded: true,
       });
       const customEditorFont = settings.customEditorFont ?? '';
@@ -438,6 +442,18 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       await writeGlobalSettings({ ...current, chapterTemplates: updated });
     } catch (err) {
       console.warn('[areyto] Failed to persist chapterTemplates:', err);
+    }
+  },
+
+  addExportHistory: async (entry: ExportEntry) => {
+    const prev = useSettingsStore.getState().exportHistory;
+    const updated = [entry, ...prev].slice(0, 10);
+    set({ exportHistory: updated });
+    try {
+      const current = await readGlobalSettings();
+      await writeGlobalSettings({ ...current, exportHistory: updated });
+    } catch (err) {
+      console.warn('[areyto] Failed to persist exportHistory:', err);
     }
   },
 }));

@@ -620,6 +620,7 @@
     "projectStarted": "Project started",
     "chapterBreakdown": "Words by chapter",
     "wordFrequency": "Most frequent words",
+    "exportHistory": "Export history",
     "bookProgress": "Book progress",
     "emptyTitle": "No data yet",
     "emptyBody": "Statistics will appear once you start writing chapters. Each chapter adds words, pages, and activity to your history.",

@@ -42,6 +42,7 @@ function BookTabContent() {
   const exportFolder = useSettingsStore((s) => s.exportFolder);
   const customThemes = useSettingsStore((s) => s.customThemes);
   const setExportFolder = useSettingsStore((s) => s.setExportFolder);
+  const addExportHistory = useSettingsStore((s) => s.addExportHistory);
   const [bookData, setBookData] = useState<BookData | null>(null);
   const [loading, setLoading] = useState(false);
   const showExportDialog = useLayoutStore((s) => s.showExportDialog);
@@ -198,6 +199,8 @@ function exportBaseNameNoExt(): string {
       setExportProgress('writing');
       await exportBookMarkdown(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
 
+      await addExportHistory({ date: new Date().toISOString(), format: 'markdown', filename: outputPath.split('/').pop()! });
+
       const now = new Date().toISOString();
       const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
       getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
@@ -251,6 +254,8 @@ function exportBaseNameNoExt(): string {
 
       setExportProgress('writing');
       await exportBookDocx(currentProject.rootPath, { scope, excludedFilenames: currentProject.excludedFromExport }, outputPath, currentProject.nombre);
+
+      await addExportHistory({ date: new Date().toISOString(), format: 'docx', filename: outputPath.split('/').pop()! });
 
       const now = new Date().toISOString();
       const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
@@ -313,6 +318,8 @@ function exportBaseNameNoExt(): string {
         currentProject.nombre,
       );
 
+      await addExportHistory({ date: new Date().toISOString(), format: 'epub', filename: outputPath.split('/').pop()! });
+
       const now = new Date().toISOString();
       const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
       getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
@@ -370,10 +377,12 @@ function exportBaseNameNoExt(): string {
       setExportProgress('writing');
       const mdPath = `${folder}/${base}.md`;
       await exportBookMarkdown(currentProject.rootPath, opts, mdPath, currentProject.nombre);
+      await addExportHistory({ date: new Date().toISOString(), format: 'markdown', filename: `${base}.md` });
       await backupExportedFile(mdPath);
 
       const docxPath = `${folder}/${base}.docx`;
       await exportBookDocx(currentProject.rootPath, opts, docxPath, currentProject.nombre);
+      await addExportHistory({ date: new Date().toISOString(), format: 'docx', filename: `${base}.docx` });
       await backupExportedFile(docxPath);
 
       const epubPath = `${folder}/${base}.epub`;
@@ -385,6 +394,7 @@ function exportBaseNameNoExt(): string {
         currentProject.temaOverrides,
         currentProject.nombre,
       );
+      await addExportHistory({ date: new Date().toISOString(), format: 'epub', filename: `${base}.epub` });
       await backupExportedFile(epubPath);
 
       const now = new Date().toISOString();

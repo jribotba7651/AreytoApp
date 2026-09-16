@@ -94,6 +94,7 @@ function StatsTabContent() {
   const writingDays = useSettingsStore((s) => s.writingDays);
   const readingGoalMinutes = useSettingsStore((s) => s.readingGoalMinutes);
   const readingSecondsByDay = useSettingsStore((s) => s.readingSecondsByDay);
+  const exportHistory = useSettingsStore((s) => s.exportHistory);
   const [loading, setLoading] = useState(true);
 
   const streaks = useMemo(() => computeStreaks(writingDays), [writingDays]);
@@ -556,6 +557,25 @@ function StatsTabContent() {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Export History */}
+            {exportHistory.length > 0 && (
+              <div className="p-4 bg-bg-secondary rounded border border-border-subtle">
+                <p className="text-[11px] text-text-tertiary uppercase tracking-wide mb-3">{t('stats.exportHistory')}</p>
+                <div className="space-y-2">
+                  {exportHistory.map((entry, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <span className="text-text-primary truncate max-w-[50%]">{entry.filename}</span>
+                      <div className="flex items-center gap-2 text-text-tertiary">
+                        <span>{entry.format}</span>
+                        <span>•</span>
+                        <span>{new Date(entry.date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

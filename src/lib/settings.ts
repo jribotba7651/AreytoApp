@@ -35,6 +35,13 @@ export interface GlobalSettings {
   readingGoalMinutes?: number;
   readingSecondsByDay?: Record<string, number>;
   chapterTemplates?: ChapterTemplate[];
+  exportHistory?: ExportEntry[];
+}
+
+export interface ExportEntry {
+  date: string;
+  format: 'markdown' | 'docx' | 'epub';
+  filename: string;
 }
 
 export interface RecentProject {
