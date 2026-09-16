@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '@/stores/projectStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useLayoutStore } from '@/stores/layoutStore';
 import type { ChapterColor } from '@/types/project';
 import { readChapter, updateProjectMeta, renameChapterTitle, reorderChapters } from '@/lib/project-fs';
+import { getChapterOutline } from '@/lib/outline';
 import { loadCommitsForActiveChapter } from '@/lib/commit-loader';
 import ChapterListItem from './ChapterListItem';
 
@@ -23,25 +25,36 @@ function ChapterList() {
   const setCommits = useProjectStore((s) => s.setCommits);
   const setChapters = useProjectStore((s) => s.setChapters);
   const chapterWordGoal = useSettingsStore((s) => s.chapterWordGoal);
+  const isChapterOutlineView = useLayoutStore((s) => s.isChapterOutlineView);
+  const toggleChapterOutlineView = useLayoutStore((s) => s.toggleChapterOutlineView);
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [wordCounts, setWordCounts] = useState<Record<string, number>>({});
+  const [outlines, setOutlines] = useState<Record<string, { level: number; text: string }[]>>({});
 
   useEffect(() => {
     if (!currentProject || chapters.length === 0) return;
     let cancelled = false;
     async function load() {
       const counts: Record<string, number> = {};
+      const chOutlines: Record<string, { level: number; text: string }[]> = {};
       for (const ch of chapters) {
         if (ch.path === activeChapterPath) {
           counts[ch.path] = countWords(activeChapterContent);
+          chOutlines[ch.path] = getChapterOutline(activeChapterContent);
         } else {
           const result = await readChapter(ch.path);
-          if (result.ok) counts[ch.path] = countWords(result.value);
+          if (result.ok) {
+            counts[ch.path] = countWords(result.value);
+            chOutlines[ch.path] = getChapterOutline(result.value);
+          }
         }
       }
-      if (!cancelled) setWordCounts(counts);
+      if (!cancelled) {
+        setWordCounts(counts);
+        setOutlines(chOutlines);
+      }
     }
     load();
     return () => { cancelled = true; };
@@ -190,6 +203,12 @@ function ChapterList() {
 
   return (
     <div className="flex flex-col">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border-subtle">
+        <span className="text-xs font-semibold text-text-tertiary uppercase">{t('sidebar.chapters')}</span>
+        <button onClick={toggleChapterOutlineView} className="text-xs text-text-secondary hover:text-text-primary">
+          {t('sidebar.outlineView')}
+        </button>
+      </div>
       {inProgressChapters.map((chapter, i) => (
         <ChapterListItem
           key={chapter.path}

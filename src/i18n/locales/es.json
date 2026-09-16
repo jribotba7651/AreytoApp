@@ -469,6 +469,7 @@
   "sidebar": {
     "frontmatter": "Frontmatter",
     "chapters": "Capítulos",
+    "outlineView": "Vista de esquema",
     "backmatter": "Backmatter",
     "noProject": "Sin proyecto",
     "noChapters": "Sin capítulos",

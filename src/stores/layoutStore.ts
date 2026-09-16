@@ -22,6 +22,7 @@ interface LayoutActions {
   setSplitView: (splitView: Partial<SplitViewState>) => void;
   toggleSplitView: () => void;
   toggleReadingMode: () => void;
+  toggleChapterOutlineView: () => void;
 }
 
 type LayoutStore = LayoutState & LayoutActions;
@@ -52,6 +53,7 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
   showChapterNotesSearch: false,
   splitView: { active: false, chapterPath: null },
   isReadingMode: false,
+  isChapterOutlineView: false,
 
   setActiveTab: (tab: Tab) => set({ activeTab: tab }),
 
@@ -104,4 +106,5 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
         : { active: true, chapterPath: null },
     })),
   toggleReadingMode: () => set((state) => ({ isReadingMode: !state.isReadingMode })),
+  toggleChapterOutlineView: () => set((state) => ({ isChapterOutlineView: !state.isChapterOutlineView })),
 }));

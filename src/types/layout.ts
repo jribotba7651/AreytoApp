@@ -36,4 +36,5 @@ export interface LayoutState {
   showChapterNotesSearch: boolean;
   splitView: SplitViewState;
   isReadingMode: boolean;
+  isChapterOutlineView: boolean;
 }

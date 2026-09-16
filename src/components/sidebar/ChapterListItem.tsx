@@ -28,6 +28,7 @@ interface ChapterListItemProps {
   onColorChange: (color: ChapterColor | null) => void;
   lastExportTimestamp?: string;
   isLocked?: boolean;
+  showOutline?: boolean;
 }
 
 function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragStart, onDragOver, onDrop, onDragEnd, isDragOver, draggable, wordCount, wordGoal, chapterTags, onTagsChange, onWordGoalChange, chapterColor, onColorChange, lastExportTimestamp, isLocked }: ChapterListItemProps) {
@@ -160,7 +161,18 @@ function ChapterListItem({ chapter, index, isActive, onClick, onRename, onDragSt
             {isLocked && (
               <Lock size={12} className="text-text-tertiary shrink-0" />
             )}
-            <span className="truncate">{chapter.title}</span>
+            {showOutline && outline && outline.length > 0 ? (
+                <div className="flex flex-col w-full text-left truncate">
+                    <span className="truncate text-text-primary font-bold">{outline[0].text}</span>
+                    {outline.slice(1).map((item, i) => (
+                        <span key={i} className={`truncate text-text-secondary text-[10px] ${item.level === 2 ? 'pl-2' : ''}`}>
+                            {item.text}
+                        </span>
+                    ))}
+                </div>
+            ) : (
+                <span className="truncate">{chapter.title}</span>
+            )}
             {isRecentlyExported && (
               <UploadCloud size={12} className="ml-auto text-text-tertiary shrink-0" />
             )}
