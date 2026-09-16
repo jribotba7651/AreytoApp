@@ -10,6 +10,17 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 
 ## Features completadas
 
+### 2026-09-16 - Handle Export Kindle
+- Que se hizo:
+  1. Implementada funcion `handleExportKindle` en `src/components/layout/BookTabContent.tsx` para permitir exportar el libro como EPUB con metadata de Kindle (cover, toc, css).
+  2. La funcion sigue el patron de `handleExportEpub` y llama a `exportBookEpub`.
+- Archivos modificados:
+  - `src/components/layout/BookTabContent.tsx`
+- Decisiones tomadas:
+  - D-352: `handleExportKindle` reutiliza la logica de `exportBookEpub` ya que esta funcion ya soporta la metadata de Kindle necesaria (cover, css, toc via pandoc). Se sigue el mismo patron de `handleExportEpub`.
+- Tests: `tsc --noEmit` limpio.
+- Bugs encontrados: ninguno.
+
 ### 2026-09-16 - Chapter Tags and Word Goals per Chapter
 - Que se hizo:
   1. CHAPTER TAGS: añadido soporte en `proyecto.json` (`chapterTags` Record<string, string[]>) y UI en `ChapterListItem.tsx` para mostrar etiquetas como chips debajo del título del capítulo. El menú de click derecho permite editarlas (csv).

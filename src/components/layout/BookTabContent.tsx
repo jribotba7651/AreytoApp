@@ -354,6 +354,69 @@ function exportBaseNameNoExt(): string {
     }
   }
 
+  async function handleExportKindle(scope: ExportScope) {
+    if (!currentProject) return;
+    setEpubLoading(true);
+
+    try {
+      const baseDir = exportFolder || currentProject.rootPath;
+      const defaultPath = `${baseDir}/${exportBaseName('epub')}`;
+
+      const outputPath = await save({
+        defaultPath,
+        filters: [{ name: 'EPUB', extensions: ['epub'] }],
+      });
+
+      if (!outputPath) {
+        setEpubLoading(false);
+        return;
+      }
+
+      setShowExportKindleDialog(false);
+      setExportProgress('assembling');
+
+      setExportProgress('writing');
+      await exportBookEpub(
+        currentProject.rootPath,
+        { scope, excludedFilenames: currentProject.excludedFromExport },
+        outputPath,
+        currentProject.tema,
+        currentProject.temaOverrides,
+        currentProject.nombre,
+      );
+
+      await addExportHistory({ date: new Date().toISOString(), format: 'epub', filename: outputPath.split('/').pop()! });
+
+      const now = new Date().toISOString();
+      const newTimestamps = { ...(currentProject.lastExportTimestamps ?? {}) };
+      getFilesToExport(scope).forEach(f => newTimestamps[f] = now);
+      await updateProjectMeta({ lastExportTimestamps: newTimestamps });
+
+      setExportProgress('backup');
+      await backupExportedFile(outputPath);
+
+      const chosenDir = outputPath.slice(0, outputPath.lastIndexOf('/'));
+      if (chosenDir) void setExportFolder(chosenDir);
+
+      setExportProgress('done');
+      await new Promise((r) => setTimeout(r, 600));
+      setExportProgress(null);
+      setEpubLoading(false);
+
+      await message(t('book.export.successBody', { path: outputPath }), {
+        title: t('book.export.successTitle'),
+        kind: 'info',
+      });
+    } catch (err) {
+      setExportProgress(null);
+      setEpubLoading(false);
+      await message(t('book.export.errorBody', { error: String(err) }), {
+        title: t('book.export.errorTitle'),
+        kind: 'error',
+      });
+    }
+  }
+
   async function handleExportAll(scope: ExportScope) {
     if (!currentProject) return;
     setExportAllLoading(true);
