@@ -45,7 +45,18 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Bugs encontrados: ninguno.
 
 
-### 2026-09-16 - Chapter Outline View (Bugfix)
+
+### 2026-09-16 - Reorganización Layout Formatting Mode
+- Que se hizo:
+  1. Reorganizado `BookTabContent` en `format` mode: columna izquierda estrecha (250px) para `ThemeGallery`, `ThemeControls`, `BookSettings`, `BookCoverSection`. Columna derecha para el preview del libro.
+  2. Refactorizado la renderización del preview en `renderBookPreview` para ser reutilizado en ambos modos (write/format).
+- Archivos modificados:
+  - `src/components/layout/BookTabContent.tsx`
+- Decisiones tomadas:
+  - Se mantuvo la funcionalidad existente de theme selection y preview, solo se cambió la estructura de CSS para una mejor experiencia tipo Atticus.
+- Tests: `tsc --noEmit` limpio.
+- Bugs encontrados: ninguno.
+
 - Que se hizo:
   1. Corregidos errores TS en `ChapterList.tsx` y `ChapterListItem.tsx` relacionados con la vista de esquema (outline view).
   2. Conectada la lógica de `isChapterOutlineView` y `outlines` pasando los props correctos de `ChapterList` a `ChapterListItem`.
