@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { save, message, open } from '@tauri-apps/plugin-dialog';
 import { Printer, ArrowUp, Maximize2 } from 'lucide-react';
@@ -10,7 +10,11 @@ import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { loadBook } from '@/lib/book-loader';
 import { exportBookMarkdown, exportBookDocx, exportBookEpub } from '@/lib/export-service';
+import { slugify, deriveExportChapterInfo } from '@/lib/export-composer';
+import type { IndiceItem } from '@/lib/export-composer';
+import BookChapter from '@/components/book/BookChapter';
 import BookIndice from '@/components/book/BookIndice';
+import BookChapterError from '@/components/book/BookChapterError';
 import BookEmptyState from '@/components/book/BookEmptyState';
 import PreExportCheckModal from '@/components/book/PreExportCheckModal';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
@@ -486,39 +490,75 @@ function exportBaseNameNoExt(): string {
     }
   }
 
-  function renderBookPreview() {
-    if (loading) {
-      return (
-        <div className="h-full flex items-center justify-center">
-          <p className="font-sans text-sm text-text-tertiary">{t('book.loading')}</p>
-        </div>
-      );
-    }
-    if (!bookData || totalChapters === 0) {
-      return <BookEmptyState />;
-    }
+  if (!currentProject) {
     return (
-      <div className="flex flex-col items-center gap-8 py-8 px-4">
-        <BookIndice items={tocItems} />
-        {chapterSections.map((section, idx) => {
-          const key = section.kind === 'chapter' ? section.chapter.filename : `error-${idx}`;
-          const isLast = idx === totalChapters - 1;
-          if (isDraft) {
-            return (
-              <div key={key} className="w-full max-w-3xl">
-                {renderChapterSection(section, isLast)}
-              </div>
-            );
-          }
-          return (
-            <div key={key} style={sheetStyle}>
-              {renderChapterSection(section, isLast)}
-            </div>
-          );
-        })}
+      <div className="h-full flex items-center justify-center bg-bg-primary">
+        <p className="font-serif text-text-tertiary">{t('common.noProjectOpen')}</p>
       </div>
     );
   }
+
+  const VIEW_MODES: { id: BookViewMode; labelKey: string }[] = [
+    { id: 'write', labelKey: 'book.writeMode' },
+    { id: 'format', labelKey: 'book.formatMode' },
+  ];
+
+  const PREVIEW_MODES: { id: PreviewMode; labelKey: string }[] = [
+    { id: 'print', labelKey: 'book.previewMode.print' },
+    { id: 'draft', labelKey: 'book.previewMode.draft' },
+    { id: 'proof', labelKey: 'book.previewMode.proof' },
+  ];
+
+  const chapterSections = bookData?.sections ?? [];
+  const totalChapters = chapterSections.length;
+
+  const tocItems: IndiceItem[] = chapterSections
+    .filter((s) => s.kind === 'chapter')
+    .map((s) => ({
+      title: deriveExportChapterInfo(s.content, s.chapter.filename).title,
+      slug: slugify(s.chapter.filename.replace(/\.md$/, '')),
+    }));
+
+  function renderChapterSection(section: BookSection, isLast: boolean) {
+    if (section.kind === 'chapter-error') {
+      return <BookChapterError chapterFilename={section.chapter.filename} reason={section.reason} />;
+    }
+
+    const slug = slugify(section.chapter.filename.replace(/\.md$/, ''));
+    return (
+      <BookChapter
+        content={section.content}
+        isLast={isLast}
+        slug={slug}
+        themeId={currentProject?.tema}
+        themeOverrides={currentProject?.temaOverrides}
+        bookSettings={currentProject?.bookSettings}
+        projectRootPath={currentProject?.rootPath}
+      />
+    );
+  }
+
+  const isDraft = previewMode === 'draft';
+  const isProof = previewMode === 'proof';
+
+  const sheetStyle: CSSProperties = isProof
+    ? {
+        width: '580px',
+        minHeight: '780px',
+        padding: '48px 56px',
+        backgroundColor: 'var(--proof-bg)',
+        boxShadow: 'inset 0 0 0 1px var(--proof-inset)',
+        borderRadius: '2px',
+        border: '12px solid var(--proof-border)',
+      }
+    : {
+        width: '580px',
+        minHeight: '780px',
+        padding: '48px 56px',
+        backgroundColor: 'var(--bg-editor)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.12)',
+        borderRadius: '2px',
+      };
 
   return (
     <div className="h-full flex flex-col bg-bg-primary">
@@ -584,31 +624,50 @@ function exportBaseNameNoExt(): string {
 
       <div className="flex-1 overflow-y-auto scroll-smooth relative" ref={scrollRef}>
         {bookViewMode === 'format' ? (
-          <div className="flex h-full">
-            <div className="w-[250px] flex-shrink-0 border-r border-border-subtle overflow-y-auto bg-bg-secondary p-4 flex flex-col gap-4">
-              <ThemeGallery
-                activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID}
-                onSelectTheme={(id) => void updateProjectMeta({ tema: id, temaOverrides: undefined })}
-                customThemes={customThemes}
-                sampleText={
-                  activeChapterContent ||
-                  bookData?.sections.find((s) => s.kind === 'chapter')?.content ||
-                  ''
-                }
-              />
-              <ThemeControls
-                themeId={currentProject.tema}
-                themeOverrides={currentProject.temaOverrides}
-              />
-              <BookSettings />
-              <BookCoverSection />
-            </div>
-            <div className="flex-grow min-w-0">
-              {renderBookPreview()}
-            </div>
+          <>
+            <ThemeGallery
+              activeThemeId={currentProject.tema ?? DEFAULT_THEME_ID}
+              onSelectTheme={(id) => void updateProjectMeta({ tema: id, temaOverrides: undefined })}
+              customThemes={customThemes}
+              sampleText={
+                activeChapterContent ||
+                bookData?.sections.find((s) => s.kind === 'chapter')?.content ||
+                ''
+              }
+            />
+            <ThemeControls
+              themeId={currentProject.tema}
+              themeOverrides={currentProject.temaOverrides}
+            />
+            <BookSettings />
+            <BookCoverSection />
+          </>
+        ) : loading ? (
+          <div className="h-full flex items-center justify-center">
+            <p className="font-sans text-sm text-text-tertiary">{t('book.loading')}</p>
           </div>
+        ) : !bookData || totalChapters === 0 ? (
+          <BookEmptyState />
         ) : (
-          renderBookPreview()
+          <div className="flex flex-col items-center gap-8 py-8 px-4">
+            <BookIndice items={tocItems} />
+            {chapterSections.map((section, idx) => {
+              const key = section.kind === 'chapter' ? section.chapter.filename : `error-${idx}`;
+              const isLast = idx === totalChapters - 1;
+              if (isDraft) {
+                return (
+                  <div key={key} className="w-full max-w-3xl">
+                    {renderChapterSection(section, isLast)}
+                  </div>
+                );
+              }
+              return (
+                <div key={key} style={sheetStyle}>
+                  {renderChapterSection(section, isLast)}
+                </div>
+              );
+            })}
+          </div>
         )}
         {showScrollToTop && (
           <button
@@ -620,7 +679,6 @@ function exportBaseNameNoExt(): string {
           </button>
         )}
       </div>
-
 
       {preExportProblems.length > 0 && (
         <PreExportCheckModal
