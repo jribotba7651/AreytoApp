@@ -46,7 +46,6 @@ async function copyText(text: string): Promise<boolean> {
 function BrowserPanel() {
   const { t } = useTranslation();
   const [input, setInput] = useState(DEFAULT_URL);
-  const [url, setUrl] = useState(DEFAULT_URL);
   const [copied, setCopied] = useState(false);
 
   const navigate = () => {
@@ -158,14 +157,11 @@ function BrowserPanel() {
           {copied ? t('browser.copied') : t('browser.copyChapter')}
         </button>
       </div>
-      <iframe
-        key={frameKey}
-        src={url}
-        title={t('browser.title')}
-        className="flex-1 w-full border-0 bg-bg-editor"
-        allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media; picture-in-picture"
-        referrerPolicy="no-referrer"
-      />
+      <div className="p-4 flex flex-col items-center justify-center flex-1 gap-3 text-text-tertiary">
+        <p className="text-xs text-center">
+          {t('browser.openHint', 'Escribe una URL y presiona Enter para abrirla en ventana.')}
+        </p>
+      </div>
     </div>
   );
 }
