@@ -113,7 +113,90 @@ function setAlignment(view: EditorView, align: 'left' | 'center' | 'right'): boo
   return true;
 }
 
-export { toggleWrap, insertLink, insertImage, setAlignment };
+export { toggleWrap, insertLink, insertImage, setAlignment, toggleHeading, toggleList, toggleBlockquote, clearFormatting };
+
+function toggleHeading(view: EditorView, level: 1 | 2 | 3 | null): boolean {
+  const { state } = view;
+  const { from } = state.selection.main;
+  const line = state.doc.lineAt(from);
+  let text = line.text;
+
+  // Remove existing heading markers
+  text = text.replace(/^#+\s*/, '');
+
+  if (level) {
+    const marker = '#'.repeat(level) + ' ';
+    text = marker + text;
+  }
+
+  view.dispatch({
+    changes: { from: line.from, to: line.to, insert: text },
+  });
+  return true;
+}
+
+function toggleList(view: EditorView, type: 'bullet' | 'numbered'): boolean {
+  const { state } = view;
+  const { from } = state.selection.main;
+  const line = state.doc.lineAt(from);
+  let text = line.text;
+
+  const bulletMatch = text.match(/^- \s*/);
+  const numberedMatch = text.match(/^\d+\. \s*/);
+
+  if (type === 'bullet') {
+    if (bulletMatch) {
+      text = text.replace(/^- \s*/, '');
+    } else {
+      text = text.replace(/^\d+\. \s*/, '').replace(/^/, '- ');
+    }
+  } else {
+    if (numberedMatch) {
+      text = text.replace(/^\d+\. \s*/, '');
+    } else {
+      text = text.replace(/^- \s*/, '').replace(/^/, '1. ');
+    }
+  }
+
+  view.dispatch({
+    changes: { from: line.from, to: line.to, insert: text },
+  });
+  return true;
+}
+
+function toggleBlockquote(view: EditorView): boolean {
+  const { state } = view;
+  const { from } = state.selection.main;
+  const line = state.doc.lineAt(from);
+  let text = line.text;
+
+  if (text.startsWith('> ')) {
+    text = text.replace(/^> /, '');
+  } else {
+    text = '> ' + text;
+  }
+
+  view.dispatch({
+    changes: { from: line.from, to: line.to, insert: text },
+  });
+  return true;
+}
+
+function clearFormatting(view: EditorView): boolean {
+  const { state } = view;
+  const { from, to } = state.selection.main;
+  const text = state.sliceDoc(from, to);
+
+  const cleared = text
+    .replace(/[*#>`]/g, '')
+    .replace(/\s\s+/g, ' ')
+    .trim();
+
+  view.dispatch({
+    changes: { from, to, insert: cleared },
+  });
+  return true;
+}
 
 export const markdownFormatKeymap: KeyBinding[] = [
   { key: 'Mod-b', run: (view) => toggleWrap(view, '**') },

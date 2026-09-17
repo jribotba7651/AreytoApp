@@ -2,7 +2,21 @@
 
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
-### 2026-09-16 - Paleta de colores Atticus
+### 2026-09-16 - Mejora de FormatToolbar
+- Que se hizo:
+  1. Mejorada la `FormatToolbar` para ser más robusta, similar a Word/Google Docs.
+  2. Implementado dropdown de Headings (Normal, H1, H2, H3) en `markdown-format.ts` y `FormatToolbar.tsx`.
+  3. Agregados botones para listas (bullets/numbered) y blockquote.
+  4. Agregado botón para eliminar formato.
+  5. Aumentado tamaño de botones e iconos para mayor visibilidad.
+- Archivos modificados:
+  - `src/components/editor/markdown-format.ts`
+  - `src/components/editor/FormatToolbar.tsx`
+- Decisiones tomadas:
+  - Se añadieron funciones de formato de línea en `markdown-format.ts` usando `state.doc.lineAt`.
+  - Se aumentó el tamaño de los iconos de la toolbar a 20px y los contenedores de botones a 32px para mejorar la visibilidad.
+- Tests: `npm run typecheck` limpio.
+- Bugs encontrados: ninguno.
 - Que se hizo:
   1. Rediseñada la paleta de colores de la app para emular el estilo de Atticus.
   2. Actualizados los tokens en `src/styles/globals.css` y la documentación en `context/ui-context.md`.
