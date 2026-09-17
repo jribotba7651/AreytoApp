@@ -100,8 +100,17 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Tests: `tsc --noEmit` limpio.
 - Bugs encontrados: ninguno.
 
-### 2026-09-16 - Chapter Tags and Word Goals per Chapter
+### 2026-09-16 - Cleanup unused imports
 - Que se hizo:
+  1. Eliminados imports no usados en `src/components/layout/BookTabContent.tsx`: `CSSProperties`, `IndiceItem`, `slugify`, `deriveExportChapterInfo`, `BookChapter`, `BookChapterError`.
+- Archivos modificados:
+  - `src/components/layout/BookTabContent.tsx`
+- Decisiones tomadas:
+  - Ninguna, limpieza técnica.
+- Tests: `tsc --noEmit` limpio.
+- Bugs encontrados: ninguno.
+
+### 2026-09-16 - Chapter Tags and Word Goals per Chapter
   1. CHAPTER TAGS: añadido soporte en `proyecto.json` (`chapterTags` Record<string, string[]>) y UI en `ChapterListItem.tsx` para mostrar etiquetas como chips debajo del título del capítulo. El menú de click derecho permite editarlas (csv).
   2. WORD GOAL PER CHAPTER: añadido soporte en `proyecto.json` (`chapterWordGoals` Record<string, number>) y UI en `ChapterListItem.tsx` para configurar un objetivo de palabras específico por capítulo. La barra de progreso usa este objetivo si existe, sino cae al global.
   3. Bugfix: corregido warning TS "Object is possibly undefined" en `ChapterListItem.tsx` (linea 44 original) usando optional chaining y chequeo de existencia.

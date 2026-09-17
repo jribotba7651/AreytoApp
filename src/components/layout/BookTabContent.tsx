@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { save, message, open } from '@tauri-apps/plugin-dialog';
 import { Printer, ArrowUp, Maximize2 } from 'lucide-react';
@@ -10,11 +10,7 @@ import { useLayoutStore } from '@/stores/layoutStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { loadBook } from '@/lib/book-loader';
 import { exportBookMarkdown, exportBookDocx, exportBookEpub } from '@/lib/export-service';
-import { slugify, deriveExportChapterInfo } from '@/lib/export-composer';
-import type { IndiceItem } from '@/lib/export-composer';
-import BookChapter from '@/components/book/BookChapter';
 import BookIndice from '@/components/book/BookIndice';
-import BookChapterError from '@/components/book/BookChapterError';
 import BookEmptyState from '@/components/book/BookEmptyState';
 import PreExportCheckModal from '@/components/book/PreExportCheckModal';
 import ExportBookDialog from '@/components/book/ExportBookDialog';
