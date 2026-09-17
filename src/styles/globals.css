@@ -24,27 +24,30 @@
 
 @theme {
   /* Background */
-  --color-bg-primary: #FAFAF9;
-  --color-bg-secondary: #F5F5F4;
-  --color-bg-tertiary: #EDECEA;
-  --color-bg-editor: #FFFFFF;
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F7F7F8;
+  --color-bg-tertiary: #F0F0F2;
+  --color-bg-editor: #FAFAF8;
   --color-bg-terminal: #0a0a0c;
 
   /* Borders */
-  --color-border-subtle: #E7E5E4;
-  --color-border-default: #D6D3D1;
-  --color-border-strong: #A8A29E;
+  --color-border-subtle: #E4E4E7;
+  --color-border-default: #E4E4E7;
+  --color-border-strong: #E4E4E7;
 
   /* Text */
-  --color-text-primary: #1C1917;
-  --color-text-secondary: #57534E;
-  --color-text-tertiary: #78716C;
-  --color-text-editor: #292524;
+  --color-text-primary: #18181B;
+  --color-text-secondary: #71717A;
+  --color-text-tertiary: #A1A1AA;
+  --color-text-editor: #18181B;
 
   /* Accent */
-  --color-accent: #475569;
-  --color-accent-hover: #334155;
-  --color-accent-muted: #94A3B8;
+  --color-accent: #2563EB;
+  --color-accent-hover: #1D4ED8;
+  --color-accent-muted: #EFF6FF;
+  
+  /* Generic UI Hover */
+  --color-hover: #F4F4F5;
 
   /* States */
   --color-success: #16A34A;
@@ -70,21 +73,22 @@
 }
 
 :root {
-  --bg-primary: #FAFAF9;
-  --bg-secondary: #F5F5F4;
-  --bg-tertiary: #EDECEA;
-  --bg-editor: #FFFFFF;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F7F7F8;
+  --bg-tertiary: #F0F0F2;
+  --bg-editor: #FAFAF8;
   --bg-terminal: #0a0a0c;
-  --border-subtle: #E7E5E4;
-  --border-default: #D6D3D1;
-  --border-strong: #A8A29E;
-  --text-primary: #1C1917;
-  --text-secondary: #57534E;
-  --text-tertiary: #78716C;
-  --text-editor: #292524;
-  --accent: #475569;
-  --accent-hover: #334155;
-  --accent-muted: #94A3B8;
+  --border-subtle: #E4E4E7;
+  --border-default: #E4E4E7;
+  --border-strong: #E4E4E7;
+  --text-primary: #18181B;
+  --text-secondary: #71717A;
+  --text-tertiary: #A1A1AA;
+  --text-editor: #18181B;
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-muted: #EFF6FF;
+  --hover: #F4F4F5;
   --success: #16A34A;
   --warning: #B45309;
   --error: #DC2626;
@@ -103,6 +107,12 @@
   /* F40 – Book font (user preference, overridden via inline style by applyBookFont()) */
   --font-book: "Iowan Old Style", Charter, Georgia, serif;
   --font-size-book: 18px;
+}
+
+/* Texture de papel para el editor */
+.bg-editor-paper {
+  background-color: var(--bg-editor);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 /* F37 – Dark theme (zinc palette, recovered from pre-F34) */

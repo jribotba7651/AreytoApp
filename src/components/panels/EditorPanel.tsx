@@ -223,7 +223,7 @@ function ChapterView() {
   }
 
   return (
-    <div className="relative h-full flex flex-col bg-bg-editor">
+    <div className="relative h-full flex flex-col bg-editor-paper">
       {!focusMode && <ExternalChangeBanner />}
       {!focusMode && isLocked && (
         <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-tertiary border-b border-border-default text-xs text-text-secondary">

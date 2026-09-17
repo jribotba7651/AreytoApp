@@ -3,30 +3,28 @@
 ## Filosofía visual
 Editor técnico que respira como un libro. Tema claro neutro (warm stone). Tipografía serif en el área de texto, monospace en terminales, sans-serif en UI chrome. Sin gradientes, sin animaciones excesivas, sin sombras dramáticas. Quieto, enfocado, hermoso. El terminal queda oscuro como excepción deliberada (D-058).
 
-## Tema (claro neutro, stone palette)
+## Tema (Atticus inspired, light palette)
 
 ### Colores base
-- --bg-primary: #FAFAF9 (fondo principal de la app, stone-50)
-- --bg-secondary: #F5F5F4 (paneles, sidebar, stone-100)
-- --bg-tertiary: #EDECEA (cards, inputs, modales, stone ~150)
-- --bg-editor: #FFFFFF (área del editor, blanco limpio)
+- --bg-primary: #FFFFFF (fondo principal de la app)
+- --bg-secondary: #F7F7F8 (paneles, sidebar)
+- --bg-tertiary: #F0F0F2 (cards, inputs, modales)
+- --bg-editor: #FAFAF8 (área del editor, textura de papel aplicada)
 - --bg-terminal: #0a0a0c (terminales, siempre oscuro, D-058)
 
 ### Borders
-- --border-subtle: #E7E5E4 (separadores sutiles, stone-200)
-- --border-default: #D6D3D1 (bordes visibles, stone-300)
-- --border-strong: #A8A29E (focus states, stone-400)
+- --border: #E4E4E7 (bordes unificados)
 
 ### Texto
-- --text-primary: #1C1917 (texto principal, stone-900)
-- --text-secondary: #57534E (labels, metadata, stone-600)
-- --text-tertiary: #78716C (placeholders, disabled, stone-500)
-- --text-editor: #292524 (texto del editor, stone-800, softer para lectura larga)
+- --text-primary: #18181B (texto principal)
+- --text-secondary: #71717A (labels, metadata)
+- --text-tertiary: #A1A1AA (placeholders, disabled)
+- --text-editor: #18181B (texto del editor)
 
 ### Accent
-- --accent: #475569 (acento principal, slate-600)
-- --accent-hover: #334155 (slate-700)
-- --accent-muted: #94A3B8 (slate-400, fondo de botones primarios y selección del editor)
+- --accent: #2563EB (acento principal)
+- --accent-muted: #EFF6FF (fondo de botones primarios y selección del editor)
+- --hover: #F4F4F5 (color de hover general)
 
 ### Estados
 - --success: #16A34A (green-600)

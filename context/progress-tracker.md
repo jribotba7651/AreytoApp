@@ -2,7 +2,20 @@
 
 Este archivo se actualiza con cada feature completada. Es la memoria del proyecto.
 
-### 2026-09-16 - Sentence Count in Editor
+### 2026-09-16 - Paleta de colores Atticus
+- Que se hizo:
+  1. Rediseñada la paleta de colores de la app para emular el estilo de Atticus.
+  2. Actualizados los tokens en `src/styles/globals.css` y la documentación en `context/ui-context.md`.
+  3. Añadida una textura de papel (CSS noise pattern) al editor mediante una nueva clase `.bg-editor-paper`.
+- Archivos modificados:
+  - `src/styles/globals.css`
+  - `context/ui-context.md`
+- Decisiones tomadas:
+  - La nueva paleta utiliza tonos claros (bg-primary #FFFFFF) con un editor de fondo crema (#FAFAF8) y textura de papel.
+  - Los bordes se unificaron en #E4E4E7 para una mayor limpieza visual.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: ninguno.
+
 - Que se hizo:
   1. Implementado conteo de oraciones en `EditorPanel.tsx`.
   2. La logica `countSentences` limpia el texto de em-dashes (`—`) antes de contar oraciones basadas en los terminadores `.`, `!`, `?`.

@@ -47,24 +47,35 @@ function BrowserPanel() {
   const { t } = useTranslation();
   const [input, setInput] = useState(DEFAULT_URL);
   const [url, setUrl] = useState(DEFAULT_URL);
-  const [frameKey, setFrameKey] = useState(0);
   const [copied, setCopied] = useState(false);
 
   const navigate = () => {
     const target = normalizeUrl(input);
     setInput(target);
-    setUrl(target);
-    setFrameKey((key) => key + 1);
+    // Open in native window directly since most sites block iframes
+    const label = `browser-${Date.now()}`;
+    new WebviewWindow(label, {
+      url: target,
+      title: target,
+      width: 1200,
+      height: 800,
+    });
   };
 
   const goTo = (target: string) => {
     setInput(target);
-    setUrl(target);
-    setFrameKey((key) => key + 1);
+    // Open in native window directly
+    const label = `browser-${Date.now()}`;
+    new WebviewWindow(label, {
+      url: target,
+      title: target,
+      width: 1200,
+      height: 800,
+    });
   };
 
   const reload = () => {
-    setFrameKey((key) => key + 1);
+    if (input) navigate();
   };
 
   const openInWindow = () => {
