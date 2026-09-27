@@ -8,6 +8,7 @@ vi.mock('@tauri-apps/api/app', () => ({
 }));
 
 vi.mock('react-i18next', () => ({
+  initReactI18next: { type: '3rdParty', init: vi.fn() },
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
       if (key === 'about.version') return `Versión ${opts?.version ?? ''}`;
