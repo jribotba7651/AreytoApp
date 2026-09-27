@@ -8,6 +8,8 @@
     "core:webview:allow-create-webview-window",
     "opener:default",
     "dialog:default",
+    "clipboard-manager:allow-read",
+    "clipboard-manager:allow-write",
     {
       "identifier": "shell:allow-execute",
       "allow": [{ "name": "binaries/pandoc", "sidecar": true, "args": true }]
