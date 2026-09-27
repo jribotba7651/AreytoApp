@@ -82,6 +82,8 @@ const ChapterEditor = forwardRef<ChapterEditorHandle, ChapterEditorProps>(functi
     const view = new EditorView({ state, parent: containerRef.current });
     viewRef.current = view;
 
+    view.dispatch({ selection: { anchor: 0 } });
+
     const scrollDom = view.scrollDOM;
     const handleScroll = () => {
       onScrollRef.current?.(scrollDom.scrollTop, scrollDom.scrollHeight, scrollDom.clientHeight);

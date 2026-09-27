@@ -19,9 +19,6 @@ const baseTheme = EditorView.theme({
     overflow: 'auto',
   },
   '.cm-content': {
-    padding: '16px 24px',
-    maxWidth: '720px',
-    margin: '0 auto',
     caretColor: 'var(--text-primary)',
   },
   '.cm-cursor': {
@@ -32,11 +29,11 @@ const baseTheme = EditorView.theme({
     borderLeftColor: 'var(--text-primary)',
   },
   '.cm-selectionBackground': {
-    backgroundColor: 'var(--accent-muted)',
-    opacity: '0.5',
+    backgroundColor: '#DBEAFE', // azul muy suave requested
+    opacity: '0.6', // 60%
   },
   '&.cm-focused .cm-selectionBackground': {
-    backgroundColor: 'var(--accent-muted)',
+    backgroundColor: '#DBEAFE',
   },
   '.cm-gutters': {
     display: 'none',

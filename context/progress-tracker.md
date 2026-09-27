@@ -110,6 +110,21 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Tests: `tsc --noEmit` limpio.
 - Bugs encontrados: ninguno.
 
+### 2026-09-27 - Editor visual Fixes (Writing mode)
+- Que se hizo:
+  1. EditorPanel: Envolví el editor en un div con estilo de hoja de papel (Atticus style): `bg-bg-editor`, `shadow-md`, `rounded-sm`, padding, `max-w-[720px]`, `mx-auto`.
+  2. Ajustado `editor-theme.ts` para eliminar `padding`, `maxWidth` y `margin` del `.cm-content` (delegado al nuevo div en `EditorPanel.tsx`).
+  3. ChapterEditor: Implementado `view.dispatch({ selection: { anchor: 0 } })` al montar para asegurar que el cursor inicie al principio sin seleccionar todo el texto.
+  4. EditorTheme: Ajustado `.cm-selectionBackground` a `#DBEAFE` con `opacity: 0.6` para una selección más suave.
+- Archivos modificados:
+  - `src/components/panels/EditorPanel.tsx`
+  - `src/components/editor/ChapterEditor.tsx`
+  - `src/components/editor/editor-theme.ts`
+- Decisiones tomadas:
+  - La estructura de layouts de edición ahora depende de `EditorPanel.tsx` para el contenedor de hoja de papel, centralizando la configuración visual en lugar de tenerla distribuida en `editor-theme.ts`.
+- Tests: tsc --noEmit limpio.
+- Bugs encontrados: El area del editor se mezclaba con el fondo y la selección de texto al cargar el capítulo era incorrecta.
+
 ### 2026-09-27 - Critical Fix: Writing Mode Layout (Atticus Style)
 - Que se hizo:
   1. Corregido el problema crítico donde Writing mode cargaba en modo preview (`BookMarkdown`) en lugar del editor editable (`ChapterEditor`).

@@ -316,13 +316,15 @@ function ChapterView() {
           <>
             <div className={splitView.active ? 'w-1/2 min-w-0 relative' : 'flex-1 min-w-0 relative'}>
               <div className={isPreview ? 'absolute inset-0 invisible pointer-events-none' : 'h-full'}>
-                <ChapterEditor
-                  ref={editorRef}
-                  key={`${activeChapterPath}:${editorVersion}`}
-                  initialContent={activeChapterContent}
-                  onChange={updateContent}
-                  readOnly={isLocked}
-                />
+                <div className="bg-bg-editor shadow-md rounded-sm px-16 py-12 max-w-[720px] mx-auto min-h-full">
+                  <ChapterEditor
+                    ref={editorRef}
+                    key={`${activeChapterPath}:${editorVersion}`}
+                    initialContent={activeChapterContent}
+                    onChange={updateContent}
+                    readOnly={isLocked}
+                  />
+                </div>
               </div>
 
               <div
