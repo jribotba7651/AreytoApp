@@ -33,7 +33,7 @@ function MiddlePanels() {
             <EditorPanel />
           </Panel>
           <Separator className={HANDLE_V} />
-          <Panel id="terminal" minSize="15%">
+          <Panel id="terminal" minSize="5%">
             <TerminalPanel />
           </Panel>
         </Group>

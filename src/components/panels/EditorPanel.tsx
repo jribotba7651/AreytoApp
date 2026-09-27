@@ -233,11 +233,8 @@ function ChapterView() {
       )}
       {!focusMode && (
         <div className="flex items-center justify-between px-3 py-1 border-b border-border-subtle shrink-0">
-          {!isPreview ? (
-            <FormatToolbar editorRef={editorRef} />
-          ) : (
-            <div />
-          )}
+          <FormatToolbar editorRef={editorRef} />
+
           <div className="relative flex items-center gap-1">
             <button
               onClick={toggleReadingMode}

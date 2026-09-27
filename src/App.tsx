@@ -82,7 +82,7 @@ function App() {
           settings.editorViewMode === 'preview' ||
           settings.editorViewMode === 'split'
         ) {
-          useLayoutStore.getState().setEditorViewMode(settings.editorViewMode);
+          useLayoutStore.getState().setEditorViewMode(settings.editorViewMode === 'preview' ? 'edit' : settings.editorViewMode);
         }
 
         if (settings.lastProjectPath) {

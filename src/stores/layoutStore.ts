@@ -29,8 +29,8 @@ type LayoutStore = LayoutState & LayoutActions;
 
 const DEFAULT_SIZES: PanelSizes = {
   sidebar: 15,
-  editor: 65,
-  terminal: 35,
+  editor: 80,
+  terminal: 5,
   versions: 22,
 };
 

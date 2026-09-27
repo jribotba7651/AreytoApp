@@ -110,7 +110,25 @@ Este archivo se actualiza con cada feature completada. Es la memoria del proyect
 - Tests: `tsc --noEmit` limpio.
 - Bugs encontrados: ninguno.
 
-### 2026-09-16 - Chapter Tags and Word Goals per Chapter
+### 2026-09-27 - Critical Fix: Writing Mode Layout (Atticus Style)
+- Que se hizo:
+  1. Corregido el problema crítico donde Writing mode cargaba en modo preview (`BookMarkdown`) en lugar del editor editable (`ChapterEditor`).
+  2. Ajustado `App.tsx` para forzar `editorViewMode: 'edit'` en el inicio si la sesión restaurada estaba en `preview`.
+  3. Reconfigurado `layoutStore.ts` y `ChapterTabContent.tsx` para cumplir con el estilo Atticus:
+     - Editor más ancho (80% default).
+     - Terminal colapsado por defecto (minSize 5% en `ChapterTabContent.tsx`, 5% default en `layoutStore.ts`).
+     - `FormatToolbar` ahora siempre visible encima del editor en `EditorPanel.tsx` (removida la condición `!isPreview`).
+- Archivos modificados:
+  - `src/App.tsx`
+  - `src/stores/layoutStore.ts`
+  - `src/components/layout/ChapterTabContent.tsx`
+  - `src/components/panels/EditorPanel.tsx`
+- Decisiones tomadas:
+  - Se forzó el modo `edit` al restaurar sesión para prevenir que el usuario quede atrapado en `preview`.
+  - Se removió la condición que ocultaba la `FormatToolbar` en preview para asegurar que el usuario siempre tenga acceso a herramientas de formato si es necesario (o para simplificar la UI).
+- Tests: `npm run typecheck` limpio.
+- Bugs encontrados: El problema crítico de modo de escritura bloqueado en preview.
+
   1. CHAPTER TAGS: añadido soporte en `proyecto.json` (`chapterTags` Record<string, string[]>) y UI en `ChapterListItem.tsx` para mostrar etiquetas como chips debajo del título del capítulo. El menú de click derecho permite editarlas (csv).
   2. WORD GOAL PER CHAPTER: añadido soporte en `proyecto.json` (`chapterWordGoals` Record<string, number>) y UI en `ChapterListItem.tsx` para configurar un objetivo de palabras específico por capítulo. La barra de progreso usa este objetivo si existe, sino cae al global.
   3. Bugfix: corregido warning TS "Object is possibly undefined" en `ChapterListItem.tsx` (linea 44 original) usando optional chaining y chequeo de existencia.
