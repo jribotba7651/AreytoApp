@@ -47,7 +47,8 @@ async function listSortedMdFilenames(dirPath: string): Promise<string[]> {
       .filter((e) => e.is_file && e.name.endsWith('.md'))
       .map((e) => e.name)
       .sort();
-  } catch {
+  } catch (err) {
+    console.warn(`[export] No se pudo listar directorio "${dirPath}":`, err);
     return [];
   }
 }
@@ -55,7 +56,8 @@ async function listSortedMdFilenames(dirPath: string): Promise<string[]> {
 async function readFileContent(filePath: string): Promise<string | null> {
   try {
     return await invoke<string>('read_text_file', { path: filePath });
-  } catch {
+  } catch (err) {
+    console.warn(`[export] No se pudo leer archivo "${filePath}":`, err);
     return null;
   }
 }

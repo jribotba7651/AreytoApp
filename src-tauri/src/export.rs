@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use uuid::Uuid;
 
 // D-169: única fuente de verdad para el orden de secciones del export.
 fn build_full_markdown(
@@ -271,9 +272,19 @@ pub async fn export_book_epub(
         excluded_filenames,
     )?;
 
-    let pid = std::process::id();
-    let temp_md = std::env::temp_dir().join(format!("areyto-epub-{}.md", pid));
-    let temp_css = std::env::temp_dir().join(format!("areyto-epub-{}.css", pid));
+    let op_id = Uuid::new_v4().to_string();
+    let temp_md = std::env::temp_dir().join(format!("areyto-epub-{}.md", op_id));
+    let temp_css = std::env::temp_dir().join(format!("areyto-epub-{}.css", op_id));
+
+    // Guard that cleans up temp files when it goes out of scope
+    struct TempGuard(PathBuf, PathBuf);
+    impl Drop for TempGuard {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(&self.0);
+            let _ = fs::remove_file(&self.1);
+        }
+    }
+    let _guard = TempGuard(temp_md.clone(), temp_css.clone());
 
     fs::write(&temp_md, md_content.as_bytes())
         .map_err(|e| format!("No se pudo escribir temp markdown: {}", e))?;
