@@ -48,8 +48,9 @@ async function listSortedMdFilenames(dirPath: string): Promise<string[]> {
       .map((e) => e.name)
       .sort();
   } catch (err) {
-    console.warn(`[export] No se pudo listar directorio "${dirPath}":`, err);
-    return [];
+    const msg = `No se pudo leer la carpeta de capitulos: ${dirPath}. Verifica que el proyecto este abierto correctamente.`;
+    console.warn('[export]', msg, err);
+    throw new Error(msg);
   }
 }
 
@@ -57,8 +58,9 @@ async function readFileContent(filePath: string): Promise<string | null> {
   try {
     return await invoke<string>('read_text_file', { path: filePath });
   } catch (err) {
-    console.warn(`[export] No se pudo leer archivo "${filePath}":`, err);
-    return null;
+    const msg = `No se pudo leer el archivo: ${filePath}. Es posible que el capitulo este vacio o corrupto.`;
+    console.warn('[export]', msg, err);
+    throw new Error(msg);
   }
 }
 

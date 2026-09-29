@@ -452,3 +452,26 @@ describe('countExportableFiles', () => {
     expect(calledPaths).toContain('/proyecto/capitulos');
   });
 });
+
+describe('buildExportAdditions - error propagation', () => {
+  it('lanza error cuando list_dir falla en lugar de devolver EPUB incompleto', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'list_dir') return Promise.reject(new Error('disk error'));
+      return Promise.resolve(undefined);
+    });
+    await expect(
+      buildExportAdditions('/proyecto', { scope: 'terminados' })
+    ).rejects.toThrow('No se pudo leer la carpeta de capitulos');
+  });
+
+  it('lanza error cuando read_text_file falla', async () => {
+    mockInvoke.mockImplementation((cmd: string) => {
+      if (cmd === 'list_dir') return Promise.resolve([{ name: 'cap-01.md', is_file: true, is_dir: false }]);
+      if (cmd === 'read_text_file') return Promise.reject(new Error('file missing'));
+      return Promise.resolve(undefined);
+    });
+    await expect(
+      buildExportAdditions('/proyecto', { scope: 'terminados' })
+    ).rejects.toThrow('No se pudo leer el archivo');
+  });
+});

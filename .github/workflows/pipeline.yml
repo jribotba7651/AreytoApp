@@ -51,7 +51,7 @@ jobs:
       - name: ESLint
         run: |
           if [ -f "eslint.config.js" ] || [ -f "eslint.config.ts" ] || [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
-            npx eslint src --ext .ts,.tsx
+            npx eslint src
           else
             echo "No ESLint config found — skipping. Add eslint.config.js to enable."
           fi
