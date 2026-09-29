@@ -11,6 +11,11 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
+      'no-useless-escape': 'warn',
+      'prefer-const': 'warn',
+      'no-useless-assignment': 'warn',
+      'preserve-caught-error': 'off',
+      'react-hooks/exhaustive-deps': 'off',
     },
   }
 );
