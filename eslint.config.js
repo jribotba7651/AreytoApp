@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default tseslint.config(
   js.configs.recommended,
@@ -8,6 +9,9 @@ export default tseslint.config(
     ignores: ['dist/**', 'src-tauri/**', 'node_modules/**'],
   },
   {
+    plugins: {
+      'react-hooks': reactHooks,
+    },
     rules: {
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -15,7 +19,8 @@ export default tseslint.config(
       'prefer-const': 'warn',
       'no-useless-assignment': 'warn',
       'preserve-caught-error': 'off',
-      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
+      'no-empty': 'warn',
     },
   }
 );
